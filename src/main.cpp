@@ -15,6 +15,8 @@
 #include "../include/SDL_mixer/SDL_mixer.h"
 #include "../include/SDL_ttf/SDL_ttf.h"
 
+#include "map_test.hpp"
+
 
 using namespace std;
 
@@ -62,60 +64,10 @@ int main(int argc, char *argv[]) {
     if( Mix_Init(MIX_INIT_OGG) == 0) { cout << "Error SDL_mixer" << endl; }
 
 
-
-    SDL_Surface *surface = IMG_Load("./img/background_menu.png");
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(render, surface);
-    if(texture == NULL) {cout << "error on texture : " << SDL_GetError() << endl; SDL_Delay(5000); return 1;}
-    SDL_FreeSurface(surface);
-
-
-    const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-        //SDL_Scancode Z_key = SDL_GetScancodeFromKey(SDLK_z);
-        //SDL_Scancode S_key = SDL_GetScancodeFromKey(SDLK_s);
-        //SDL_Scancode Q_key = SDL_GetScancodeFromKey(SDLK_q);
-        //SDL_Scancode D_key = SDL_GetScancodeFromKey(SDLK_d);
-
-
-    SDL_Rect player;
-        player.w = 100; player.h = 100;
-        player.x = screen.w/2-player.w/2; player.y = screen.h/2-player.h/2;
-
-    SDL_SetRenderDrawColor(render, 0, 255, 0, 255);
-    
-    SDL_Event event;
-    int i = 0;
-    while(running) {
-
-        while (SDL_PollEvent(&event)) {  // poll until all events are handled!
-            //If keypressed
-            if(event.type == SDL_KEYDOWN) {
-                switch (event.key.keysym.sym)
-                {
-                case SDL_SCANCODE_UP:    {player.y -= 10; cout << "move to top"    << endl;} break;
-                case SDL_SCANCODE_DOWN:  {player.y += 10; cout << "move to bottom" << endl;} break;
-                case SDL_SCANCODE_LEFT:  {player.x -= 10; cout << "move to left"   << endl;} break;
-                case SDL_SCANCODE_RIGHT: {player.x += 10; cout << "move to right"  << endl;} break;
-
-                default:
-                    break;
-                }
-            }
-            //If user want to quit
-            if(event.type == SDL_QUIT) running = false;
-        }
-        
-
-        SDL_RenderCopy(render, texture, NULL, NULL);
-        SDL_RenderFillRect(render, &player);
-        SDL_RenderPresent(render);
-        SDL_Delay(16);
-
-        i++;
-        cout << i << "player y : " << player.x << "player y : " << player.y<< endl;
-        if(i>500) running = false;
+    while (running) {
+        running = map_test(render, window, screen);
     }
-
-    SDL_DestroyTexture(texture);
+    
     
     SDL_DestroyRenderer(render);
     SDL_DestroyWindow(window);
