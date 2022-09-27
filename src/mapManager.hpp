@@ -23,7 +23,7 @@ class MapManager {
         /**
          * Constuctor of MapManager
         */
-        MapManager(SDL_Renderer *render, string mapName);
+        MapManager(string mapName);
         ~MapManager();
 
         /**
@@ -35,7 +35,7 @@ class MapManager {
          * Print the map on screen 
          * @return True if successful else false
         */
-        bool print(SDL_Renderer *render, bool showHitbox);
+        bool print(bool showHitbox);
 
         /**
          * Print the map on screen 

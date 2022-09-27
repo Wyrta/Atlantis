@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <stdlib.h>     /* srand, rand */
 
 #include "../include/SDL/SDL.h"
 #include "../include/SDL_image/SDL_image.h"
@@ -75,7 +76,7 @@ TTF_Font *createFont(const char *path, int size);
  * @param font SDL font
  * @param text text to display
 */
-SDL_Texture *write(SDL_Renderer *render, SDL_Rect *rect, TTF_Font *font, const char *text);
+SDL_Texture *write(SDL_Renderer *render, SDL_Rect *rect, TTF_Font *font, const char *text, SDL_Color color = { 0, 0, 0 });
 
 /**
  * @return Return the pixels color
@@ -85,5 +86,10 @@ SDL_Texture *write(SDL_Renderer *render, SDL_Rect *rect, TTF_Font *font, const c
 */
 Uint32 GetPixel(SDL_Surface *surface, int x, int y);
 
+/**
+ * @brief generate a number aleat between min and max
+ * 
+ */
+int intAleat(int min, int max);
 
 #endif //SOMEFUNCTION_H_

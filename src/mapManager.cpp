@@ -1,6 +1,8 @@
 #include "mapManager.hpp"
 
-MapManager::MapManager(SDL_Renderer *render, string mapName) {
+extern SDL_Renderer *render;
+
+MapManager::MapManager(string mapName) {
 
     string strToCut = mapName;
     int cutPos = strToCut.find('_');
@@ -46,6 +48,7 @@ MapManager::MapManager(SDL_Renderer *render, string mapName) {
     //...
 
 }
+
 MapManager::~MapManager() {
     SDL_FreeSurface(hitbox);
 
@@ -62,7 +65,7 @@ SDL_Point MapManager::initPos() {
     return mPoint;
 }
 
-bool MapManager::print(SDL_Renderer *render, bool showHitbox) {
+bool MapManager::print(bool showHitbox) {
     recthitboxMap = rectMap;
 
     //Render of the map

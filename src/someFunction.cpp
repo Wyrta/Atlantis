@@ -80,8 +80,7 @@ TTF_Font *createFont(const char *path, int size) {
     else return font;
 }
 
-SDL_Texture *write(SDL_Renderer *render, SDL_Rect *rect, TTF_Font *font, const char *text) {
-    SDL_Color color = { 0, 0, 0 };
+SDL_Texture *write(SDL_Renderer *render, SDL_Rect *rect, TTF_Font *font, const char *text, SDL_Color color) {
     SDL_Surface *surface;
 
     surface = TTF_RenderText_Solid(font, text, color);
@@ -122,5 +121,9 @@ Uint32 GetPixel(SDL_Surface *surface, int x, int y) {
 
 }
 
-
+int intAleat(int min, int max)  {
+    if(min > max) { int temp = min; min = max; max = temp; }
+    if(min == max) return max;
+    return (min + (rand() % max));
+}
 

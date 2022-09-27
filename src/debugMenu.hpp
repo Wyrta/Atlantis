@@ -17,33 +17,40 @@ class DebugMenu {
     public:
         /**
          * Constuctor of DebugMenu
-         * @param render the actual render of the screen 
         */
-        DebugMenu(SDL_Renderer *render);
+        DebugMenu(string font);
         /**
          * Print the debug menu on screen
         */
-        void print(SDL_Renderer *render, int fps, SDL_Point playerCoo);
+        void print(int fps);
 
-        //If it's display on show or not
+        //If it's display or not
         bool active = false;
 
+        static TTF_Font *debugFont;
+
     private:
+        SDL_Texture *fpsTxt = NULL;
+        SDL_Rect     rectFpsTxt;
+        SDL_Texture *fpsValue = NULL;
+        SDL_Rect     rectFpsValue;
+
+
+        SDL_Rect rect_atk;
+        SDL_Rect rect_hp;
+        SDL_Rect rect_speed;
+        SDL_Rect rect_name;
+        SDL_Rect rect_coo;
+
+
+        SDL_Texture *name_texture  = NULL;
+        SDL_Texture *coo_texture   = NULL;
+        SDL_Texture *atk_texture   = NULL;
+        SDL_Texture *hp_texture    = NULL;
+        SDL_Texture *speed_texture = NULL;
+
         
 
-        TTF_Font *debugFont = NULL;
-
-        SDL_Texture *fpsDisplay = NULL;
-        SDL_Rect rectFpsDisplay;
-        SDL_Texture *fpsDisplay2 = NULL;
-        SDL_Rect rectFpsDisplay2;
-
-        SDL_Texture *texturePosPLayer = NULL;
-        SDL_Rect rectTexturePosPLayer;
-        SDL_Texture *texturePosPLayerX = NULL;
-        SDL_Rect rectTexturePosPLayerX;
-        SDL_Texture *texturePosPLayerY = NULL;
-        SDL_Rect rectTexturePosPLayerY;
 };
 
 #endif //MAP_TEST
