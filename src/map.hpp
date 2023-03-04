@@ -7,7 +7,7 @@ using namespace std;
 
 #include "Printable.hpp"
 #include "../include/SDL/SDL.h"
-#define NB_MAP_LVL      3
+
 
 typedef enum {
 	TEST,
@@ -17,15 +17,17 @@ typedef enum {
 
 class Map {
     public:
-        Map(Map_lvl name);
+        Map(Map_lvl mapname);
         ~Map();
 
         void print(void);
 
 		void focus(SDL_Point pos);
 		SDL_Point getPosition(void) { return (this->position); }
-    private:
 
+		Tile *getTile(SDL_Point pos);
+    private:
+		Map_lvl name;
 		vector<Tile> tilemap;
 
 		SDL_Point	position;

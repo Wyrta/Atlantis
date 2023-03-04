@@ -8,7 +8,9 @@
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path);
 
-#define TILESIZE	64
+#define TILESIZE		64
+#define ENTITYSPEED		4
+
 
 typedef enum {
 	NORTH,
@@ -90,6 +92,9 @@ class Tile : public Printable
 
 		bool print_onMap(SDL_Point offset);
 		void setPosition(int x, int y);
+		SDL_Point getPosition(void) { return (this->position); }
+		Direction getWalkable() 	{ return (this->walkable); }
+
 
 		static void load_all_texture();
 		static void unload_all_texture();
@@ -99,16 +104,24 @@ class Tile : public Printable
 class Entity : public Printable
 {
 	private:
-		SDL_Point position;
+		SDL_Point	position;
+		SDL_Point 	positionScreen;
+		Direction	moving;
+
+
 	public:
 		Entity(const char *entityName, const char *texturePath);
 		~Entity();
 
-		bool print_onMap(SDL_Point offset);
+		bool		print_onMap(SDL_Point offset);
 
-		void move(Direction direction);
-		SDL_Point getPosition() { return this->position; }
+		void		proc(void);
+		void		move(Direction direction, Tile *tile);
 
+		SDL_Point	getPosition(void)			{ return this->position; }
+		SDL_Point	getPosition_screen(void)	{ return this->positionScreen; }
+		Direction	isMoving(void)				{ return this->moving; }
+		bool		canMove(void)				{ return (this->moving == Direction::NONE); }
 };
 
 
