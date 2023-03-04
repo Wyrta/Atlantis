@@ -70,20 +70,35 @@ class Game
 			if (!this->loaded)
 				this->load();
 
-			if (event->getKey(SDL_GetScancodeFromKey(SDLK_z))) {
-				mob->move(NORTH);
-			}
-			if (event->getKey(SDL_GetScancodeFromKey(SDLK_s))) {
-				mob->move(SOUTH);
-			}
-			if (event->getKey(SDL_GetScancodeFromKey(SDLK_q))) {
-				mob->move(WEST);
-			}
-			if (event->getKey(SDL_GetScancodeFromKey(SDLK_d))) {
-				mob->move(EAST);
+			if (mob->canMove())
+			{
+				SDL_Point 	futurePos = mob->getPosition();
+				
+				if (mob->canMove() && event->getKey(SDL_GetScancodeFromKey(SDLK_z)))
+				{
+					futurePos.y--;
+					mob->move(Direction::NORTH, map->getTile(futurePos));
+				}
+				if (mob->canMove() && event->getKey(SDL_GetScancodeFromKey(SDLK_s)))
+				{
+					futurePos.y++;
+					mob->move(Direction::SOUTH, map->getTile(futurePos));
+				}
+				if (mob->canMove() && event->getKey(SDL_GetScancodeFromKey(SDLK_q)))
+				{
+					futurePos.x--;
+					mob->move(Direction::WEST, map->getTile(futurePos));
+				}
+				if (mob->canMove() && event->getKey(SDL_GetScancodeFromKey(SDLK_d)))
+				{
+					futurePos.x++;
+					mob->move(Direction::EAST, map->getTile(futurePos));
+				}
 			}
 
-			map->focus(mob->getPosition());
+			mob->proc();
+
+			map->focus(mob->getPosition_screen());
 			map->print();
 
 			mob->print_onMap(map->getPosition());

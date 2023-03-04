@@ -273,14 +273,20 @@ Entity::Entity(const char *entityName, const char *texturePath) : Printable(enti
 	this->position.x = 0;
 	this->position.y = 0;
 
-	dst_rect.x = this->position.x;
-	dst_rect.y = this->position.y;
-	dst_rect.w = dst_rect.h = 60;
+	this->positionScreen.x = this->position.x*TILESIZE;
+	this->positionScreen.y = this->position.y*TILESIZE;
+	
+	this->src_rect.x = 0;
+	this->src_rect.y = 0;
+	this->src_rect.w = screen.w;
+	this->src_rect.h = screen.h;
 
-	src_rect.x = 0;
-	src_rect.y = 0;
-	src_rect.w = screen.w;
-	src_rect.h = screen.h;
+	this->dst_rect.x = this->positionScreen.x;
+	this->dst_rect.y = this->positionScreen.y;
+	this->dst_rect.w = TILESIZE;
+	this->dst_rect.h = TILESIZE;
+
+	this->moving = Direction::NONE;
 }
 
 
@@ -289,37 +295,72 @@ Entity::~Entity()
 }
 
 
-void Entity::move(Direction direction)
+void Entity::move(Direction direction, Tile *tile)
 {
-	switch (direction)
+	if (tile == NULL)
+		return;
+	if ((direction == tile->getWalkable()) || (tile->getWalkable() == Direction::ALL))
 	{
-		case NORTH: 
-			this->position.y -= 10;
-			break;
-		case SOUTH: 
-			this->position.y += 10;
-			break;
-		case WEST:  
-			this->position.x -= 10;
-			break;
-		case EAST:  
-			this->position.x += 10;
-			break;
-		
-		default:
-			break;
-	}
+		switch (direction)
+		{
+			case Direction::NORTH:
+				this->position.y -= 1;
+				break;
+			case Direction::SOUTH: 
+				this->position.y += 1;
+				break;
+			case Direction::WEST:  
+				this->position.x -= 1;
+				break;
+			case Direction::EAST:  
+				this->position.x += 1;
+				break;
 
-	this->dst_rect.x = this->position.x;
-	this->dst_rect.y = this->position.y;
+			default:
+				break;
+		}
+
+		this->moving = direction;
+	}
 }
 
+void Entity::proc(void)
+{
+	if (this->moving != Direction::NONE)
+	{
+		switch (this->moving)
+		{
+			case Direction::NORTH: 
+				this->positionScreen.y -= ENTITYSPEED;
+				break;
+			case Direction::SOUTH: 
+				this->positionScreen.y += ENTITYSPEED;
+				break;
+			case Direction::WEST:  
+				this->positionScreen.x -= ENTITYSPEED;
+				break;
+			case Direction::EAST:  
+				this->positionScreen.x += ENTITYSPEED;
+				break;
+
+			default:
+				break;
+		}
+
+		if ((this->positionScreen.x == this->position.x*TILESIZE) && (this->positionScreen.y == this->position.y*TILESIZE))
+			this->moving = Direction::NONE;
+	
+		console->log("player : x%d y%d tile : x%d y%d ", this->positionScreen.x, this->positionScreen.y, this->position.x*TILESIZE, this->position.y*TILESIZE);
+	}
+
+	/* TODO PSN, EMBUSH */
+}
 
 bool Entity::print_onMap(SDL_Point offset)
 {
 	SDL_Rect offsetRect;
-	offsetRect.x = offset.x + this->position.x;
-	offsetRect.y = offset.y + this->position.y;
+	offsetRect.x = offset.x + this->positionScreen.x;
+	offsetRect.y = offset.y + this->positionScreen.y;
 	offsetRect.w = dst_rect.w;
 	offsetRect.h = dst_rect.h;
 
