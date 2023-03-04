@@ -8,6 +8,26 @@
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path);
 
+#define TILESIZE	64
+
+typedef enum {
+	NORTH,
+	SOUTH,
+	WEST,
+	EAST,
+	ALL,
+	NONE
+} Direction;
+
+typedef enum {
+	DIRT,
+	WATER,
+	STONE,
+	BUSH,
+	EMPTY,
+	LAST	/* Dont use */
+} Tile_type;
+
 class Printable
 {
 	private:
@@ -15,7 +35,7 @@ class Printable
 
 		SDL_Rect texture_rect;
 
-
+		bool destroy_texture = true;
 	protected:
 		std::string name = "";
 		std::string path = "";
@@ -24,22 +44,46 @@ class Printable
 		SDL_Rect dst_rect;
 
 	public:
+		Printable(SDL_Rect size);
 		Printable(const char *objname, const char *filepath);
 		~Printable();
 
 		bool print();
 		bool print(SDL_Rect *src_rect, SDL_Rect *dst_rect);
 
+
+		void setTexture(const char *filepath);
+		void setTexture(SDL_Texture *ptr_texture);
+
 		SDL_Rect getHitbox() { return texture_rect; }
 
+		static bool debug;
 };
 
-typedef enum {
-	NORTH,
-	SOUTH,
-	WEST,
-	EAST
-} Direction;
+
+
+class Tile : public Printable
+{
+	private:
+		static SDL_Texture *texture[Tile_type::LAST];
+
+		Tile_type type;
+		Direction walkable;
+
+		SDL_Point position;
+
+	public:
+		Tile(Tile_type type = EMPTY, SDL_Rect size = {0, 0, TILESIZE, TILESIZE});
+		~Tile();
+
+		bool print_onMap(SDL_Point offset);
+		void setPosition(int x, int y);
+
+		static void load_all_texture();
+		static void unload_all_texture();
+};
+
+
 
 class Entity : public Printable
 {
@@ -49,9 +93,11 @@ class Entity : public Printable
 		Entity(const char *entityName, const char *texturePath);
 		~Entity();
 
-		void move(Direction direction);
+		bool print_onMap(SDL_Point offset);
 
-		static bool debug;
+		void move(Direction direction);
+		SDL_Point getPosition() { return this->position; }
+
 };
 
 
