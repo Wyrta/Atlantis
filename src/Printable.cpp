@@ -7,7 +7,7 @@ extern SDL_Renderer *render;
 extern SDL_Rect		screen;
 
 
-bool Entity::debug = false;
+bool Printable::debug = false;
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -57,17 +57,20 @@ bool Printable::print(SDL_Rect *src, SDL_Rect *dst)
 {
 	int retval;
 
-	if (this->texture == NULL) {
+	if (this->texture == NULL)
+	{
 		console->log(ERROR, "Invalid texture (ptr : 0x%x) \"%s\"", (unsigned int) this->texture, this->name.c_str());
 		return (false);
 	}
 
 	retval = SDL_RenderCopy(render, this->texture, src, dst);
 
-	if (retval == 0) {
+	if (retval == 0)
+	{
 		return (true);
 	}
-	else {
+	else
+	{
 		console->log(ERROR, "Cannot print \"%s\"", this->name.c_str());
 		return (false);
 	}
@@ -118,4 +121,15 @@ void Entity::move(Direction direction)
 
 	this->dst_rect.x = this->position.x;
 	this->dst_rect.y = this->position.y;
+}
+
+bool Entity::print_onMap(SDL_Point offset)
+{
+	SDL_Rect offsetRect;
+	offsetRect.x = offset.x + this->position.x;
+	offsetRect.y = offset.y + this->position.y;
+	offsetRect.w = dst_rect.w;
+	offsetRect.h = dst_rect.h;
+
+	return (this->print(&this->src_rect, &offsetRect));
 }

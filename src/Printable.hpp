@@ -32,6 +32,7 @@ class Printable
 
 		SDL_Rect getHitbox() { return texture_rect; }
 
+		static bool debug;
 };
 
 typedef enum {
@@ -49,9 +50,11 @@ class Entity : public Printable
 		Entity(const char *entityName, const char *texturePath);
 		~Entity();
 
-		void move(Direction direction);
+		bool print_onMap(SDL_Point offset);
 
-		static bool debug;
+		void move(Direction direction);
+		SDL_Point getPosition() { return this->position; }
+
 };
 
 

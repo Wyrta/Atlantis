@@ -36,11 +36,6 @@ Console::~Console() {
 //	}
 }
 
-/*
-void Console::log(string txt_to_print) {
-	this->log(MSG, txt_to_print);
-}
-*/
 void Console::log(const char *format, ...) {
 	/* args parsing */
 	va_list arglist;
@@ -161,42 +156,6 @@ void Console::log(log_t type, const char *format, ...)
 	cout << this->buffer[this->last_log] << endl;
 	//printf("%s | %s\r\n", message, this->buffer[this->last_log].c_str());
 }
-
-/*
-void Console::log(log_t type, string txt_to_print) {
-	this->last_msg_time = SDL_GetTicks();
-	char buff[BUF_LENGTH], type_str[16];
-	SDL_memset(buff, 0, BUF_LENGTH);
-	SDL_memset(type_str, 0, 16);
-
-	this->last_log++;
-
-	if (this->last_log == LOG_LENGHT)
-		this->last_log = 0;
-
-	if (this->last_log == this->first_log) {
-		this->first_log++;
-		if (this->first_log == LOG_LENGHT)
-			this->first_log = 0;
-	}
-
-	switch (type)
-	{
-		case MSG: 				snprintf(type_str, 16, "LOG"); break;
-		case EVENT: 			snprintf(type_str, 16, "EVT"); break;
-		case ERROR: 			snprintf(type_str, 16, "ERR"); break;
-		case CRITICAL_ERROR: 	snprintf(type_str, 16, "CER"); break;
-		case WARNING: 			snprintf(type_str, 16, "WRN"); break;
-		default: snprintf(type_str, 16, "???"); break;
-	}
-
-	snprintf(buff, BUF_LENGTH, "[%s] %08d : %s", type_str, this->last_msg_time, txt_to_print.c_str());
-	this->buffer[this->last_log].assign(buff);
-
-	cout << this->buffer[this->last_log] << endl;
-}
-*/
-
 
 
 void Console::print_all(void) {

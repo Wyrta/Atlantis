@@ -2,7 +2,10 @@
 
 #include "Console.hpp"
 
-extern Console *console; 
+extern Console		*console;
+extern SDL_Window	*window;
+extern SDL_Rect		screen;
+
 
 EventManager::EventManager(State *state)
 {
@@ -30,13 +33,15 @@ void EventManager::pollEvent(void)
 			switch (this->event.type)
 			{
 				case SDL_QUIT: *this->appState = EXIT; break;
-
+				case SDL_WINDOWEVENT: {
+					if (this->event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+						SDL_GetWindowSize(window, &screen.w, &screen.h);
+				} break;
 				case SDL_MOUSEBUTTONDOWN:	break;
 				case SDL_MOUSEBUTTONUP:		break;
 				case SDL_MOUSEWHEEL:		break;
 				case SDL_KEYDOWN: {
-					/* ESCAPE */
-					if (this->getKey(SDL_SCANCODE_ESCAPE))
+					if (this->getKey(SDL_SCANCODE_ESCAPE))	/* ESCAPE */
 						*this->appState = EXIT;
 				} break;
 				case SDL_KEYUP:				break;

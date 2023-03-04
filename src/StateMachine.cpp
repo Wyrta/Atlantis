@@ -74,9 +74,11 @@ class Game
 				mob->move(EAST);
 			}
 
+			map->focus(mob->getPosition());
+
 			map->print();
 
-			mob->print();
+			mob->print_onMap(map->getPosition());
 		}
 };
 
@@ -163,8 +165,7 @@ int init(State *state)
 
 	printf("\r\n");
 
-
-	SDL_SetWindowSize(window, screen.w, screen.h);
+	SDL_GetWindowSize(window, &screen.w, &screen.h);
 
 	SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderFillRect(render, &screen);
