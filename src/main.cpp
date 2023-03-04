@@ -3,11 +3,10 @@
  * Aim : an rpg
  * License : Sills gaming
  * Date : 25/05/2021 - abort
- *        10/03/2022
- * 
-*/
+ *		10/03/2022
+ *
+ */
 
-#include <iostream>
 #include <string>
 
 #include "../include/SDL/SDL.h"
@@ -15,98 +14,67 @@
 #include "../include/SDL_mixer/SDL_mixer.h"
 #include "../include/SDL_ttf/SDL_ttf.h"
 
-#include "map.hpp"
+#include "Console.hpp"
+#include "Statemachine.hpp"
+#include "EventManager.hpp"
 
-#define ATLANTIS_VER "Atlantis v0.5.0-indev"
+#include "Printable.hpp"
+
 
 using namespace std;
 
+string  		app_version		= "Atlantis v23w09";
+SDL_Window		*window 		= NULL;
+SDL_Renderer	*render 		= NULL;
+Console			*console 		= NULL;
+EventManager	*event			= NULL;
+SDL_Rect		screen;
 
-SDL_Renderer *render = NULL;
-SDL_Window   *window = NULL;
+//EventManager	*eventManager	= NULL;
 
+int main(int argc, char *argv[])
+{
+	printf("Starting %s ...\r\n\r\n", app_version.c_str());
 
-int main(int argc, char *argv[]) {    
-    cout << "Init game utils : ";
+	/* random init */
+	srand(0);
 
-    srand(0);   //rand init
-    
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);  //SDL init 
-    IMG_Init(IMG_INIT_PNG);                     //
-    TTF_Init();                                 //
-    Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);      //
+	/* SDL init */
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+	IMG_Init(IMG_INIT_PNG);
+	TTF_Init();
+	Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
 
-    /**
-     * Channel used :
-     *  1 => Entity.follow()         => footstep
-     *  2 => GUI.inventory()         => scratchsound
-     *  3 => Npc.talk()              => talkingSound
-     *  4 => gameManager.playClick() => click
-     * 
-    */
+	
+	/*main loop*/
 
-    /* Init window and render */
+	State state = INIT;
+	init(&state);
 
-//    cout << "Init window and render" << endl;
+	while (state != EXIT) {
+		SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_RenderFillRect(render, &screen);
+		event->pollEvent();
 
-    /* Init screen size */
+		switch (state)
+		{
+			case INIT: state = MENU; break;
+			case GAME: menu(&state); break;
+			case MENU: game(&state); break;
+			case EXIT: break;
+			
+			default: state = EXIT; break;
+		}
 
-    SDL_Rect screen;
-        screen.h = 800;
-        screen.w = 1400;
-        screen.x = 0;
-        screen.y = 0;
+		SDL_RenderPresent(render);
 
-    /* init window & render */
+		/* TODO : wait for ticks */
+		SDL_Delay(10);
+	}
 
-    window = SDL_CreateWindow(ATLANTIS_VER, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen.w, screen.h, SDL_WINDOW_RESIZABLE);
-    render = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-    /* Test window and render */
-    if(window == NULL) {cout << "error on window" << endl; SDL_Delay(1000); return -1;}
-    if(render == NULL) {cout << "error on render" << endl; SDL_Delay(1000); return -1;}
-
-    SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderFillRect(render, &screen);
-
-    LoadingBar bar({ screen.w/4, 2*(screen.h/3)}, (screen.w/2), 25);
-    bar.print();
-
-    SDL_RenderPresent(render);
-
-    SDL_Texture *splitScreen_texture = createTexture(render, NULL, "./img/splitScreen.png");
-    SDL_RenderCopy(render, splitScreen_texture, NULL, NULL);
-
-    bar.addPercentage(20);
-    bar.print();
-
-    SDL_RenderPresent(render);
-
-    /* Init audio */
-
-    if( Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) < 0 ) { cout << "Error audio SDL" << endl; }
-    if( Mix_Init(MIX_INIT_OGG) == 0) { cout << "Error SDL_mixer" << endl; }
-
-    bar.addPercentage(20);
-    bar.print();
-    SDL_RenderPresent(render);
-
-    /*main loop*/
-
-    string running = "plage_00";
-
-    while (running != "none") {
-        running = map(window, screen, running);
-        
-        SDL_RenderCopy(render, splitScreen_texture, NULL, NULL);
-//        SDL_RenderPresent(render);
-    }
-
-    SDL_DestroyTexture(splitScreen_texture);
-
-    SDL_DestroyRenderer(render);
-    SDL_DestroyWindow(window);
-
-    SDL_Quit();
-    return 0;
+	exit(&state);
+	
+//	delete eventManager;
+	SDL_Quit();
+	return (0);
 }
