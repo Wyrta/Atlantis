@@ -25,8 +25,19 @@ typedef enum {
 	STONE,
 	BUSH,
 	EMPTY,
-	LAST	/* Dont use */
+	LAST_TTYPE		/* Dont use */
 } Tile_type;
+
+
+typedef struct {
+	int x;
+	int y;
+
+	Tile_type type;
+	
+	Direction walkable;
+} Tile_params;
+
 
 class Printable
 {
@@ -61,11 +72,10 @@ class Printable
 };
 
 
-
 class Tile : public Printable
 {
 	private:
-		static SDL_Texture *texture[Tile_type::LAST];
+		static SDL_Texture *texture[Tile_type::LAST_TTYPE];
 
 		Tile_type type;
 		Direction walkable;
@@ -73,7 +83,9 @@ class Tile : public Printable
 		SDL_Point position;
 
 	public:
-		Tile(Tile_type type = EMPTY, SDL_Rect size = {0, 0, TILESIZE, TILESIZE});
+	
+		Tile(Tile_params params);
+		Tile(Tile_type type = EMPTY, SDL_Rect info = {0, 0, TILESIZE, TILESIZE});
 		~Tile();
 
 		bool print_onMap(SDL_Point offset);
@@ -82,7 +94,6 @@ class Tile : public Printable
 		static void load_all_texture();
 		static void unload_all_texture();
 };
-
 
 
 class Entity : public Printable

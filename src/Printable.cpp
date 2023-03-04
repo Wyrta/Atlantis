@@ -11,7 +11,7 @@ extern Mouse_t		mouse;
 
 
 bool		Printable::debug = false;
-SDL_Texture *Tile::texture[Tile_type::LAST];
+SDL_Texture *Tile::texture[Tile_type::LAST_TTYPE];
 
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
@@ -124,9 +124,31 @@ void Printable::setTexture(SDL_Texture *ptr_texture)
 }
 
 
-Tile::Tile(Tile_type type, SDL_Rect size) : Printable(size)
+Tile::Tile(Tile_params params) : Printable({params.x, params.y, TILESIZE, TILESIZE})
 {
-	position = {0, 0};
+	this->position.x = params.x;
+	this->position.y = params.y;
+
+	this->walkable = params.walkable;
+
+	switch (params.type)
+	{
+	
+		case DIRT:	this->setTexture(Tile::texture[DIRT]);	break;
+		case WATER:	this->setTexture(Tile::texture[WATER]);	break;
+		case STONE:	this->setTexture(Tile::texture[STONE]);	break;
+		case BUSH:	this->setTexture(Tile::texture[BUSH]);	break;
+		case EMPTY: this->setTexture(Tile::texture[DIRT]);	break;
+		default:
+			break;
+	}
+}
+
+
+Tile::Tile(Tile_type type, SDL_Rect info) : Printable(info)
+{
+	this->position.x = info.x;
+	this->position.y = info.y;
 
 	switch (type)
 	{
@@ -195,7 +217,7 @@ void Tile::load_all_texture()
 	console->log("Load tiles");
 
 	/* reset tile */
-	for (int i = 0; i < Tile_type::LAST; i++)
+	for (int i = 0; i < Tile_type::LAST_TTYPE; i++)
 		Tile::texture[i] = NULL;
 	
 
@@ -204,7 +226,7 @@ void Tile::load_all_texture()
 		if (line.c_str()[0] == '#')
 			continue;
 
-		tileType = LAST;
+		tileType = Tile_type::LAST_TTYPE;
 		file 	 = "";
 
 		index = line.find(";");
@@ -237,7 +259,7 @@ void Tile::unload_all_texture()
 {
 	console->log("Unload tile");
 
-	for (int i = 0; i < Tile_type::LAST; i++)
+	for (int i = 0; i < Tile_type::LAST_TTYPE; i++)
 	{
 		if (Tile::texture[i] != NULL)
 			SDL_DestroyTexture(Tile::texture[i]);
