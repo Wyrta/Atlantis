@@ -49,7 +49,7 @@ class Game
 		{
 			Tile::load_all_texture();
 
-			map = new Map("img/map/map.png");
+			map = new Map(Map_lvl::TEST);
 			mob = new Entity("Mob_random", "img/entity/mobTest.png");
 
 			this->loaded = true;
@@ -84,7 +84,6 @@ class Game
 			}
 
 			map->focus(mob->getPosition());
-
 			map->print();
 
 			mob->print_onMap(map->getPosition());
@@ -197,6 +196,8 @@ int init(State *state)
 
 int exit(State *state)
 {
+	console->log("Exit game ...");
+
 	delete (gameCnf);
 	delete (menuCnf);
 
@@ -205,6 +206,8 @@ int exit(State *state)
 
 	SDL_DestroyRenderer(render);
 	SDL_DestroyWindow(window);
+
+	printf("Exit successfull\r\n");
 
     return (0);
 }

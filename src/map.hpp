@@ -1,14 +1,23 @@
 #ifndef _map_hpp_
 #define _map_hpp_
 
+#include <vector>
+
+using namespace std;
+
 #include "Printable.hpp"
 #include "../include/SDL/SDL.h"
-
 #define NB_MAP_LVL      3
+
+typedef enum {
+	TEST,
+	TEST2,
+	LAST_MLVL		/* Dont use */
+} Map_lvl;
 
 class Map {
     public:
-        Map(const char *filepath);
+        Map(Map_lvl name);
         ~Map();
 
         void print(void);
@@ -17,12 +26,9 @@ class Map {
 		SDL_Point getPosition(void) { return (this->position); }
     private:
 
-		Tile *tilemap;
-
-        Printable	*maplvl[NB_MAP_LVL];   /* 0 hitbox, 1 ground, ... */
+		vector<Tile> tilemap;
 
 		SDL_Point	position;
-        SDL_Rect	mapHitbox;
 };
 
 #endif /* _map_hpp_ */

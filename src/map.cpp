@@ -5,56 +5,44 @@
 extern Console *console;
 extern SDL_Rect screen;
 
-Map::Map(const char *filepath)
+Tile_params maps_TEST[] = {
+#include "maps/test.rc"
+};
+
+
+Map::Map(Map_lvl name)
 {
-	for (int i = 0; i < NB_MAP_LVL; i++)
-		maplvl[i] = NULL;
-
-//	maplvl[1] = new Printable("Map test", filepath);
-
-//	mapHitbox = maplvl[1]->getHitbox();
-//	mapHitbox.x = mapHitbox.y = 0;
-//	mapHitbox.w *= 2;
-//	mapHitbox.h *= 2;
-
-
-	this->tilemap = new Tile[10];
-
-	for (int i = 0; i < 10; i++)
+	switch (name)
 	{
-		tilemap[i].setPosition(i, 0);
+		case Map_lvl::TEST:		
+			for (int i = 0; i < (int)(sizeof(maps_TEST)/sizeof(Tile_params)); i++)
+			{
+				tilemap.push_back(Tile(maps_TEST[i]) );
+			}
+		break;
+		case Map_lvl::TEST2:	
+			for (int i = 0; i < (int)(sizeof(maps_TEST)/sizeof(Tile_params)); i++)
+			{
+				tilemap.push_back(Tile(DIRT, {i, 0, TILESIZE, TILESIZE}) );
+			}
+		break;
+		
+		default:
+			break;
 	}
+
 }
 
 
 Map::~Map()
 {
-	for (int i = 0; i < NB_MAP_LVL; i++)
-	{
-		if (maplvl[i] != NULL) {
-			delete (maplvl[i]);
-			maplvl[i] = NULL; 
-		}
-	}
 
-	delete (this->tilemap);
 }
 
 
 void Map::print(void)
 {
-	mapHitbox.x = this->position.x;
-	mapHitbox.y = this->position.y;
-
-/*
-	for (int i = 0; i < NB_MAP_LVL; i++)
-	{
-		if (maplvl[i] != NULL)
-			maplvl[i]->print(NULL, &mapHitbox);
-	}
-*/
-
-	for (int i = 0; i < 10; i++)
+	for (unsigned int i = 0; i < tilemap.size(); i++)
 	{
 		tilemap[i].print_onMap(position);
 	}
