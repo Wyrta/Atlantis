@@ -1,13 +1,18 @@
 #include "Printable.hpp"
+#include <fstream>
 
 #include "Console.hpp"
+#include "EventManager.hpp"
 
 extern Console		*console;
 extern SDL_Renderer *render;
 extern SDL_Rect		screen;
+extern Mouse_t		mouse;
 
 
-bool Printable::debug = false;
+bool		Printable::debug = false;
+SDL_Texture *Tile::texture[Tile_type::LAST];
+
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -32,6 +37,24 @@ SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 	return (NULL);
 }
 
+
+Printable::Printable(SDL_Rect size)
+{
+	char printableName[32]; 
+	sprintf(printableName, "[Printable] 0x%x", (unsigned int)this);
+
+	this->name.assign(printableName);
+	this->path.assign("");
+
+	this->texture = NULL;
+
+	this->destroy_texture = false;
+
+	this->dst_rect.w = size.w;
+	this->dst_rect.h = size.h;
+}
+
+
 Printable::Printable(const char *objname, const char *filepath)
 {
 	this->name.assign(objname);
@@ -43,15 +66,21 @@ Printable::Printable(const char *objname, const char *filepath)
 	this->dst_rect.h = this->texture_rect.h;
 }
 
+
 Printable::~Printable()
 {
-	SDL_DestroyTexture(this->texture);
+	if (this->destroy_texture)
+		SDL_DestroyTexture(this->texture);
+	else
+		this->texture = NULL;
 }
+
 
 bool Printable::print()
 {
 	return (this->print(&this->src_rect, &this->dst_rect));
 }
+
 
 bool Printable::print(SDL_Rect *src, SDL_Rect *dst)
 {
@@ -74,6 +103,146 @@ bool Printable::print(SDL_Rect *src, SDL_Rect *dst)
 		console->log(ERROR, "Cannot print \"%s\"", this->name.c_str());
 		return (false);
 	}
+}
+
+
+void Printable::setTexture(const char *filepath)
+{
+	console->log("void Printable::setTexture(const char *filepath) > marche pas encore");
+}
+
+
+void Printable::setTexture(SDL_Texture *ptr_texture)
+{
+	if (this->texture != NULL)
+	{
+		SDL_DestroyTexture(this->texture);
+		this->texture = NULL;	
+	}
+	
+	this->texture = ptr_texture;
+}
+
+
+Tile::Tile(Tile_type type, SDL_Rect size) : Printable(size)
+{
+	position = {0, 0};
+
+	switch (type)
+	{
+	
+		case DIRT:	this->setTexture(Tile::texture[DIRT]);	break;
+		case WATER:	this->setTexture(Tile::texture[WATER]);	break;
+		case STONE:	this->setTexture(Tile::texture[STONE]);	break;
+		case BUSH:	this->setTexture(Tile::texture[BUSH]);	break;
+		case EMPTY: this->setTexture(Tile::texture[DIRT]);	break;
+		default:
+			break;
+	}
+}
+
+
+Tile::~Tile()
+{
+	
+}
+
+
+void Tile::setPosition(int x, int y)
+{
+	this->position.x = x;
+	this->position.y = y;
+}
+
+
+bool Tile::print_onMap(SDL_Point offset)
+{
+	SDL_Rect offsetRect;
+	bool retval;
+
+	offsetRect.x = offset.x + (this->position.x*TILESIZE);
+	offsetRect.y = offset.y + (this->position.y*TILESIZE);
+	offsetRect.w = dst_rect.w;
+	offsetRect.h = dst_rect.h;
+
+	retval = this->print(NULL, &offsetRect);
+
+	if ((mouse.x < (offsetRect.x + offsetRect.w)) & (mouse.x > offsetRect.x))
+	{
+		if ((mouse.y < (offsetRect.y + offsetRect.h)) & (mouse.y > offsetRect.y))
+		{
+			if (mouse.left)
+				SDL_SetRenderDrawColor(render, 32, 255, 32, 64);
+			else
+				SDL_SetRenderDrawColor(render, 255, 255, 255, 64);
+			SDL_RenderFillRect(render, &offsetRect);
+		}
+	}
+
+	return (retval);
+}
+
+
+void Tile::load_all_texture()
+{
+	ifstream	config("config/tiles.config");
+	string		line;
+	int			index;
+
+	Tile_type tileType;
+	string    file;
+
+	console->log("Load tiles");
+
+	/* reset tile */
+	for (int i = 0; i < Tile_type::LAST; i++)
+		Tile::texture[i] = NULL;
+	
+
+	while (getline(config, line) )
+	{
+		if (line.c_str()[0] == '#')
+			continue;
+
+		tileType = LAST;
+		file 	 = "";
+
+		index = line.find(";");
+		if(index == (int)string::npos)
+			continue;
+		
+		string str_tileType = line.substr(0, index);
+
+		if (str_tileType == "DIRT")
+			tileType = Tile_type::DIRT;
+		if (str_tileType == "WATER")
+			tileType = Tile_type::WATER;
+		if (str_tileType == "STONE")
+			tileType = Tile_type::STONE;
+		if (str_tileType == "BUSH")
+			tileType = Tile_type::BUSH;
+
+		file = line.substr(index+1, line.length());
+
+		file.insert(0, "textures/");
+		
+		Tile::texture[tileType] = createTexture(NULL, file.c_str());
+	}
+
+	config.close();
+}
+
+
+void Tile::unload_all_texture()
+{
+	console->log("Unload tile");
+
+	for (int i = 0; i < Tile_type::LAST; i++)
+	{
+		if (Tile::texture[i] != NULL)
+			SDL_DestroyTexture(Tile::texture[i]);
+	}
+	
 }
 
 
@@ -122,6 +291,7 @@ void Entity::move(Direction direction)
 	this->dst_rect.x = this->position.x;
 	this->dst_rect.y = this->position.y;
 }
+
 
 bool Entity::print_onMap(SDL_Point offset)
 {

@@ -6,6 +6,16 @@
 
 #define MAX_EVENT_POLL      100
 
+
+typedef struct Mouse_s
+{
+	int x;
+	int y;
+
+	bool left;
+	bool right;
+} Mouse_t;
+
 class EventManager
 {
     private:

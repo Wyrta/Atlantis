@@ -31,33 +31,42 @@ class Game
 
 	public:
 
-		Game(/* args */) {
+		Game()
+		{
 			this->loaded = false;
 
 			this->map = NULL;
 			this->mob = NULL;
 		}
 
-		~Game() {
+		~Game()
+		{
 			if (!this->loaded)
 				this->unload();
 		}
 
-		void load(void) {
+		void load(void)
+		{
+			Tile::load_all_texture();
+
 			map = new Map("img/map/map.png");
 			mob = new Entity("Mob_random", "img/entity/mobTest.png");
-			
+
 			this->loaded = true;
 		}
 
-		void unload(void) {
+		void unload(void)
+		{
 			delete (map);
 			delete (mob);
+
+			Tile::unload_all_texture();
 			
 			this->loaded = false;
 		}
 
-		void proc(State *state) {
+		void proc(State *state)
+		{
 			if (!this->loaded)
 				this->load();
 
@@ -167,6 +176,8 @@ int init(State *state)
 
 	SDL_GetWindowSize(window, &screen.w, &screen.h);
 
+
+	SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
 	SDL_RenderFillRect(render, &screen);
 	SDL_RenderPresent(render);

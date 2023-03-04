@@ -16,6 +16,9 @@ class Map {
 		void focus(SDL_Point pos);
 		SDL_Point getPosition(void) { return (this->position); }
     private:
+
+		Tile *tilemap;
+
         Printable	*maplvl[NB_MAP_LVL];   /* 0 hitbox, 1 ground, ... */
 
 		SDL_Point	position;

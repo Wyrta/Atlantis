@@ -29,6 +29,7 @@ SDL_Renderer	*render 		= NULL;
 Console			*console 		= NULL;
 EventManager	*event			= NULL;
 SDL_Rect		screen;
+Mouse_t			mouse;
 
 //EventManager	*eventManager	= NULL;
 
