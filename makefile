@@ -33,23 +33,20 @@ all: cleanAll $(EXEC) clean
 $(EXEC): $(OBJ) $(METADAT)
 	$(info Assemble the exe $@ ...)
 	$(CC) -o $@ $^ $(LDFLAGS) $(LIB)
-	$(info Done)
 
 %.o: %.cpp
 	$(info Compilation of $@ ...)
 	@$(CC) $(LIB) -o $@ -c $< $(CFLAGS) $(LIB)
-	$(info Done)
 
 %.res : %.rc
 	$(info Compilation of $@ ...)
 	@windres $< -O coff -o $@
-	$(info Done)
 
 clean:
-	$(RM) src\*.o
+	-$(RM) src\*.o
 
 cleanAll:
-	$(RM) src\*.o
-	$(RM) $(EXEC)
+	-$(RM) src\*.o
+	-$(RM) $(EXEC)
 
 #EoF

@@ -1,40 +1,51 @@
-#ifndef CONSOLE_HPP
-#define CONSOLE_HPP
+#ifndef _console_hpp_
+#define _console_hpp_
 
-#include <iostream>
 #include <string>
 
 #include "../include/SDL/SDL.h"
 #include "../include/SDL_ttf/SDL_ttf.h"
 
-#include "someFunction.hpp"
-#include "debugMenu.hpp"
-
-#define BUFFER_LENGTH   64
-#define MAX_LOG_LENGTH  8
-
+#define BUF_LENGTH      1024
+#define LOG_LENGHT      16
 
 using namespace std;
 
+typedef enum { 
+	MSG,
+	EVENT,
+	ERROR,
+	CRITICAL_ERROR,
+	WARNING,
+} log_t ;
 
 class Console {
-    public:
-        Console(SDL_Rect *screen);
-        ~Console();
+	public:
+		Console(SDL_Rect *);
+		~Console();
 
-        void log(string txt_to_print);
-        void print();
+//		void log(string );
+		void log(const char *, ...);
+//		void log(log_t , string );
+		void log(log_t , const char *, ...);
 
-    private:
-        string buffer[BUFFER_LENGTH];
+//		void print(void);
+//		void input(void);
 
-        SDL_Rect size;
-        SDL_Rect *gameScreen; 
-
-        SDL_Texture *lign[MAX_LOG_LENGTH];
-        SDL_Rect     lignRect[MAX_LOG_LENGTH];
+		void print_all(void);
 
 
+	private:
+		string buffer[BUF_LENGTH];
+
+//		SDL_Rect size;
+//		SDL_Rect *gameScreen; 
+
+//		SDL_Texture *lign[MAX_LOG_LENGTH];
+//		SDL_Rect	 lignRect[MAX_LOG_LENGTH];
+
+		Uint32 last_msg_time;
+        int first_log, last_log;
 };
 
-#endif //CONSOLE_HPP
+#endif /* _console_hpp_ */

@@ -1,28 +1,20 @@
-#ifndef MAP_TEST
-#define MAP_TEST
+#ifndef _map_hpp_
+#define _map_hpp_
 
-#include <iostream>
-#include <string>
-
+#include "Printable.hpp"
 #include "../include/SDL/SDL.h"
-#include "../include/SDL_image/SDL_image.h"
-#include "../include/SDL_mixer/SDL_mixer.h"
-#include "../include/SDL_ttf/SDL_ttf.h"
 
-#include "someFunction.hpp"
-#include "debugMenu.hpp"
-#include "gameManager.hpp"
-#include "GUI.hpp"
-#include "Entity.hpp"
-#include "mapManager.hpp"
+#define NB_MAP_LVL      3
 
+class Map {
+    public:
+        Map(const char *filepath);
+        ~Map();
 
-using namespace std;
+        void print(void);
+    private:
+        Printable *maplvl[NB_MAP_LVL];   /* 0 hitbox, 1 ground, ... */
+        SDL_Rect   mapHitbox;
+};
 
-
-//bool map_test(SDL_Window *window, SDL_Rect screen, string mapName);
-
-string map(SDL_Window *window, SDL_Rect screen, string mapName);
-
-
-#endif //MAP_TEST
+#endif /* _map_hpp_ */
