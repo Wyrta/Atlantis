@@ -41,13 +41,14 @@ class Game
 
 		~Game()
 		{
-			if (!this->loaded)
+			if (this->loaded)
 				this->unload();
 		}
 
 		void load(void)
 		{
 			Tile::load_all_texture();
+			Text::load_font();
 
 			map = new Map(Map_lvl::TEST);
 			mob = new Entity("Mob_random", "img/entity/mobTest.png");
@@ -59,10 +60,13 @@ class Game
 		{
 			delete (map);
 			delete (mob);
-
-			Tile::unload_all_texture();
 			
-			this->loaded = false;
+			Tile::unload_all_texture();
+			Text::unload_font();
+			
+			this->map		= NULL;
+			this->mob		= NULL;
+			this->loaded	= false;
 		}
 
 		void proc(State *state)
@@ -70,9 +74,15 @@ class Game
 			if (!this->loaded)
 				this->load();
 
+			if (event->getKeyUp(SDL_SCANCODE_F3))
+			{
+				Printable::debug = !Printable::debug;
+				console->log("debug = %s", (Printable::debug) ? "Enable" : "Disable");
+			}
+
 			if (mob->canMove())
 			{
-				SDL_Point 	futurePos = mob->getPosition();
+				SDL_Point futurePos = mob->getPosition();
 				
 				if (mob->canMove() && event->getKey(SDL_GetScancodeFromKey(SDLK_z)))
 				{
@@ -102,6 +112,8 @@ class Game
 			map->print();
 
 			mob->print_onMap(map->getPosition());
+
+			Printable::proc_debug();
 		}
 };
 
@@ -109,19 +121,23 @@ class Menu
 {
 	private:
 	public:
-		Menu() {
+		Menu()
+		{
 
 		}
 
-		~Menu() {
+		~Menu()
+		{
 
 		}
 
-		void load(void) {
+		void load(void)
+		{
 
 		}
 
-		void proc(State *state) {
+		void proc(State *state)
+		{
 
 		}
 

@@ -25,6 +25,13 @@ void EventManager::pollEvent(void)
 	
 	bool log = true; 
 
+	/* store last value of the keyboard */
+	for (int i = 0; i < SDL_Scancode::SDL_NUM_SCANCODES; i++)
+	{
+		this->last_keyboardState[i] = this->keyboardState[i];
+	}
+	
+	/* event proc */
 	do
 	{
 		hasEvent = SDL_PollEvent(&this->event);
@@ -56,10 +63,12 @@ void EventManager::pollEvent(void)
 				case SDL_KEYDOWN: {
 					if (this->getKey(SDL_SCANCODE_ESCAPE))	/* ESCAPE */
 						*this->appState = EXIT;
-					if (this->getKey(SDL_SCANCODE_F3))	/* F3 */
-						console->log("x%d y%d l%d, r%d", mouse.x, mouse.y, mouse.left, mouse.right);
+					log = false;
 				} break;
-				case SDL_KEYUP:				break;
+				case SDL_KEYUP: {
+
+					log = false;
+				} break;
 
 				default: log = false; break;
 			}
@@ -74,5 +83,25 @@ void EventManager::pollEvent(void)
 
 bool EventManager::getKey(SDL_Scancode key)
 {
-	return (keyboardState[key]); 
+	return (this->keyboardState[key]); 
 }
+
+bool EventManager::getKeyUp(SDL_Scancode key)
+{
+	bool retval;
+
+	retval = (this->last_keyboardState[key] == false) && (this->keyboardState[key] == true);
+
+	return (retval);
+}
+
+
+bool EventManager::getKeyDown(SDL_Scancode key)
+{
+	bool retval;
+
+	retval = (this->last_keyboardState[key] == true) && (this->keyboardState[key] == false);
+
+	return (retval);
+}
+

@@ -10,9 +10,10 @@ extern SDL_Rect		screen;
 extern Mouse_t		mouse;
 
 
-bool		Printable::debug = false;
-SDL_Texture *Tile::texture[Tile_type::LAST_TTYPE];
-
+bool				Printable::debug = false;
+vector<Printable *> Printable::toDebug; 
+SDL_Texture			*Tile::texture[Tile_type::LAST_TTYPE];
+TTF_Font			*Text::fonts[Font_type::LAST_FONT];
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -21,7 +22,8 @@ SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 
 	surface = IMG_Load(path);
 
-	if(surface) {
+	if (surface)
+	{
 		texture = SDL_CreateTextureFromSurface(render, surface);
 		SDL_FreeSurface(surface);
 
@@ -31,10 +33,48 @@ SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 		console->log("Create texture : \"%s\" at 0x%x", path, (unsigned int) texture);
 		return (texture);
 	}
-	else {
+	else
+	{
 		console->log(ERROR, "Create texture : \"%s\" : %s", path, SDL_GetError());
 	}
 	return (NULL);
+}
+
+
+TTF_Font *createFont(const char *path, int size)
+{
+	TTF_Font *font;
+	font = TTF_OpenFont(path, size);
+
+	if (!font)
+	{
+		console->log(ERROR, "Opening font (%s) : %s", path, SDL_GetError());
+	}
+	
+	return (font);
+}
+
+
+SDL_Texture *write(SDL_Rect *rect, TTF_Font *font, const char *text, SDL_Color color)
+{
+	SDL_Surface *surface = NULL;
+	SDL_Texture *texture = NULL;
+
+	surface = TTF_RenderText_Solid(font, text, color);
+
+	texture = SDL_CreateTextureFromSurface(render, surface);
+	SDL_FreeSurface(surface);
+
+	if (texture == NULL) 
+	{
+		console->log(ERROR, "Create texte texture : texture NULL");
+	}
+	else
+	{
+		SDL_QueryTexture(texture, NULL, NULL, &rect->w, &rect->h);
+	}
+
+	return (texture);
 }
 
 
@@ -50,8 +90,12 @@ Printable::Printable(SDL_Rect size)
 
 	this->destroy_texture = false;
 
+	this->dst_rect.x = size.x;
+	this->dst_rect.y = size.y;
 	this->dst_rect.w = size.w;
 	this->dst_rect.h = size.h;
+
+	/* texture ptr should be set after */
 }
 
 
@@ -106,6 +150,12 @@ bool Printable::print(SDL_Rect *src, SDL_Rect *dst)
 }
 
 
+void Printable::print_debug(void)
+{
+
+}
+
+
 void Printable::setTexture(const char *filepath)
 {
 	console->log("void Printable::setTexture(const char *filepath) > marche pas encore");
@@ -121,6 +171,17 @@ void Printable::setTexture(SDL_Texture *ptr_texture)
 	}
 	
 	this->texture = ptr_texture;
+}
+
+
+void Printable::proc_debug(void)
+{
+	for (unsigned int i = 0; i < Printable::toDebug.size(); i++)
+	{
+		Printable::toDebug[i]->print_debug();
+	}
+	
+		Printable::toDebug.clear();
 }
 
 
@@ -193,11 +254,72 @@ bool Tile::print_onMap(SDL_Point offset)
 				SDL_SetRenderDrawColor(render, 32, 255, 32, 64);
 			else
 				SDL_SetRenderDrawColor(render, 255, 255, 255, 64);
+
 			SDL_RenderFillRect(render, &offsetRect);
+
+			if (this->debug)
+			{
+				Printable::toDebug.push_back(this);
+			}
 		}
 	}
 
 	return (retval);
+}
+
+
+void Tile::print_debug(void)
+{
+	SDL_Rect advancedInfo;
+
+	char buffer[512];
+	char typebuffer[64];
+
+	switch (this->type)
+	{
+		case DIRT:			 sprintf(typebuffer, "DIRT");			break;
+		case DIRT_PATH_1:	 sprintf(typebuffer, "DIRT_PATH_1");	break;
+		case DIRT_PATH_2:	 sprintf(typebuffer, "DIRT_PATH_2");	break;
+		case DIRT_PATH_3:	 sprintf(typebuffer, "DIRT_PATH_3");	break;
+		case DIRT_PATH_4:	 sprintf(typebuffer, "DIRT_PATH_4");	break;
+		case DIRT_NE_GRASS:	 sprintf(typebuffer, "DIRT_NE_GRASS");	break;
+		case DIRT_NW_GRASS:	 sprintf(typebuffer, "DIRT_NW_GRASS");	break;
+		case DIRT_SE_GRASS:	 sprintf(typebuffer, "DIRT_SE_GRASS");	break;
+		case DIRT_SW_GRASS:	 sprintf(typebuffer, "DIRT_SW_GRASS");	break;
+		case GRASS_E_W_DIRT: sprintf(typebuffer, "GRASS_E_W_DIRT");	break;
+		case GRASS_N_S_DIRT: sprintf(typebuffer, "GRASS_N_S_DIRT");	break;
+		case GRASS_NE_DIRT:	 sprintf(typebuffer, "GRASS_NE_DIRT");	break;
+		case GRASS_NW_DIRT:	 sprintf(typebuffer, "GRASS_NW_DIRT");	break;
+		case GRASS_S_N_DIRT: sprintf(typebuffer, "GRASS_S_N_DIRT");	break;
+		case GRASS_SE_DIRT:	 sprintf(typebuffer, "GRASS_SE_DIRT");	break;
+		case GRASS_SW_DIRT:	 sprintf(typebuffer, "GRASS_SW_DIRT");	break;
+		case GRASS_W_E_DIRT: sprintf(typebuffer, "GRASS_W_E_DIRT");	break;
+		case GRASS_1:		 sprintf(typebuffer, "GRASS_1");		break;
+		case GRASS_2:		 sprintf(typebuffer, "GRASS_2");		break;
+		case GRASS_3:		 sprintf(typebuffer, "GRASS_3");		break;
+		case TINYBUSH_1:	 sprintf(typebuffer, "TINYBUSH_1");		break;
+		case TINYBUSH_2:	 sprintf(typebuffer, "TINYBUSH_2");		break;
+		case TINYBUSH_3:	 sprintf(typebuffer, "TINYBUSH_3");		break;
+		case TINYBUSH_4:	 sprintf(typebuffer, "TINYBUSH_4");		break;
+	
+		default: 	sprintf(typebuffer, "Unknow");
+	}
+
+	sprintf(buffer, "[Pos]: %2d %2d, [Type]: %s", this->position.x, this->position.y, typebuffer);
+	
+	advancedInfo.w = 200;
+	advancedInfo.h = 100;
+	advancedInfo.x = mouse.x + 10;
+	advancedInfo.y = mouse.y - advancedInfo.h - 10;
+
+	Text debugText(buffer, Font_type::AVARA, {advancedInfo.x+5, advancedInfo.y+5});
+
+	advancedInfo.w = debugText.getHitbox().w + 10;
+
+	SDL_SetRenderDrawColor(render, 128, 128, 128, 255);
+	SDL_RenderFillRect(render, &advancedInfo);
+
+	debugText.print_onMap({advancedInfo.x+5, advancedInfo.y+5});
 }
 
 
@@ -328,6 +450,7 @@ Entity::Entity(const char *entityName, const char *texturePath) : Printable(enti
 
 Entity::~Entity()
 {
+
 }
 
 
@@ -360,6 +483,7 @@ void Entity::move(Direction direction, Tile *tile)
 	}
 }
 
+
 void Entity::proc(void)
 {
 	if (this->moving != Direction::NONE)
@@ -390,6 +514,7 @@ void Entity::proc(void)
 	/* TODO PSN, EMBUSH */
 }
 
+
 bool Entity::print_onMap(SDL_Point offset)
 {
 	SDL_Rect offsetRect;
@@ -399,4 +524,66 @@ bool Entity::print_onMap(SDL_Point offset)
 	offsetRect.h = dst_rect.h;
 
 	return (this->print(&this->src_rect, &offsetRect));
+}
+
+
+void Entity::print_debug(void)
+{
+
+}
+
+
+Text::Text(const char *content, Font_type fontype, SDL_Point pos) : Printable((SDL_Rect){pos.x, pos.y, TILESIZE, TILESIZE})
+{
+	SDL_Rect	rect;
+	this->text.assign(content);
+	TTF_Font	*textfont	= Text::fonts[fontype];
+	SDL_Texture *texture	= write(&rect, textfont, this->text.c_str(), {0, 0, 0});
+
+	this->setTexture(texture);
+	this->setHitbox();
+
+	this->destroy_texture = true;
+}
+
+
+Text::~Text()
+{
+
+}
+
+
+bool Text::print_onMap(SDL_Point offset)
+{
+	SDL_Rect offsetRect;
+
+	SDL_Rect hitboxtmp = this->getHitbox();
+
+	offsetRect.x = offset.x;
+	offsetRect.y = offset.y;
+	offsetRect.w = hitboxtmp.w;
+	offsetRect.h = hitboxtmp.h;
+
+	return (this->print(NULL, &offsetRect));
+}
+
+
+
+void Text::load_font(void)
+{
+	console->log("Load fonts");
+	
+	Text::fonts[Font_type::AVARA]	= createFont("Avara.ttf", 16);
+	Text::fonts[Font_type::DUNO]	= NULL;
+}
+
+void Text::unload_font(void)
+{
+	console->log("Unload fonts");
+
+	for (int i = 0; i < Font_type::LAST_FONT; i++)
+	{
+		if (Text::fonts[i] != NULL)
+			TTF_CloseFont(fonts[i]);
+	}
 }

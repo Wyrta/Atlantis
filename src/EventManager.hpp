@@ -20,19 +20,21 @@ class EventManager
 {
     private:
 	    const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+        Uint8 last_keyboardState[SDL_Scancode::SDL_NUM_SCANCODES];
         State *appState;
 
     public:
         EventManager(State *);
         ~EventManager();
 
-        void pollEvent(void);
+        void        pollEvent(void);
         const Uint8 *getKeyboard(void);
-        bool getKey(SDL_Scancode );
+        bool        getKey(SDL_Scancode );
+        bool        getKeyUp(SDL_Scancode );
+        bool        getKeyDown(SDL_Scancode );
 
-        bool eventLog;
-        SDL_Event event;
-
+        bool        eventLog;
+        SDL_Event   event;
 };
 
 
