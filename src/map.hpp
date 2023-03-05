@@ -20,17 +20,17 @@ class Map {
         Map(Map_lvl mapname);
         ~Map();
 
-        void print(void);
+        void		print(void);
 
-		void focus(SDL_Point pos);
-		SDL_Point getPosition(void) { return (this->position); }
-
-		Tile *getTile(SDL_Point pos);
+		void		focus(SDL_Point pos);
+		
+		SDL_Point	getPosition(void) { return (this->position); }
+		Tile		*getTile(SDL_Point pos);
     private:
-		Map_lvl name;
-		vector<Tile> tilemap;
-
+		Map_lvl		name;
 		SDL_Point	position;
+		
+		vector<Tile> tilemap;
 };
 
 #endif /* _map_hpp_ */
