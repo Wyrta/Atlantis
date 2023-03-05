@@ -23,9 +23,29 @@ typedef enum {
 
 typedef enum {
 	DIRT,
-	WATER,
-	STONE,
-	BUSH,
+	DIRT_PATH_1,
+	DIRT_PATH_2,
+	DIRT_PATH_3,
+	DIRT_PATH_4,
+	DIRT_NE_GRASS,
+	DIRT_NW_GRASS,
+	DIRT_SE_GRASS,
+	DIRT_SW_GRASS,
+	GRASS_E_W_DIRT,
+	GRASS_N_S_DIRT,
+	GRASS_NE_DIRT,
+	GRASS_NW_DIRT,
+	GRASS_S_N_DIRT,
+	GRASS_SE_DIRT,
+	GRASS_SW_DIRT,
+	GRASS_W_E_DIRT,
+	GRASS_1,
+	GRASS_2,
+	GRASS_3,
+	TINYBUSH_1,
+	TINYBUSH_2,
+	TINYBUSH_3,
+	TINYBUSH_4,
 	EMPTY,
 	LAST_TTYPE		/* Dont use */
 } Tile_type;
@@ -87,7 +107,7 @@ class Tile : public Printable
 	public:
 	
 		Tile(Tile_params params);
-		Tile(Tile_type type = EMPTY, SDL_Rect info = {0, 0, TILESIZE, TILESIZE});
+		Tile(Tile_type tiletype = EMPTY, SDL_Rect info = {0, 0, TILESIZE, TILESIZE});
 		~Tile();
 
 		bool print_onMap(SDL_Point offset);

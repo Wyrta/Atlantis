@@ -100,7 +100,7 @@ bool Printable::print(SDL_Rect *src, SDL_Rect *dst)
 	}
 	else
 	{
-		console->log(ERROR, "Cannot print \"%s\"", this->name.c_str());
+		console->log(ERROR, "Cannot print \"%s\" %s", this->name.c_str(), SDL_GetError());
 		return (false);
 	}
 }
@@ -131,36 +131,32 @@ Tile::Tile(Tile_params params) : Printable({params.x, params.y, TILESIZE, TILESI
 
 	this->walkable = params.walkable;
 
-	switch (params.type)
+	this->type = params.type;
+
+	/* if unknow type */
+	if (!((this->type != Tile_type::EMPTY) && (this->type >= 0) && (this->type < Tile_type::LAST_TTYPE)))	
 	{
-	
-		case DIRT:	this->setTexture(Tile::texture[DIRT]);	break;
-		case WATER:	this->setTexture(Tile::texture[WATER]);	break;
-		case STONE:	this->setTexture(Tile::texture[STONE]);	break;
-		case BUSH:	this->setTexture(Tile::texture[BUSH]);	break;
-		case EMPTY: this->setTexture(Tile::texture[DIRT]);	break;
-		default:
-			break;
+		this->type = Tile_type::DIRT;
 	}
+
+	this->setTexture(Tile::texture[this->type]);
 }
 
 
-Tile::Tile(Tile_type type, SDL_Rect info) : Printable(info)
+Tile::Tile(Tile_type tiletype, SDL_Rect info) : Printable(info)
 {
 	this->position.x = info.x;
 	this->position.y = info.y;
 
-	switch (type)
+	this->type = tiletype;
+
+	/* if unknow type */
+	if (!((this->type != Tile_type::EMPTY) && (this->type >= 0) && (this->type < Tile_type::LAST_TTYPE)))	
 	{
-	
-		case DIRT:	this->setTexture(Tile::texture[DIRT]);	break;
-		case WATER:	this->setTexture(Tile::texture[WATER]);	break;
-		case STONE:	this->setTexture(Tile::texture[STONE]);	break;
-		case BUSH:	this->setTexture(Tile::texture[BUSH]);	break;
-		case EMPTY: this->setTexture(Tile::texture[DIRT]);	break;
-		default:
-			break;
+		this->type = Tile_type::DIRT;
 	}
+
+	this->setTexture(Tile::texture[this->type]);
 }
 
 
@@ -237,12 +233,52 @@ void Tile::load_all_texture()
 
 		if (str_tileType == "DIRT")
 			tileType = Tile_type::DIRT;
-		if (str_tileType == "WATER")
-			tileType = Tile_type::WATER;
-		if (str_tileType == "STONE")
-			tileType = Tile_type::STONE;
-		if (str_tileType == "BUSH")
-			tileType = Tile_type::BUSH;
+		if (str_tileType == "DIRT_PATH_1")
+			tileType = Tile_type::DIRT_PATH_1;
+		if (str_tileType == "DIRT_PATH_2")
+			tileType = Tile_type::DIRT_PATH_2;
+		if (str_tileType == "DIRT_PATH_3")
+			tileType = Tile_type::DIRT_PATH_3;
+		if (str_tileType == "DIRT_PATH_4")
+			tileType = Tile_type::DIRT_PATH_4;
+		if (str_tileType == "DIRT_NE_GRASS")
+			tileType = Tile_type::DIRT_NE_GRASS;
+		if (str_tileType == "DIRT_NW_GRASS")
+			tileType = Tile_type::DIRT_NW_GRASS;
+		if (str_tileType == "DIRT_SE_GRASS")
+			tileType = Tile_type::DIRT_SE_GRASS;
+		if (str_tileType == "DIRT_SW_GRASS")
+			tileType = Tile_type::DIRT_SW_GRASS;
+		if (str_tileType == "GRASS_E_W_DIRT")
+			tileType = Tile_type::GRASS_E_W_DIRT;
+		if (str_tileType == "GRASS_N_S_DIRT")
+			tileType = Tile_type::GRASS_N_S_DIRT;
+		if (str_tileType == "GRASS_NE_DIRT")
+			tileType = Tile_type::GRASS_NE_DIRT;
+		if (str_tileType == "GRASS_NW_DIRT")
+			tileType = Tile_type::GRASS_NW_DIRT;
+		if (str_tileType == "GRASS_S_N_DIRT")
+			tileType = Tile_type::GRASS_S_N_DIRT;
+		if (str_tileType == "GRASS_SE_DIRT")
+			tileType = Tile_type::GRASS_SE_DIRT;
+		if (str_tileType == "GRASS_SW_DIRT")
+			tileType = Tile_type::GRASS_SW_DIRT;
+		if (str_tileType == "GRASS_W_E_DIRT")
+			tileType = Tile_type::GRASS_W_E_DIRT;
+		if (str_tileType == "GRASS_1")
+			tileType = Tile_type::GRASS_1;
+		if (str_tileType == "GRASS_2")
+			tileType = Tile_type::GRASS_2;
+		if (str_tileType == "GRASS_3")
+			tileType = Tile_type::GRASS_3;
+		if (str_tileType == "TINYBUSH_1")
+			tileType = Tile_type::TINYBUSH_1;
+		if (str_tileType == "TINYBUSH_2")
+			tileType = Tile_type::TINYBUSH_2;
+		if (str_tileType == "TINYBUSH_3")
+			tileType = Tile_type::TINYBUSH_3;
+		if (str_tileType == "TINYBUSH_4")
+			tileType = Tile_type::TINYBUSH_4;
 
 		file = line.substr(index+1, line.length());
 
@@ -349,8 +385,6 @@ void Entity::proc(void)
 
 		if ((this->positionScreen.x == this->position.x*TILESIZE) && (this->positionScreen.y == this->position.y*TILESIZE))
 			this->moving = Direction::NONE;
-	
-		console->log("player : x%d y%d tile : x%d y%d ", this->positionScreen.x, this->positionScreen.y, this->position.x*TILESIZE, this->position.y*TILESIZE);
 	}
 
 	/* TODO PSN, EMBUSH */
