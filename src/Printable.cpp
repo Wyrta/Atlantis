@@ -272,54 +272,64 @@ void Tile::print_debug(void)
 {
 	SDL_Rect advancedInfo;
 
-	char buffer[512];
-	char typebuffer[64];
+	char posbuffer[512];
+	char typbuffer[64];
+
+	int lenght = 0;
+
+	sprintf(posbuffer, "[Pos]: %2d %2d", this->position.x, this->position.y);
 
 	switch (this->type)
 	{
-		case DIRT:			 sprintf(typebuffer, "DIRT");			break;
-		case DIRT_PATH_1:	 sprintf(typebuffer, "DIRT_PATH_1");	break;
-		case DIRT_PATH_2:	 sprintf(typebuffer, "DIRT_PATH_2");	break;
-		case DIRT_PATH_3:	 sprintf(typebuffer, "DIRT_PATH_3");	break;
-		case DIRT_PATH_4:	 sprintf(typebuffer, "DIRT_PATH_4");	break;
-		case DIRT_NE_GRASS:	 sprintf(typebuffer, "DIRT_NE_GRASS");	break;
-		case DIRT_NW_GRASS:	 sprintf(typebuffer, "DIRT_NW_GRASS");	break;
-		case DIRT_SE_GRASS:	 sprintf(typebuffer, "DIRT_SE_GRASS");	break;
-		case DIRT_SW_GRASS:	 sprintf(typebuffer, "DIRT_SW_GRASS");	break;
-		case GRASS_E_W_DIRT: sprintf(typebuffer, "GRASS_E_W_DIRT");	break;
-		case GRASS_N_S_DIRT: sprintf(typebuffer, "GRASS_N_S_DIRT");	break;
-		case GRASS_NE_DIRT:	 sprintf(typebuffer, "GRASS_NE_DIRT");	break;
-		case GRASS_NW_DIRT:	 sprintf(typebuffer, "GRASS_NW_DIRT");	break;
-		case GRASS_S_N_DIRT: sprintf(typebuffer, "GRASS_S_N_DIRT");	break;
-		case GRASS_SE_DIRT:	 sprintf(typebuffer, "GRASS_SE_DIRT");	break;
-		case GRASS_SW_DIRT:	 sprintf(typebuffer, "GRASS_SW_DIRT");	break;
-		case GRASS_W_E_DIRT: sprintf(typebuffer, "GRASS_W_E_DIRT");	break;
-		case GRASS_1:		 sprintf(typebuffer, "GRASS_1");		break;
-		case GRASS_2:		 sprintf(typebuffer, "GRASS_2");		break;
-		case GRASS_3:		 sprintf(typebuffer, "GRASS_3");		break;
-		case TINYBUSH_1:	 sprintf(typebuffer, "TINYBUSH_1");		break;
-		case TINYBUSH_2:	 sprintf(typebuffer, "TINYBUSH_2");		break;
-		case TINYBUSH_3:	 sprintf(typebuffer, "TINYBUSH_3");		break;
-		case TINYBUSH_4:	 sprintf(typebuffer, "TINYBUSH_4");		break;
+		case DIRT:			 sprintf(typbuffer, "[Type]: DIRT");			break;
+		case DIRT_PATH_1:	 sprintf(typbuffer, "[Type]: DIRT_PATH_1");		break;
+		case DIRT_PATH_2:	 sprintf(typbuffer, "[Type]: DIRT_PATH_2");		break;
+		case DIRT_PATH_3:	 sprintf(typbuffer, "[Type]: DIRT_PATH_3");		break;
+		case DIRT_PATH_4:	 sprintf(typbuffer, "[Type]: DIRT_PATH_4");		break;
+		case DIRT_NE_GRASS:	 sprintf(typbuffer, "[Type]: DIRT_NE_GRASS");	break;
+		case DIRT_NW_GRASS:	 sprintf(typbuffer, "[Type]: DIRT_NW_GRASS");	break;
+		case DIRT_SE_GRASS:	 sprintf(typbuffer, "[Type]: DIRT_SE_GRASS");	break;
+		case DIRT_SW_GRASS:	 sprintf(typbuffer, "[Type]: DIRT_SW_GRASS");	break;
+		case GRASS_E_W_DIRT: sprintf(typbuffer, "[Type]: GRASS_E_W_DIRT");	break;
+		case GRASS_N_S_DIRT: sprintf(typbuffer, "[Type]: GRASS_N_S_DIRT");	break;
+		case GRASS_NE_DIRT:	 sprintf(typbuffer, "[Type]: GRASS_NE_DIRT");	break;
+		case GRASS_NW_DIRT:	 sprintf(typbuffer, "[Type]: GRASS_NW_DIRT");	break;
+		case GRASS_S_N_DIRT: sprintf(typbuffer, "[Type]: GRASS_S_N_DIRT");	break;
+		case GRASS_SE_DIRT:	 sprintf(typbuffer, "[Type]: GRASS_SE_DIRT");	break;
+		case GRASS_SW_DIRT:	 sprintf(typbuffer, "[Type]: GRASS_SW_DIRT");	break;
+		case GRASS_W_E_DIRT: sprintf(typbuffer, "[Type]: GRASS_W_E_DIRT");	break;
+		case GRASS_1:		 sprintf(typbuffer, "[Type]: GRASS_1");			break;
+		case GRASS_2:		 sprintf(typbuffer, "[Type]: GRASS_2");			break;
+		case GRASS_3:		 sprintf(typbuffer, "[Type]: GRASS_3");			break;
+		case TINYBUSH_1:	 sprintf(typbuffer, "[Type]: TINYBUSH_1");		break;
+		case TINYBUSH_2:	 sprintf(typbuffer, "[Type]: TINYBUSH_2");		break;
+		case TINYBUSH_3:	 sprintf(typbuffer, "[Type]: TINYBUSH_3");		break;
+		case TINYBUSH_4:	 sprintf(typbuffer, "[Type]: TINYBUSH_4");		break;
 	
-		default: 	sprintf(typebuffer, "Unknow");
+		default: 	sprintf(typbuffer, "[Type]: Unknow");
 	}
 
-	sprintf(buffer, "[Pos]: %2d %2d, [Type]: %s", this->position.x, this->position.y, typebuffer);
 	
 	advancedInfo.w = 200;
 	advancedInfo.h = 100;
 	advancedInfo.x = mouse.x + 10;
 	advancedInfo.y = mouse.y - advancedInfo.h - 10;
 
-	Text debugText(buffer, Font_type::AVARA, {advancedInfo.x+5, advancedInfo.y+5});
+	Text posText(posbuffer, Font_type::AVARA, {advancedInfo.x+4, advancedInfo.y+4});
+	Text typText(typbuffer, Font_type::AVARA, {advancedInfo.x+4, advancedInfo.y+4+posText.getHitbox().h});//typText.getHitbox().h+5});
 
-	advancedInfo.w = debugText.getHitbox().w + 10;
+	if (lenght < posText.getHitbox().w)
+		lenght = posText.getHitbox().w;
+	if (lenght < typText.getHitbox().w)
+		lenght = typText.getHitbox().w;
+
+	advancedInfo.w = lenght + 8;
 
 	SDL_SetRenderDrawColor(render, 128, 128, 128, 255);
 	SDL_RenderFillRect(render, &advancedInfo);
 
-	debugText.print_onMap({advancedInfo.x+5, advancedInfo.y+5});
+	posText.print_onMap();
+	typText.print_onMap();
 }
 
 
@@ -543,6 +553,11 @@ Text::Text(const char *content, Font_type fontype, SDL_Point pos) : Printable((S
 	this->setTexture(texture);
 	this->setHitbox();
 
+	this->dst_rect.x = pos.x;
+	this->dst_rect.y = pos.y;
+	this->dst_rect.h = this->getHitbox().h;
+	this->dst_rect.w = this->getHitbox().w;
+
 	this->destroy_texture = true;
 }
 
@@ -557,12 +572,10 @@ bool Text::print_onMap(SDL_Point offset)
 {
 	SDL_Rect offsetRect;
 
-	SDL_Rect hitboxtmp = this->getHitbox();
-
-	offsetRect.x = offset.x;
-	offsetRect.y = offset.y;
-	offsetRect.w = hitboxtmp.w;
-	offsetRect.h = hitboxtmp.h;
+	offsetRect.x = dst_rect.x + offset.x;
+	offsetRect.y = dst_rect.y + offset.y;
+	offsetRect.w = dst_rect.w;
+	offsetRect.h = dst_rect.h;
 
 	return (this->print(NULL, &offsetRect));
 }

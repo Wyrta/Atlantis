@@ -102,7 +102,7 @@ class Printable
 
 		void		setTexture(const char *filepath);
 		void		setTexture(SDL_Texture *ptr_texture);
-		SDL_Rect	getHitbox() { return texture_rect; }
+		SDL_Rect	getHitbox() { return this->texture_rect; }
 		void		setHitbox() { SDL_QueryTexture(this->texture, NULL, NULL, &this->texture_rect.w, &this->texture_rect.h); }
 
 };
@@ -174,7 +174,7 @@ class Text : public Printable
 		Text(const char *content, Font_type fontype, SDL_Point pos = {0, 0});
 		~Text();
 		
-		bool		print_onMap(SDL_Point offset);
+		bool		print_onMap(SDL_Point offset = {0, 0});
 
 		string 		getText() { return (text); }
 
