@@ -26,7 +26,7 @@ class Game
 		bool loaded;
 
 		Map		*map;
-		Entity	*mob;
+		Entity	*player;
 
 
 	public:
@@ -36,7 +36,7 @@ class Game
 			this->loaded = false;
 
 			this->map = NULL;
-			this->mob = NULL;
+			this->player = NULL;
 		}
 
 		~Game()
@@ -51,7 +51,10 @@ class Game
 			Text::load_font();
 
 			map = new Map(Map_lvl::TEST);
-			mob = new Entity("Mob_random", "img/entity/mobTest.png");
+			// player = new Entity("Mob_random", "img/entity/mobTest.png");
+			player = new Entity("Mob_random", "img/entity/player2.png");
+
+			player->setAnimation(3, -1, {0, 0, 22, 22});
 
 			this->loaded = true;
 		}
@@ -59,13 +62,13 @@ class Game
 		void unload(void)
 		{
 			delete (map);
-			delete (mob);
+			delete (player);
 			
 			Tile::unload_all_texture();
 			Text::unload_font();
 			
 			this->map		= NULL;
-			this->mob		= NULL;
+			this->player	= NULL;
 			this->loaded	= false;
 		}
 
@@ -80,38 +83,38 @@ class Game
 				console->log("debug = %s", (Printable::debug) ? "Enable" : "Disable");
 			}
 
-			if (mob->canMove())
+			if (player->canMove())
 			{
-				SDL_Point futurePos = mob->getPosition();
+				SDL_Point futurePos = player->getPosition();
 				
-				if (mob->canMove() && event->getKey(SDL_GetScancodeFromKey(SDLK_z)))
+				if (event->getKey(SDL_GetScancodeFromKey(SDLK_z)))
 				{
 					futurePos.y--;
-					mob->move(Direction::NORTH, map->getTile(futurePos));
+					player->move(Direction::NORTH, map->getTile(futurePos));
 				}
-				if (mob->canMove() && event->getKey(SDL_GetScancodeFromKey(SDLK_s)))
+				else if (event->getKey(SDL_GetScancodeFromKey(SDLK_s)))
 				{
 					futurePos.y++;
-					mob->move(Direction::SOUTH, map->getTile(futurePos));
+					player->move(Direction::SOUTH, map->getTile(futurePos));
 				}
-				if (mob->canMove() && event->getKey(SDL_GetScancodeFromKey(SDLK_q)))
+				else if (event->getKey(SDL_GetScancodeFromKey(SDLK_q)))
 				{
 					futurePos.x--;
-					mob->move(Direction::WEST, map->getTile(futurePos));
+					player->move(Direction::WEST, map->getTile(futurePos));
 				}
-				if (mob->canMove() && event->getKey(SDL_GetScancodeFromKey(SDLK_d)))
+				else if (event->getKey(SDL_GetScancodeFromKey(SDLK_d)))
 				{
 					futurePos.x++;
-					mob->move(Direction::EAST, map->getTile(futurePos));
+					player->move(Direction::EAST, map->getTile(futurePos));
 				}
 			}
 
-			mob->proc();
+			player->proc();
 
-			map->focus(mob->getPosition_screen());
+			map->focus(player->getPosition_screen());
 			map->print();
 
-			mob->print_onMap(map->getPosition());
+			player->print_onMap(map->getPosition());
 
 			Printable::proc_debug();
 		}

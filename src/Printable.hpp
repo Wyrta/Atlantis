@@ -62,6 +62,7 @@ typedef enum {
 	LAST_FONT		/* Dont use */
 } Font_type;
 
+
 typedef struct {
 	int x;
 	int y;
@@ -75,15 +76,24 @@ typedef struct {
 class Printable
 {
 	private:
-		SDL_Texture *texture = NULL;
+		SDL_Texture	*texture = NULL;
 		SDL_Rect	texture_rect;
 
 	protected:
-		std::string name = "";
-		std::string path = "";
+		std::string	name = "";
+		std::string	path = "";
 
-		SDL_Rect src_rect;
-		SDL_Rect dst_rect;
+		SDL_Rect	src_rect;
+		SDL_Rect	dst_rect;
+
+		bool		animated = false;
+		int			nb_animation;
+		int 		nb_frames;
+		int 		frame_ttl;
+
+		int			current_frame;
+		int			current_time;
+		int			current_animation;
 
 		static vector<Printable *>toDebug;
 		bool destroy_texture = true;
@@ -92,6 +102,8 @@ class Printable
 		Printable(SDL_Rect size);
 		Printable(const char *objname, const char *filepath);
 		~Printable();
+
+		void		setAnimation(int n_frames, int ttl, SDL_Rect size);
 
 		static bool debug;
 		static void proc_debug(void);

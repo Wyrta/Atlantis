@@ -4,6 +4,7 @@
 #include "Console.hpp"
 #include "EventManager.hpp"
 
+
 extern Console		*console;
 extern SDL_Renderer *render;
 extern SDL_Rect		screen;
@@ -14,6 +15,7 @@ bool				Printable::debug = false;
 vector<Printable *> Printable::toDebug; 
 SDL_Texture			*Tile::texture[Tile_type::LAST_TTYPE];
 TTF_Font			*Text::fonts[Font_type::LAST_FONT];
+
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -120,6 +122,31 @@ Printable::~Printable()
 }
 
 
+void Printable::setAnimation(int n_frames, int ttl, SDL_Rect size)
+{
+	this->animated			= true;
+
+	if (ttl == -1)
+	{
+		ttl = TILESIZE / ENTITYSPEED;
+	}
+
+	this->nb_frames			= n_frames;
+	this->frame_ttl			= ttl;
+
+	this->current_frame		= 0;
+	this->current_time		= 0;
+	this->current_animation	= 0;
+	
+	this->src_rect.x		= size.x;
+	this->src_rect.y		= size.y;
+	this->src_rect.w		= size.w;
+	this->src_rect.h		= size.h;
+	
+	console->log("ttl %d, nb %d", this->frame_ttl, this->nb_frames);
+}
+
+
 bool Printable::print()
 {
 	return (this->print(&this->src_rect, &this->dst_rect));
@@ -134,6 +161,29 @@ bool Printable::print(SDL_Rect *src, SDL_Rect *dst)
 	{
 		console->log(ERROR, "Invalid texture (ptr : 0x%x) \"%s\"", (unsigned int) this->texture, this->name.c_str());
 		return (false);
+	}
+
+	if (this->animated)
+	{
+/*	Horizontal animated tiles
+		src->x = src_rect.w * this->current_frame;
+		src->y = src_rect.h * this->current_animation;
+*/
+
+/*	Vertical animated tiles */
+		src->x = src_rect.w * this->current_animation;
+		src->y = src_rect.h * this->current_frame;
+
+		if (current_time == 0)
+		{
+			this->current_frame = (this->current_frame == this->nb_frames-1) ? (0) : (this->current_frame + 1);
+			this->current_time = this->frame_ttl;
+		}
+		else
+		{
+			this->current_time--;
+		}
+
 	}
 
 	retval = SDL_RenderCopy(render, this->texture, src, dst);
@@ -274,6 +324,7 @@ void Tile::print_debug(void)
 
 	char posbuffer[512];
 	char typbuffer[64];
+	char wlkbuffer[64];
 
 	int lenght = 0;
 
@@ -310,26 +361,42 @@ void Tile::print_debug(void)
 	}
 
 	
+	switch (this->walkable)
+	{
+		case Direction::NORTH:	sprintf(wlkbuffer, "[Walkable]: NORTH");	break;
+		case Direction::SOUTH:	sprintf(wlkbuffer, "[Walkable]: SOUTH");	break;
+		case Direction::WEST:	sprintf(wlkbuffer, "[Walkable]: WEST");		break;
+		case Direction::EAST:	sprintf(wlkbuffer, "[Walkable]: EAST");		break;
+		case Direction::ALL:	sprintf(wlkbuffer, "[Walkable]: ALL");		break;
+
+		default: 	sprintf(typbuffer, "[Walkable]: Unknow");
+	}
+	
+	
 	advancedInfo.w = 200;
 	advancedInfo.h = 100;
-	advancedInfo.x = mouse.x + 10;
-	advancedInfo.y = mouse.y - advancedInfo.h - 10;
+	advancedInfo.x = mouse.x + 4;
+	advancedInfo.y = mouse.y - advancedInfo.h - 4;
 
 	Text posText(posbuffer, Font_type::AVARA, {advancedInfo.x+4, advancedInfo.y+4});
 	Text typText(typbuffer, Font_type::AVARA, {advancedInfo.x+4, advancedInfo.y+4+posText.getHitbox().h});//typText.getHitbox().h+5});
+	Text wlkText(wlkbuffer, Font_type::AVARA, {advancedInfo.x+4, advancedInfo.y+8+2*posText.getHitbox().h});//typText.getHitbox().h+5});
 
 	if (lenght < posText.getHitbox().w)
 		lenght = posText.getHitbox().w;
 	if (lenght < typText.getHitbox().w)
 		lenght = typText.getHitbox().w;
-
+	if (lenght < wlkText.getHitbox().w)
+		lenght = wlkText.getHitbox().w;
+		
 	advancedInfo.w = lenght + 8;
 
-	SDL_SetRenderDrawColor(render, 128, 128, 128, 255);
+	SDL_SetRenderDrawColor(render, 128, 128, 128, 200);
 	SDL_RenderFillRect(render, &advancedInfo);
 
 	posText.print_onMap();
 	typText.print_onMap();
+	wlkText.print_onMap();
 }
 
 
@@ -347,7 +414,7 @@ void Tile::load_all_texture()
 	/* reset tile */
 	for (int i = 0; i < Tile_type::LAST_TTYPE; i++)
 		Tile::texture[i] = NULL;
-	
+
 
 	while (getline(config, line) )
 	{
@@ -360,7 +427,7 @@ void Tile::load_all_texture()
 		index = line.find(";");
 		if(index == (int)string::npos)
 			continue;
-		
+
 		string str_tileType = line.substr(0, index);
 
 		if (str_tileType == "DIRT")
@@ -415,7 +482,7 @@ void Tile::load_all_texture()
 		file = line.substr(index+1, line.length());
 
 		file.insert(0, "textures/");
-		
+
 		Tile::texture[tileType] = createTexture(NULL, file.c_str());
 	}
 
@@ -446,8 +513,8 @@ Entity::Entity(const char *entityName, const char *texturePath) : Printable(enti
 	
 	this->src_rect.x = 0;
 	this->src_rect.y = 0;
-	this->src_rect.w = screen.w;
-	this->src_rect.h = screen.h;
+	this->src_rect.w = this->getHitbox().w;
+	this->src_rect.h = this->getHitbox().h;
 
 	this->dst_rect.x = this->positionScreen.x;
 	this->dst_rect.y = this->positionScreen.y;
@@ -468,6 +535,7 @@ void Entity::move(Direction direction, Tile *tile)
 {
 	if (tile == NULL)
 		return;
+
 	if ((direction == tile->getWalkable()) || (tile->getWalkable() == Direction::ALL))
 	{
 		switch (direction)
@@ -486,6 +554,7 @@ void Entity::move(Direction direction, Tile *tile)
 				break;
 
 			default:
+				direction = Direction::NONE;
 				break;
 		}
 
@@ -518,7 +587,10 @@ void Entity::proc(void)
 		}
 
 		if ((this->positionScreen.x == this->position.x*TILESIZE) && (this->positionScreen.y == this->position.y*TILESIZE))
+		{
 			this->moving = Direction::NONE;
+		}
+
 	}
 
 	/* TODO PSN, EMBUSH */
@@ -532,6 +604,27 @@ bool Entity::print_onMap(SDL_Point offset)
 	offsetRect.y = offset.y + this->positionScreen.y;
 	offsetRect.w = dst_rect.w;
 	offsetRect.h = dst_rect.h;
+
+	switch (this->moving)
+	{
+		case Direction::NORTH: 
+			this->current_animation = 1;
+			break;
+		case Direction::SOUTH: 
+			this->current_animation = 0;
+			break;
+		case Direction::WEST:  
+			this->current_animation = 2;
+			break;
+		case Direction::EAST:  
+			this->current_animation = 2;
+			break;
+			
+		default:
+			if (this->current_frame == 0)
+				this->current_time	= 1;
+			break;
+	}
 
 	return (this->print(&this->src_rect, &offsetRect));
 }
@@ -581,7 +674,6 @@ bool Text::print_onMap(SDL_Point offset)
 }
 
 
-
 void Text::load_font(void)
 {
 	console->log("Load fonts");
@@ -589,6 +681,7 @@ void Text::load_font(void)
 	Text::fonts[Font_type::AVARA]	= createFont("Avara.ttf", 16);
 	Text::fonts[Font_type::DUNO]	= NULL;
 }
+
 
 void Text::unload_font(void)
 {
@@ -600,3 +693,4 @@ void Text::unload_font(void)
 			TTF_CloseFont(fonts[i]);
 	}
 }
+
