@@ -14,7 +14,7 @@ SDL_Texture *write(SDL_Rect *rect, TTF_Font *font, const char *text, SDL_Color c
 TTF_Font	*createFont(const char *path, int size);
 
 #define TILESIZE		64
-#define ENTITYSPEED		4
+#define ENTITYSPEED		2
 
 
 typedef enum {

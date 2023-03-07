@@ -128,7 +128,7 @@ void Printable::setAnimation(int n_frames, int ttl, SDL_Rect size)
 
 	if (ttl == -1)
 	{
-		ttl = TILESIZE / ENTITYSPEED;
+		ttl = (TILESIZE / ENTITYSPEED) / n_frames;
 	}
 
 	this->nb_frames			= n_frames;
@@ -617,7 +617,7 @@ bool Entity::print_onMap(SDL_Point offset)
 			this->current_animation = 2;
 			break;
 		case Direction::EAST:  
-			this->current_animation = 2;
+			this->current_animation = 3;
 			break;
 			
 		default:
