@@ -140,8 +140,8 @@ class Tile : public Printable
 		void		print_debug(void);
 
 		void		setPosition(int x, int y);
-		SDL_Point	getPosition(void) { return (this->position); }
-		Direction	getWalkable() 	{ return (this->walkable); }
+		SDL_Point	getPosition(void)	{ return (this->position); }
+		Direction	getWalkable() 		{ return (this->walkable); }
 
 		static void load_all_texture();
 		static void unload_all_texture();
@@ -168,6 +168,7 @@ class Entity : public Printable
 
 		SDL_Point	getPosition(void)			{ return this->position; }
 		SDL_Point	getPosition_screen(void)	{ return this->positionScreen; }
+		void 		setPosition(int x, int y)	{ this->position.x = x; this->position.y = y; this->positionScreen.x = x*TILESIZE; this->positionScreen.y = y*TILESIZE;}
 		Direction	isMoving(void)				{ return this->moving; }
 		bool		canMove(void)				{ return (this->moving == Direction::NONE); }
 };
