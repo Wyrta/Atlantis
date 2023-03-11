@@ -28,7 +28,9 @@ class Game
 		Map		*map;
 		Player	*player;
 
-
+		Entity	*mob0;
+		Entity	*mob1;
+		Entity	*mob2;
 	public:
 
 		Game()
@@ -37,6 +39,9 @@ class Game
 
 			this->map = NULL;
 			this->player = NULL;
+			this->mob0 = NULL;
+			this->mob1 = NULL;
+			this->mob2 = NULL;
 		}
 
 		~Game()
@@ -50,23 +55,37 @@ class Game
 			Tile::load_all_texture();
 			Text::load_font();
 
-			map = new Map(Map_lvl::TEST);
+			this->map = new Map(Map_lvl::TEST);
 			// player = new Entity("Mob_random", "img/entity/mobTest.png");
-			player = new Player("Mob_random", "img/entity/player2.png");
+			this->player = new Player("Mob_random", "img/entity/player2.png");
 
-			player->setAnimation(3, -1, {0, 0, 22, 22});
+			this->mob0 = new Entity("IA_0", "img/entity/mobTest.png");
+			this->mob1 = new Entity("IA_1", "img/entity/mobTest.png");
+			this->mob2 = new Entity("IA_2", "img/entity/mobTest.png");
+
+			this->player->setAnimation(3, -1, {0, 0, 22, 22});
+
+			this->mob0->setPosition(1, 1);
+			this->mob1->setPosition(1, 3);
+			this->mob2->setPosition(1, 5);
 
 			this->loaded = true;
 		}
 
 		void unload(void)
 		{
-			delete (map);
-			delete (player);
+			delete (this->map);
+			delete (this->player);
+			delete (this->mob0);
+			delete (this->mob1);
+			delete (this->mob2);
 			
 			Tile::unload_all_texture();
 			Text::unload_font();
 			
+			this->mob0 		= NULL;
+			this->mob1 		= NULL;
+			this->mob2 		= NULL;
 			this->map		= NULL;
 			this->player	= NULL;
 			this->loaded	= false;
@@ -115,6 +134,9 @@ class Game
 			map->print();
 
 			player->print_onMap(map->getPosition());
+			this->mob0->print_onMap(map->getPosition());
+			this->mob1->print_onMap(map->getPosition());
+			this->mob2->print_onMap(map->getPosition());
 
 			Printable::proc_debug();
 		}
