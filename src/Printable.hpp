@@ -15,7 +15,7 @@ TTF_Font	*createFont(const char *path, int size);
 
 #define TILESIZE		64
 #define ENTITYSPEED		2
-
+#define DECK_SIZE		6
 
 typedef enum {
 	NORTH,
@@ -73,6 +73,29 @@ typedef struct {
 } Tile_params;
 
 
+typedef enum {
+	TWO_B,
+	A_TWO,
+	NINE_S,
+	KAINE,
+	NIER,
+
+	LAST_WTYPE
+} Waifu_type;
+
+
+typedef struct {
+	char name[64];
+	char texture_path[512];
+
+	Waifu_type type;
+	int lvl;
+	int xp;
+} Waifu_params;
+
+
+
+
 class Printable
 {
 	private:
@@ -108,14 +131,14 @@ class Printable
 		static bool debug;
 		static void proc_debug(void);
 
-		bool		print();
+		bool		print(void);
 		bool		print(SDL_Rect *src_rect, SDL_Rect *dst_rect);
 		virtual void print_debug(void);
 
 		void		setTexture(const char *filepath);
 		void		setTexture(SDL_Texture *ptr_texture);
-		SDL_Rect	getHitbox() { return this->texture_rect; }
-		void		setHitbox() { SDL_QueryTexture(this->texture, NULL, NULL, &this->texture_rect.w, &this->texture_rect.h); }
+		SDL_Rect	getHitbox(void) { return this->texture_rect; }
+		void		setHitbox(void) { SDL_QueryTexture(this->texture, NULL, NULL, &this->texture_rect.w, &this->texture_rect.h); }
 
 };
 
@@ -141,10 +164,10 @@ class Tile : public Printable
 
 		void		setPosition(int x, int y);
 		SDL_Point	getPosition(void) { return (this->position); }
-		Direction	getWalkable() 	{ return (this->walkable); }
+		Direction	getWalkable(void) 	{ return (this->walkable); }
 
-		static void load_all_texture();
-		static void unload_all_texture();
+		static void load_all_texture(void);
+		static void unload_all_texture(void);
 };
 
 
@@ -154,7 +177,6 @@ class Entity : public Printable
 		SDL_Point	position;
 		SDL_Point 	positionScreen;
 		Direction	moving;
-
 
 	public:
 		Entity(const char *entityName, const char *texturePath);
@@ -173,6 +195,27 @@ class Entity : public Printable
 };
 
 
+class Waifu : public Entity
+{
+	private:
+
+	public:
+		Waifu(Waifu_params params);
+		~Waifu();
+};
+
+
+class Player : public Entity
+{
+	private:
+		Waifu *deck[DECK_SIZE];
+
+	public:
+		Player(const char *entityName, const char *texturePath);
+		~Player();
+};
+
+
 class Text : public Printable
 {
 	private:
@@ -188,7 +231,7 @@ class Text : public Printable
 		
 		bool		print_onMap(SDL_Point offset = {0, 0});
 
-		string 		getText() { return (text); }
+		string 		getText(void) { return (text); }
 
 		static void load_font(void);
 		static void unload_font(void);

@@ -80,6 +80,13 @@ SDL_Texture *write(SDL_Rect *rect, TTF_Font *font, const char *text, SDL_Color c
 }
 
 
+/*
+ ************************************************************************************************
+ *		Printable class																			*
+ *																								*
+ ************************************************************************************************
+ */
+
 Printable::Printable(SDL_Rect size)
 {
 	char printableName[32]; 
@@ -234,6 +241,13 @@ void Printable::proc_debug(void)
 		Printable::toDebug.clear();
 }
 
+
+/*
+ ************************************************************************************************
+ *		Tile class																				*
+ *																								*
+ ************************************************************************************************
+ */
 
 Tile::Tile(Tile_params params) : Printable({params.x, params.y, TILESIZE, TILESIZE})
 {
@@ -402,7 +416,7 @@ void Tile::print_debug(void)
 
 void Tile::load_all_texture()
 {
-	ifstream	config("config/tiles.config");
+	ifstream	config("config/tiles.cnf");
 	string		line;
 	int			index;
 
@@ -503,6 +517,13 @@ void Tile::unload_all_texture()
 }
 
 
+/*
+ ************************************************************************************************
+ *		Entity class																			*
+ *																								*
+ ************************************************************************************************
+ */
+
 Entity::Entity(const char *entityName, const char *texturePath) : Printable(entityName, texturePath)
 {
 	this->position.x = 0;
@@ -593,7 +614,7 @@ void Entity::proc(void)
 
 	}
 
-	/* TODO PSN, EMBUSH */
+	/* TODO PSN, EMBUSH, DIALOG*/
 }
 
 
@@ -635,6 +656,60 @@ void Entity::print_debug(void)
 
 }
 
+
+/*
+ ************************************************************************************************
+ *		Waifu class																				*
+ *																								*
+ ************************************************************************************************
+ */
+
+Waifu::Waifu(Waifu_params params) : Entity(params.name, params.texture_path)
+{
+
+}
+
+
+Waifu::~Waifu()
+{
+
+}
+
+
+/*
+ ************************************************************************************************
+ *		Player class																			*
+ *																								*
+ ************************************************************************************************
+ */
+
+Player::Player(const char *entityName, const char *texturePath) : Entity(entityName, texturePath)
+{
+	Waifu_params wfu_params;
+	for (int i_wfu = 0; i_wfu < DECK_SIZE; i_wfu++)
+	{
+		sprintf(wfu_params.name, "TWO_B");
+		sprintf(wfu_params.texture_path, "img/entity/mobTest.png");
+		wfu_params.type = Waifu_type::TWO_B;
+		
+		this->deck[i_wfu] = new Waifu(wfu_params);
+	}
+	
+}
+
+
+Player::~Player()
+{
+
+}
+
+
+/*
+ ************************************************************************************************
+ *		Text class																				*
+ *																								*
+ ************************************************************************************************
+ */
 
 Text::Text(const char *content, Font_type fontype, SDL_Point pos) : Printable((SDL_Rect){pos.x, pos.y, TILESIZE, TILESIZE})
 {

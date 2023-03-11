@@ -26,7 +26,7 @@ class Game
 		bool loaded;
 
 		Map		*map;
-		Entity	*player;
+		Player	*player;
 
 
 	public:
@@ -52,7 +52,7 @@ class Game
 
 			map = new Map(Map_lvl::TEST);
 			// player = new Entity("Mob_random", "img/entity/mobTest.png");
-			player = new Entity("Mob_random", "img/entity/player2.png");
+			player = new Player("Mob_random", "img/entity/player2.png");
 
 			player->setAnimation(3, -1, {0, 0, 22, 22});
 
@@ -266,4 +266,3 @@ int game(State *state)
 
     return (0);
 }
-

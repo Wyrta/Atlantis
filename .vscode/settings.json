@@ -5,6 +5,7 @@
 		"xstring": "cpp",
 		"algorithm": "cpp",
 		"string": "cpp",
-		"*.tcc": "cpp"
+		"*.tcc": "cpp",
+		"*.rc": "cpp"
 	}
 }
