@@ -6,6 +6,7 @@
 		"algorithm": "cpp",
 		"string": "cpp",
 		"*.tcc": "cpp",
-		"*.rc": "cpp"
+		"*.rc": "cpp",
+		"vector": "cpp"
 	}
 }

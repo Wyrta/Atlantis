@@ -16,6 +16,7 @@ TTF_Font	*createFont(const char *path, int size);
 #define TILESIZE		64
 #define ENTITYSPEED		2
 #define DECK_SIZE		6
+#define MAX_NPC			64
 
 typedef enum {
 	NORTH,
@@ -94,8 +95,6 @@ typedef struct {
 } Waifu_params;
 
 
-
-
 class Printable
 {
 	private:
@@ -124,7 +123,7 @@ class Printable
 	public:
 		Printable(SDL_Rect size);
 		Printable(const char *objname, const char *filepath);
-		~Printable();
+		virtual ~Printable();
 
 		void		setAnimation(int n_frames, int ttl, SDL_Rect size);
 
@@ -175,9 +174,12 @@ class Tile : public Printable
 class Entity : public Printable
 {
 	private:
+
+	protected:
 		SDL_Point	position;
 		SDL_Point 	positionScreen;
 		Direction	moving;
+		Direction	orientation;
 
 	public:
 		Entity(const char *entityName, const char *texturePath);
@@ -186,7 +188,7 @@ class Entity : public Printable
 		bool		print_onMap(SDL_Point offset);
 		void		print_debug(void);
 
-		void		proc(void);
+		virtual void proc(void);
 		void		move(Direction direction, Tile *tile);
 
 		SDL_Point	getPosition(void)			{ return this->position; }
@@ -200,21 +202,46 @@ class Entity : public Printable
 class Waifu : public Entity
 {
 	private:
-
+		int pv;
+		int atk;
+		int def;
+		int atk_spd;
 	public:
 		Waifu(Waifu_params params);
 		~Waifu();
 };
 
 
+class NPC : public Entity
+{
+	private:
+
+	public:
+		NPC(const char *entityName, const char *texturePath);
+		~NPC();
+
+		int			i_npc;
+
+		static NPC	*getNPC(SDL_Point pos);
+		static NPC	*allNPC[MAX_NPC];
+};
+
 class Player : public Entity
 {
 	private:
-		Waifu *deck[DECK_SIZE];
+		Waifu			*deck[DECK_SIZE];
+		int				inDialog;
+		NPC				*dialogTarget;
+		string 			dialogText;
+		unsigned int	i_dglChar;
 
 	public:
 		Player(const char *entityName, const char *texturePath);
 		~Player();
+
+		virtual void proc(int *ptr_map);
+		virtual bool print_onMap(SDL_Point offset);
+
 };
 
 

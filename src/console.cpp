@@ -154,7 +154,6 @@ void Console::log(log_t type, const char *format, ...)
 	this->buffer[this->last_log].assign(message);
 
 	cout << this->buffer[this->last_log] << endl;
-	//printf("%s | %s\r\n", message, this->buffer[this->last_log].c_str());
 }
 
 

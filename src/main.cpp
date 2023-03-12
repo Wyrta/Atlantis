@@ -18,12 +18,12 @@
 #include "Statemachine.hpp"
 #include "EventManager.hpp"
 
-#include "Printable.hpp"
+//#include "Printable.hpp"
 
 
 using namespace std;
 
-string  		app_version		= "Atlantis v23w09";
+string  		app_version		= "Atlantis v23w10";
 SDL_Window		*window 		= NULL;
 SDL_Renderer	*render 		= NULL;
 Console			*console 		= NULL;
@@ -52,6 +52,11 @@ int main(int argc, char *argv[])
 	State state = INIT;
 	init(&state);
 
+	Uint32	lastTicks		= SDL_GetTicks();
+	Uint32	currentTicks	= SDL_GetTicks();
+	int 	syncTick		= 0;
+	int 	i_tick			= 0;
+
 	while (state != EXIT) {
 		SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
 		SDL_RenderFillRect(render, &screen);
@@ -69,8 +74,16 @@ int main(int argc, char *argv[])
 
 		SDL_RenderPresent(render);
 
-		/* TODO : wait for ticks */
-		SDL_Delay(10);
+		/* ticks management */
+		currentTicks = SDL_GetTicks();
+		syncTick = 10 - (currentTicks - lastTicks);
+		if (syncTick < 0)
+			console->log(log_t::ERROR, "Ticks num %d missed (last tick was %dms ago)", i_tick, currentTicks - lastTicks);
+		else
+			SDL_Delay(syncTick);
+
+		lastTicks = SDL_GetTicks();
+		i_tick++;
 	}
 
 	exit(&state);

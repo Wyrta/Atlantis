@@ -28,9 +28,9 @@ class Game
 		Map		*map;
 		Player	*player;
 
-		Entity	*mob0;
-		Entity	*mob1;
-		Entity	*mob2;
+		NPC	*mob0;
+		NPC	*mob1;
+		NPC	*mob2;
 	public:
 
 		Game()
@@ -55,13 +55,12 @@ class Game
 			Tile::load_all_texture();
 			Text::load_font();
 
-			this->map = new Map(Map_lvl::TEST);
-			// player = new Entity("Mob_random", "img/entity/mobTest.png");
-			this->player = new Player("Mob_random", "img/entity/player2.png");
+			this->map		= new Map(Map_lvl::TEST);
+			this->player	= new Player("Mob_random", "img/entity/player2.png");
 
-			this->mob0 = new Entity("IA_0", "img/entity/mobTest.png");
-			this->mob1 = new Entity("IA_1", "img/entity/mobTest.png");
-			this->mob2 = new Entity("IA_2", "img/entity/mobTest.png");
+			this->mob0		= new NPC("IA_0", "img/entity/mobTest.png");
+			this->mob1		= new NPC("IA_1", "img/entity/mobTest.png");
+			this->mob2		= new NPC("IA_2", "img/entity/mobTest.png");
 
 			this->player->setAnimation(3, -1, {0, 0, 22, 22});
 
@@ -102,41 +101,15 @@ class Game
 				console->log("debug = %s", (Printable::debug) ? "Enable" : "Disable");
 			}
 
-			if (player->canMove())
-			{
-				SDL_Point futurePos = player->getPosition();
-				
-				if (event->getKey(SDL_GetScancodeFromKey(SDLK_z)))
-				{
-					futurePos.y--;
-					player->move(Direction::NORTH, map->getTile(futurePos));
-				}
-				else if (event->getKey(SDL_GetScancodeFromKey(SDLK_s)))
-				{
-					futurePos.y++;
-					player->move(Direction::SOUTH, map->getTile(futurePos));
-				}
-				else if (event->getKey(SDL_GetScancodeFromKey(SDLK_q)))
-				{
-					futurePos.x--;
-					player->move(Direction::WEST, map->getTile(futurePos));
-				}
-				else if (event->getKey(SDL_GetScancodeFromKey(SDLK_d)))
-				{
-					futurePos.x++;
-					player->move(Direction::EAST, map->getTile(futurePos));
-				}
-			}
+			this->player->proc((int *)map);
 
-			player->proc();
+			this->map->focus(player->getPosition_screen());
+			this->map->print();
 
-			map->focus(player->getPosition_screen());
-			map->print();
-
-			player->print_onMap(map->getPosition());
 			this->mob0->print_onMap(map->getPosition());
 			this->mob1->print_onMap(map->getPosition());
 			this->mob2->print_onMap(map->getPosition());
+			this->player->print_onMap(map->getPosition());
 
 			Printable::proc_debug();
 		}
@@ -176,8 +149,8 @@ int init(State *state)
     int audio, mixer;
 	audio = mixer = 0;
 
-    screen.h = 800;
-    screen.w = 1400;
+    screen.h = 600;
+    screen.w = 800;
 
 	/* info CPU, RAM,... */
 	int CPUcount = SDL_GetCPUCount();

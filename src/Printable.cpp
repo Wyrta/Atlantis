@@ -3,19 +3,21 @@
 
 #include "Console.hpp"
 #include "EventManager.hpp"
+#include "Map.hpp"
 
 
 extern Console		*console;
 extern SDL_Renderer *render;
 extern SDL_Rect		screen;
 extern Mouse_t		mouse;
+extern EventManager	*event;
 
 
 bool				Printable::debug = false;
 vector<Printable *> Printable::toDebug; 
 SDL_Texture			*Tile::texture[Tile_type::LAST_TTYPE];
 TTF_Font			*Text::fonts[Font_type::LAST_FONT];
-
+NPC					*NPC::allNPC[MAX_NPC];
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -126,6 +128,7 @@ Printable::~Printable()
 		SDL_DestroyTexture(this->texture);
 	else
 		this->texture = NULL;
+
 }
 
 
@@ -149,8 +152,6 @@ void Printable::setAnimation(int n_frames, int ttl, SDL_Rect size)
 	this->src_rect.y		= size.y;
 	this->src_rect.w		= size.w;
 	this->src_rect.h		= size.h;
-	
-	console->log("ttl %d, nb %d", this->frame_ttl, this->nb_frames);
 }
 
 
@@ -233,12 +234,14 @@ void Printable::setTexture(SDL_Texture *ptr_texture)
 
 void Printable::proc_debug(void)
 {
-	for (unsigned int i = 0; i < Printable::toDebug.size(); i++)
+	if (Printable::debug)
 	{
-		Printable::toDebug[i]->print_debug();
+		for (unsigned int i = 0; i < Printable::toDebug.size(); i++)
+		{
+			Printable::toDebug[i]->print_debug();
+		}
 	}
-	
-		Printable::toDebug.clear();
+	Printable::toDebug.clear();
 }
 
 
@@ -305,8 +308,8 @@ bool Tile::print_onMap(SDL_Point offset)
 
 	offsetRect.x = offset.x + (this->position.x*TILESIZE);
 	offsetRect.y = offset.y + (this->position.y*TILESIZE);
-	offsetRect.w = dst_rect.w;
-	offsetRect.h = dst_rect.h;
+	offsetRect.w = this->dst_rect.w;
+	offsetRect.h = this->dst_rect.h;
 
 	retval = this->print(NULL, &offsetRect);
 
@@ -315,7 +318,7 @@ bool Tile::print_onMap(SDL_Point offset)
 		if ((mouse.y < (offsetRect.y + offsetRect.h)) & (mouse.y > offsetRect.y))
 		{
 			if (mouse.left)
-				SDL_SetRenderDrawColor(render, 32, 255, 32, 64);
+				SDL_SetRenderDrawColor(render, 64, 64, 64, 64);
 			else
 				SDL_SetRenderDrawColor(render, 255, 255, 255, 64);
 
@@ -614,7 +617,7 @@ void Entity::proc(void)
 
 	}
 
-	/* TODO PSN, EMBUSH, DIALOG*/
+	/* TODO EMBUSH, DIALOG*/
 }
 
 
@@ -623,8 +626,8 @@ bool Entity::print_onMap(SDL_Point offset)
 	SDL_Rect offsetRect;
 	offsetRect.x = offset.x + this->positionScreen.x;
 	offsetRect.y = offset.y + this->positionScreen.y;
-	offsetRect.w = dst_rect.w;
-	offsetRect.h = dst_rect.h;
+	offsetRect.w = this->dst_rect.w;
+	offsetRect.h = this->dst_rect.h;
 
 	switch (this->moving)
 	{
@@ -678,6 +681,54 @@ Waifu::~Waifu()
 
 /*
  ************************************************************************************************
+ *		NPC class																				*
+ *																								*
+ ************************************************************************************************
+ */
+
+NPC::NPC(const char *entityName, const char *texturePath) : Entity(entityName, texturePath)
+{
+	for (int i = 0; i < MAX_NPC; i++)
+	{
+		if (NPC::allNPC[i] == NULL)
+		{
+			this->i_npc = i;
+			NPC::allNPC[i] = this;
+			break;
+		}
+	}
+	
+}
+
+
+NPC::~NPC()
+{
+	NPC::allNPC[this->i_npc] = NULL;
+}
+
+
+NPC	*NPC::getNPC(SDL_Point pos)
+{
+	NPC *npc = NULL;
+
+	for (int i = 0; i < MAX_NPC; i++)
+	{
+		if (NPC::allNPC[i] != NULL)
+		{
+			if ((NPC::allNPC[i]->getPosition().x == pos.x) && (NPC::allNPC[i]->getPosition().y == pos.y))
+			{
+				npc = NPC::allNPC[i];
+				break;
+			}
+		}
+	}
+	
+
+	return (npc);
+}
+
+/*
+ ************************************************************************************************
  *		Player class																			*
  *																								*
  ************************************************************************************************
@@ -694,6 +745,10 @@ Player::Player(const char *entityName, const char *texturePath) : Entity(entityN
 		
 		this->deck[i_wfu] = new Waifu(wfu_params);
 	}
+
+	this->inDialog = -1;
+
+	this->dialogText = "Ceci est un test de texte, c'est un texte test !";
 	
 }
 
@@ -702,6 +757,175 @@ Player::~Player()
 {
 
 }
+
+void Player::proc(int *ptr_map)
+{
+	Map *map = (Map *)ptr_map;
+
+	/* deplacement proc */
+	if (this->canMove() && (this->inDialog < 0))
+	{
+		SDL_Point futurePos = this->position;
+
+		if (event->getKey(SDL_GetScancodeFromKey(SDLK_z)) )
+		{
+			futurePos.y--;
+			this->move(Direction::NORTH, map->getTile(futurePos));
+		}
+		else if (event->getKey(SDL_GetScancodeFromKey(SDLK_s)) )
+		{
+			futurePos.y++;
+			this->move(Direction::SOUTH, map->getTile(futurePos));
+		}
+		else if (event->getKey(SDL_GetScancodeFromKey(SDLK_q)) )
+		{
+			futurePos.x--;
+			this->move(Direction::WEST, map->getTile(futurePos));
+		}
+		else if (event->getKey(SDL_GetScancodeFromKey(SDLK_d)) )
+		{
+			futurePos.x++;
+			this->move(Direction::EAST, map->getTile(futurePos));
+		}
+	}
+	else
+	{
+		if (this->moving == Direction::NORTH || 
+			this->moving == Direction::SOUTH ||
+			this->moving == Direction::EAST  ||
+			this->moving == Direction::WEST)
+		{
+			if (this->orientation != this->moving)
+			{
+				this->orientation = this->moving;
+				console->log("Orientation changed");
+			}
+		}
+
+		switch (this->moving)
+		{
+			case Direction::NORTH: 
+				this->positionScreen.y -= ENTITYSPEED;
+				break;
+			case Direction::SOUTH: 
+				this->positionScreen.y += ENTITYSPEED;
+				break;
+			case Direction::WEST:  
+				this->positionScreen.x -= ENTITYSPEED;
+				break;
+			case Direction::EAST:  
+				this->positionScreen.x += ENTITYSPEED;
+				break;
+
+			default:
+				break;
+		}
+
+		if ((this->positionScreen.x == this->position.x*TILESIZE) && (this->positionScreen.y == this->position.y*TILESIZE))
+		{
+			this->moving = Direction::NONE;
+		}
+	}
+
+	/* dialog proc */		
+	if (event->getKeyUp(SDL_GetScancodeFromKey(SDLK_e)) )
+	{
+		SDL_Point	talkingPos = this->position;
+		NPC			*npcTarget;
+
+		switch (this->orientation)
+		{
+			case Direction::NORTH: talkingPos.y -= 1; break;
+			case Direction::SOUTH: talkingPos.y += 1; break;
+			case Direction::WEST:  talkingPos.x -= 1; break;
+			case Direction::EAST:  talkingPos.x += 1; break;
+
+			default:
+				console->log("default orientation : curr loc");
+				break;
+		}
+
+		npcTarget = NPC::getNPC(talkingPos);
+
+		if (npcTarget != NULL)
+		{
+			console->log("dialog");
+
+			this->inDialog = -this->inDialog;
+			if (this->inDialog > 0)
+			{
+				this->dialogTarget = npcTarget;
+			}
+		}
+	}
+
+	
+
+	/* TODO PSN, EMBUSH, DIALOG*/
+}
+
+
+bool Player::print_onMap(SDL_Point offset)
+{
+	SDL_Rect offsetRect;
+	offsetRect.x = offset.x + this->positionScreen.x;
+	offsetRect.y = offset.y + this->positionScreen.y;
+	offsetRect.w = this->dst_rect.w;
+	offsetRect.h = this->dst_rect.h;
+
+	switch (this->moving)
+	{
+		case Direction::NORTH: this->current_animation = 1; break;
+		case Direction::SOUTH: this->current_animation = 0; break;
+		case Direction::WEST:  this->current_animation = 2; break;
+		case Direction::EAST:  this->current_animation = 3; break;
+			
+		default:
+			if (this->current_frame == 0)
+				this->current_time	= 1;
+			break;
+	}
+
+
+	/* display dialog */
+	if (this->inDialog > 0)
+	{
+		SDL_Rect textArea;
+		string ttp;
+		Text *printedText;
+		
+		textArea.h = 100;
+		textArea.w = screen.w - 20;
+		textArea.x = 10;
+		textArea.y = screen.h - textArea.h - 10;
+
+		SDL_SetRenderDrawColor(render, 128, 128, 128, SDL_ALPHA_OPAQUE);
+		SDL_RenderFillRect(render, &textArea);
+
+		
+		if (this->i_dglChar < this->dialogText.length())
+		{
+			this->i_dglChar++;
+		}
+
+		ttp = this->dialogText.substr(0, this->i_dglChar);
+	
+		printedText = new Text(ttp.c_str(), Font_type::AVARA, {textArea.x + 10, textArea.y + 10});
+
+		printedText->print_onMap();
+
+		delete (printedText);
+ 	}
+	else
+	{
+		this->i_dglChar = 0;
+	}
+	
+
+	return (this->print(&this->src_rect, &offsetRect));
+}
+
+
 
 
 /*
@@ -742,8 +966,8 @@ bool Text::print_onMap(SDL_Point offset)
 
 	offsetRect.x = dst_rect.x + offset.x;
 	offsetRect.y = dst_rect.y + offset.y;
-	offsetRect.w = dst_rect.w;
-	offsetRect.h = dst_rect.h;
+	offsetRect.w = this->dst_rect.w;
+	offsetRect.h = this->dst_rect.h;
 
 	return (this->print(NULL, &offsetRect));
 }
