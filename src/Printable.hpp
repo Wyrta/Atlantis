@@ -17,6 +17,7 @@ TTF_Font	*createFont(const char *path, int size);
 #define ENTITYSPEED		2
 #define DECK_SIZE		6
 #define MAX_NPC			64
+#define MAX_ENTITY		(MAX_NPC+1)
 
 typedef enum {
 	NORTH,
@@ -185,17 +186,22 @@ class Entity : public Printable
 		Entity(const char *entityName, const char *texturePath);
 		~Entity();
 
-		bool		print_onMap(SDL_Point offset);
-		void		print_debug(void);
+		bool			print_onMap(SDL_Point offset);
+		void			print_debug(void);
 
-		virtual void proc(void);
-		void		move(Direction direction, Tile *tile);
+		virtual void	proc(void);
 
-		SDL_Point	getPosition(void)			{ return this->position; }
-		SDL_Point	getPosition_screen(void)	{ return this->positionScreen; }
-		void 		setPosition(int x, int y)	{ this->position.x = x; this->position.y = y; this->positionScreen.x = x*TILESIZE; this->positionScreen.y = y*TILESIZE;}
-		Direction	isMoving(void)				{ return this->moving; }
-		bool		canMove(void)				{ return (this->moving == Direction::NONE); }
+		static Entity	*allEntity[MAX_ENTITY];
+		int				i_ent;
+
+
+		void			move(Direction direction, Tile *tile);
+
+		SDL_Point		getPosition(void)			{ return this->position; }
+		SDL_Point		getPosition_screen(void)	{ return this->positionScreen; }
+		void 			setPosition(int x, int y)	{ this->position.x = x; this->position.y = y; this->positionScreen.x = x*TILESIZE; this->positionScreen.y = y*TILESIZE;}
+		Direction		isMoving(void)				{ return this->moving; }
+		bool			canMove(void)				{ return (this->moving == Direction::NONE); }
 };
 
 
@@ -222,6 +228,7 @@ class NPC : public Entity
 
 		int			i_npc;
 
+		static void	proc_print(SDL_Point offset);
 		static NPC	*getNPC(SDL_Point pos);
 		static NPC	*allNPC[MAX_NPC];
 };

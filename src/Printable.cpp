@@ -18,6 +18,7 @@ vector<Printable *> Printable::toDebug;
 SDL_Texture			*Tile::texture[Tile_type::LAST_TTYPE];
 TTF_Font			*Text::fonts[Font_type::LAST_FONT];
 NPC					*NPC::allNPC[MAX_NPC];
+Entity				*Entity::allEntity[MAX_ENTITY];
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -529,6 +530,16 @@ void Tile::unload_all_texture()
 
 Entity::Entity(const char *entityName, const char *texturePath) : Printable(entityName, texturePath)
 {
+	for (int i = 0; i < MAX_ENTITY; i++)
+	{
+		if (NPC::allEntity[i] == NULL)
+		{
+			this->i_ent = i;
+			NPC::allEntity[i] = this;
+			break;
+		}
+	}
+
 	this->position.x = 0;
 	this->position.y = 0;
 
@@ -551,7 +562,7 @@ Entity::Entity(const char *entityName, const char *texturePath) : Printable(enti
 
 Entity::~Entity()
 {
-
+	NPC::allEntity[this->i_ent] = NULL;
 }
 
 
@@ -618,6 +629,18 @@ void Entity::proc(void)
 	}
 
 	/* TODO EMBUSH, DIALOG*/
+}
+
+
+void NPC::proc_print(SDL_Point offset)
+{
+	for (int i = 0; i < MAX_NPC; i++)
+	{
+		if (NPC::allNPC[i] != NULL)
+		{
+			NPC::allNPC[i]->print_onMap(offset);
+		}
+	}
 }
 
 
@@ -761,6 +784,7 @@ Player::~Player()
 void Player::proc(int *ptr_map)
 {
 	Map *map = (Map *)ptr_map;
+	static int32_t ignoreMove = 0;
 
 	/* deplacement proc */
 	if (this->canMove() && (this->inDialog < 0))
@@ -769,24 +793,62 @@ void Player::proc(int *ptr_map)
 
 		if (event->getKey(SDL_GetScancodeFromKey(SDLK_z)) )
 		{
-			futurePos.y--;
-			this->move(Direction::NORTH, map->getTile(futurePos));
+			if (this->orientation != Direction::NORTH)
+			{
+				ignoreMove = 20;
+				this->orientation = Direction::NORTH;
+			}
+
+			if (ignoreMove < 0)
+			{
+				futurePos.y--;
+				this->move(Direction::NORTH, map->getTile(futurePos));
+			}
 		}
 		else if (event->getKey(SDL_GetScancodeFromKey(SDLK_s)) )
 		{
-			futurePos.y++;
-			this->move(Direction::SOUTH, map->getTile(futurePos));
+			if (this->orientation != Direction::SOUTH)
+			{
+				ignoreMove = 20;
+				this->orientation = Direction::SOUTH;
+			}
+
+			if (ignoreMove < 0)
+			{
+				futurePos.y++;
+				this->move(Direction::SOUTH, map->getTile(futurePos));
+			}
 		}
 		else if (event->getKey(SDL_GetScancodeFromKey(SDLK_q)) )
 		{
-			futurePos.x--;
-			this->move(Direction::WEST, map->getTile(futurePos));
+			if (this->orientation != Direction::WEST)
+			{
+				ignoreMove = 20;
+				this->orientation = Direction::WEST;
+			}
+
+			if (ignoreMove < 0)
+			{
+				futurePos.x--;
+				this->move(Direction::WEST, map->getTile(futurePos));
+			}
 		}
 		else if (event->getKey(SDL_GetScancodeFromKey(SDLK_d)) )
 		{
-			futurePos.x++;
-			this->move(Direction::EAST, map->getTile(futurePos));
+			if (this->orientation != Direction::EAST)
+			{
+				ignoreMove = 20;
+				this->orientation = Direction::EAST;
+			}
+
+			if (ignoreMove < 0)
+			{
+				futurePos.x++;
+				this->move(Direction::EAST, map->getTile(futurePos));
+			}
 		}
+
+		ignoreMove--;
 	}
 	else
 	{
@@ -797,7 +859,7 @@ void Player::proc(int *ptr_map)
 		{
 			if (this->orientation != this->moving)
 			{
-				this->orientation = this->moving;
+//				this->orientation = this->moving;
 				console->log("Orientation changed");
 			}
 		}
@@ -859,9 +921,9 @@ void Player::proc(int *ptr_map)
 		}
 	}
 
-	
 
-	/* TODO PSN, EMBUSH, DIALOG*/
+
+	/* TODO PSN, EMBUSH, DIALOG */
 }
 
 
@@ -873,7 +935,7 @@ bool Player::print_onMap(SDL_Point offset)
 	offsetRect.w = this->dst_rect.w;
 	offsetRect.h = this->dst_rect.h;
 
-	switch (this->moving)
+	switch (this->orientation)
 	{
 		case Direction::NORTH: this->current_animation = 1; break;
 		case Direction::SOUTH: this->current_animation = 0; break;
@@ -886,6 +948,11 @@ bool Player::print_onMap(SDL_Point offset)
 			break;
 	}
 
+	if (this->moving == Direction::NONE)
+	{
+		if (this->current_frame == 0)
+			this->current_time	= 1;
+	}
 
 	/* display dialog */
 	if (this->inDialog > 0)

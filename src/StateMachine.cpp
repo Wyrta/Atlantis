@@ -28,20 +28,20 @@ class Game
 		Map		*map;
 		Player	*player;
 
-		NPC	*mob0;
-		NPC	*mob1;
-		NPC	*mob2;
+		NPC		*mob0;
+		NPC		*mob1;
+		NPC		*mob2;
 	public:
 
 		Game()
 		{
-			this->loaded = false;
+			this->loaded	= false;
 
-			this->map = NULL;
-			this->player = NULL;
-			this->mob0 = NULL;
-			this->mob1 = NULL;
-			this->mob2 = NULL;
+			this->map		= NULL;
+			this->player	= NULL;
+			this->mob0		= NULL;
+			this->mob1		= NULL;
+			this->mob2		= NULL;
 		}
 
 		~Game()
@@ -106,11 +106,9 @@ class Game
 			this->map->focus(player->getPosition_screen());
 			this->map->print();
 
-			this->mob0->print_onMap(map->getPosition());
-			this->mob1->print_onMap(map->getPosition());
-			this->mob2->print_onMap(map->getPosition());
+			NPC::proc_print(map->getPosition());
 			this->player->print_onMap(map->getPosition());
-
+			
 			Printable::proc_debug();
 		}
 };
