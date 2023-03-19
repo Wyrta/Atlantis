@@ -14,8 +14,11 @@ SDL_Texture *write(SDL_Rect *rect, TTF_Font *font, const char *text, SDL_Color c
 TTF_Font	*createFont(const char *path, int size);
 
 #define TILESIZE		64
+#define IGNORE_DELAY	10
 #define ENTITYSPEED		2
 #define DECK_SIZE		6
+
+#define MAX_DIALOG		64
 #define MAX_NPC			64
 #define MAX_ENTITY		(MAX_NPC+1)
 
@@ -221,6 +224,7 @@ class Waifu : public Entity
 class NPC : public Entity
 {
 	private:
+		int dialogs[MAX_DIALOG/4]; 
 
 	public:
 		NPC(const char *entityName, const char *texturePath);
@@ -229,19 +233,28 @@ class NPC : public Entity
 		int			i_npc;
 
 		static void	proc_print(SDL_Point offset);
+		
 		static NPC	*getNPC(SDL_Point pos);
 		static NPC	*allNPC[MAX_NPC];
+
+		void assign_dialogs(int num_args, ...);
+
+		static void	load_history(void);
+		static string history[MAX_DIALOG];
 };
+
 
 class Player : public Entity
 {
 	private:
 		Waifu			*deck[DECK_SIZE];
-		int				inDialog;
-		NPC				*dialogTarget;
-		string 			dialogText;
 		unsigned int	i_dglChar;
 
+		NPC				*dialogTarget;
+		int 			history;
+		int				inDialog;
+		string			dialogText;
+		
 	public:
 		Player(const char *entityName, const char *texturePath);
 		~Player();

@@ -5,6 +5,7 @@
 #include "EventManager.hpp"
 #include "Map.hpp"
 
+/* extern var including */
 
 extern Console		*console;
 extern SDL_Renderer *render;
@@ -12,6 +13,7 @@ extern SDL_Rect		screen;
 extern Mouse_t		mouse;
 extern EventManager	*event;
 
+/* static var creation */
 
 bool				Printable::debug = false;
 vector<Printable *> Printable::toDebug; 
@@ -19,6 +21,8 @@ SDL_Texture			*Tile::texture[Tile_type::LAST_TTYPE];
 TTF_Font			*Text::fonts[Font_type::LAST_FONT];
 NPC					*NPC::allNPC[MAX_NPC];
 Entity				*Entity::allEntity[MAX_ENTITY];
+string 				NPC::history[MAX_DIALOG];
+
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -720,7 +724,13 @@ NPC::NPC(const char *entityName, const char *texturePath) : Entity(entityName, t
 			break;
 		}
 	}
-	
+/*
+	int cpt = 0;
+	while (dialogs_cnf[cpt] && cpt < MAX_DIALOG/4)
+	{
+		this->dialogs[cpt] = dialogs_cnf[cpt];
+	}
+*/
 }
 
 
@@ -750,6 +760,77 @@ NPC	*NPC::getNPC(SDL_Point pos)
 	return (npc);
 }
 
+
+void NPC::assign_dialogs(int num_args, ...) {
+	va_list arglist;
+
+	va_start(arglist, num_args);
+	console->log("%d", num_args);
+	
+	int loop = 0;
+	while (arglist[loop] != 0)
+	{
+		console->log("%d", arglist[loop]);
+
+		loop++;
+	}
+	
+	va_end(arglist);
+
+}
+
+
+void NPC::load_history(void)
+{
+	ifstream	config("config/history.cnf");
+	string		line;
+	int			index;
+	int 		dialog_idx;
+	int			history_lenght = 0;
+	console->log("Load history");
+
+	/* reset dialogs */
+	for (int i = 0; i < MAX_DIALOG; i++)
+		NPC::history[i].assign("");
+
+
+	while (getline(config, line) )
+	{
+		if (line.c_str()[0] == '#')
+			continue;
+		
+		index = line.find(";");
+
+		/* if error continue */
+		if(index == (int)string::npos)
+		{
+			console->log(log_t::ERROR, "Load dialogs : \"%s\" no \';\'", line.c_str());
+			continue;
+		}
+
+		string str_dialog_idx = line.substr(0, index);
+		dialog_idx = atoi(str_dialog_idx.c_str());
+		
+		if  (dialog_idx == 0)
+		{
+			console->log(log_t::ERROR, "Conversion to integer of : \"%s\"", str_dialog_idx.c_str());
+			continue;
+		}
+		
+		dialog_idx--; /* to make it start from 0 and not 1 */
+
+		NPC::history[dialog_idx].assign(line.substr(index+1, line.length()) );
+		
+		history_lenght++;
+		console->log("Set dialog %d : %s", dialog_idx, NPC::history[dialog_idx].c_str());
+	}
+
+	console->log("Succesfully load %d dialog(s)", history_lenght);
+
+	config.close();
+}
+
+
 /*
  ************************************************************************************************
  *		Player class																			*
@@ -769,10 +850,7 @@ Player::Player(const char *entityName, const char *texturePath) : Entity(entityN
 		this->deck[i_wfu] = new Waifu(wfu_params);
 	}
 
-	this->inDialog = -1;
-
-	this->dialogText = "Ceci est un test de texte, c'est un texte test !";
-	
+	this->inDialog = -1;	
 }
 
 
@@ -795,7 +873,7 @@ void Player::proc(int *ptr_map)
 		{
 			if (this->orientation != Direction::NORTH)
 			{
-				ignoreMove = 20;
+				ignoreMove = IGNORE_DELAY;
 				this->orientation = Direction::NORTH;
 			}
 
@@ -809,7 +887,7 @@ void Player::proc(int *ptr_map)
 		{
 			if (this->orientation != Direction::SOUTH)
 			{
-				ignoreMove = 20;
+				ignoreMove = IGNORE_DELAY;
 				this->orientation = Direction::SOUTH;
 			}
 
@@ -823,7 +901,7 @@ void Player::proc(int *ptr_map)
 		{
 			if (this->orientation != Direction::WEST)
 			{
-				ignoreMove = 20;
+				ignoreMove = IGNORE_DELAY;
 				this->orientation = Direction::WEST;
 			}
 
@@ -837,7 +915,7 @@ void Player::proc(int *ptr_map)
 		{
 			if (this->orientation != Direction::EAST)
 			{
-				ignoreMove = 20;
+				ignoreMove = IGNORE_DELAY;
 				this->orientation = Direction::EAST;
 			}
 
@@ -969,7 +1047,6 @@ bool Player::print_onMap(SDL_Point offset)
 		SDL_SetRenderDrawColor(render, 128, 128, 128, SDL_ALPHA_OPAQUE);
 		SDL_RenderFillRect(render, &textArea);
 
-		
 		if (this->i_dglChar < this->dialogText.length())
 		{
 			this->i_dglChar++;
@@ -987,7 +1064,6 @@ bool Player::print_onMap(SDL_Point offset)
 	{
 		this->i_dglChar = 0;
 	}
-	
 
 	return (this->print(&this->src_rect, &offsetRect));
 }

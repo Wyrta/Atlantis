@@ -54,13 +54,20 @@ class Game
 		{
 			Tile::load_all_texture();
 			Text::load_font();
+			NPC::load_history();
 
 			this->map		= new Map(Map_lvl::TEST);
+
 			this->player	= new Player("Mob_random", "img/entity/player2.png");
 
 			this->mob0		= new NPC("IA_0", "img/entity/mobTest.png");
 			this->mob1		= new NPC("IA_1", "img/entity/mobTest.png");
 			this->mob2		= new NPC("IA_2", "img/entity/mobTest.png");
+
+			
+			this->mob0->assign_dialogs(2, 2, 3);
+			this->mob1->assign_dialogs(4, 5, 6);
+
 
 			this->player->setAnimation(3, -1, {0, 0, 22, 22});
 
