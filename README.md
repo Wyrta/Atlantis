@@ -11,7 +11,10 @@ https://www.spriters-resource.com/game_boy_advance/pokemonemerald/
 - dialog
 - multiligns text 
 - change map
-- zoom (tile dim)
+- zoom (modify tile dim)
 - dialog choice > "XX;A QUESTION [XY/YX/YY]" for each choice print dialog XY YX or YY (may have more than 3) 
 - improve player movement : if already moving dont apply ignoreMove
 - System class to store some info : performance graph (tick missed..), save/load function
+- dynamic map loader (use <Tile>vector)
+	tile ex : NAME,X,Y,DIR	=> GRASS,0,0,ALL
+	map  ex : TILE;TILE;    => GRASS,0,0,ALL;GRASS,0,1,ALL;GRASS,1,0,ALL;GRASS,1,1,ALL;

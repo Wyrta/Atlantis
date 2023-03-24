@@ -36,7 +36,7 @@ $(EXEC): $(OBJ) $(METADAT)
 
 %.o: %.cpp
 	$(info Compilation of $@ ...)
-	@$(CC) $(LIB) -o $@ -c $< $(CFLAGS) $(LIB)
+	@$(CC) -o $@ -c $< $(CFLAGS) $(LIB)
 
 %.res : %.rc
 	$(info Compilation of $@ ...)

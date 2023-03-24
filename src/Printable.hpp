@@ -19,6 +19,8 @@ TTF_Font	*createFont(const char *path, int size);
 #define DECK_SIZE		6
 
 #define MAX_DIALOG		64
+#define NPC_MAX_DIALOG	16
+
 #define MAX_NPC			64
 #define MAX_ENTITY		(MAX_NPC+1)
 
@@ -224,7 +226,8 @@ class Waifu : public Entity
 class NPC : public Entity
 {
 	private:
-		int dialogs[MAX_DIALOG/4]; 
+		int dialogs[NPC_MAX_DIALOG];
+		int nb_dialog;
 
 	public:
 		NPC(const char *entityName, const char *texturePath);
@@ -237,7 +240,9 @@ class NPC : public Entity
 		static NPC	*getNPC(SDL_Point pos);
 		static NPC	*allNPC[MAX_NPC];
 
-		void assign_dialogs(int num_args, ...);
+		void addDialog(int dialog);
+		bool hasDialog(int hist);
+		const string rdmDialogs[3] = {"Bonjour", "Enchanter monsieur", "Il fait beau dehord vous ne trouvez pas ?"};
 
 		static void	load_history(void);
 		static string history[MAX_DIALOG];
@@ -252,7 +257,7 @@ class Player : public Entity
 
 		NPC				*dialogTarget;
 		int 			history;
-		int				inDialog;
+		bool			inDialog;
 		string			dialogText;
 		
 	public:

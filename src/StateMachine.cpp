@@ -64,10 +64,13 @@ class Game
 			this->mob1		= new NPC("IA_1", "img/entity/mobTest.png");
 			this->mob2		= new NPC("IA_2", "img/entity/mobTest.png");
 
-			
-			this->mob0->assign_dialogs(2, 2, 3);
-			this->mob1->assign_dialogs(4, 5, 6);
+			this->mob0->addDialog(0);
+			this->mob0->addDialog(1);
+			this->mob0->addDialog(2);
 
+			this->mob1->addDialog(3);
+			this->mob1->addDialog(4);
+			this->mob1->addDialog(5);
 
 			this->player->setAnimation(3, -1, {0, 0, 22, 22});
 
@@ -172,34 +175,37 @@ int init(State *state)
 	audio	= Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024);
 	mixer	= Mix_Init(MIX_INIT_OGG);
 	
-    if (window == NULL) {
+    if (window == NULL)
+	{
 		printf("Error while init window\r\n");
         *state = EXIT;
 		return (-1);
 	}
-	else {
+	else
+	{
 		printf("Init window at 0x%x\r\n", (unsigned int) window);
 	}
-	if (render == NULL) {
+	if (render == NULL)
+	{
 		printf("Error while init render\r\n");
         *state = EXIT;
 		return (-1);
 	}
-	else {
+	else
+	{
 		printf("Init render at 0x%x\r\n", (unsigned int) render);
 	}
-	if (audio < 0) {
+	if (audio < 0)
+	{
 		printf("Error while init SDL audio\r\n");
-        *state = EXIT;
-		return (-1);
 	}
-	else {
+	else
+	{
 		printf("Init SDL audio\r\n");
 	}
-	if (mixer == 0) {
+	if (mixer == 0)
+	{
 		printf("Error while init SDL_Mixer audio\r\n");
-        *state = EXIT;
-		return (-1);
 	}
 	else {
 		printf("Init SDL_Mixer audio\r\n");

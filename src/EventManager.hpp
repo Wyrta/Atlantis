@@ -6,6 +6,8 @@
 
 #define MAX_EVENT_POLL      100
 
+#define getKeyK(x)	getKeySC(SDL_GetScancodeFromKey(x))
+
 
 typedef struct Mouse_s
 {
@@ -29,7 +31,7 @@ class EventManager
 
         void        pollEvent(void);
         const Uint8 *getKeyboard(void);
-        bool        getKey(SDL_Scancode );
+        bool        getKeySC(SDL_Scancode );
         bool        getKeyUp(SDL_Scancode );
         bool        getKeyDown(SDL_Scancode );
 

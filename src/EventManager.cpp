@@ -61,7 +61,7 @@ void EventManager::pollEvent(void)
 				} break;
 				case SDL_MOUSEWHEEL:		break;
 				case SDL_KEYDOWN: {
-					if (this->getKey(SDL_SCANCODE_ESCAPE))	/* ESCAPE */
+					if (this->getKeySC(SDL_SCANCODE_ESCAPE))	/* ESCAPE */
 						*this->appState = EXIT;
 					log = false;
 				} break;
@@ -74,14 +74,19 @@ void EventManager::pollEvent(void)
 			}
 
 			if (log)
-				console->log(EVENT, "%d", eventPolling);
+			{
+				if (eventPolling > 0)
+					console->log(EVENT, "nb poll: %d", eventPolling);
+				else
+					console->log(EVENT, "");
+			}
 		}
 		
 		eventPolling++;
 	} while ((eventPolling < MAX_EVENT_POLL) && (hasEvent == 1));
 }
 
-bool EventManager::getKey(SDL_Scancode key)
+bool EventManager::getKeySC(SDL_Scancode key)
 {
 	return (this->keyboardState[key]); 
 }

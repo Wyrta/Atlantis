@@ -636,18 +636,6 @@ void Entity::proc(void)
 }
 
 
-void NPC::proc_print(SDL_Point offset)
-{
-	for (int i = 0; i < MAX_NPC; i++)
-	{
-		if (NPC::allNPC[i] != NULL)
-		{
-			NPC::allNPC[i]->print_onMap(offset);
-		}
-	}
-}
-
-
 bool Entity::print_onMap(SDL_Point offset)
 {
 	SDL_Rect offsetRect;
@@ -724,13 +712,12 @@ NPC::NPC(const char *entityName, const char *texturePath) : Entity(entityName, t
 			break;
 		}
 	}
-/*
-	int cpt = 0;
-	while (dialogs_cnf[cpt] && cpt < MAX_DIALOG/4)
+
+	for (int cpt = 0; cpt < NPC_MAX_DIALOG; cpt++)
 	{
-		this->dialogs[cpt] = dialogs_cnf[cpt];
+		this->dialogs[cpt] = -1;
 	}
-*/
+
 }
 
 
@@ -756,27 +743,45 @@ NPC	*NPC::getNPC(SDL_Point pos)
 		}
 	}
 	
-
 	return (npc);
 }
 
 
-void NPC::assign_dialogs(int num_args, ...) {
-	va_list arglist;
+void NPC::addDialog(int dialog)
+{
+	if (this->nb_dialog < NPC_MAX_DIALOG)
+		this->dialogs[this->nb_dialog] = dialog;
 
-	va_start(arglist, num_args);
-	console->log("%d", num_args);
-	
-	int loop = 0;
-	while (arglist[loop] != 0)
+	this->nb_dialog++;
+}
+
+
+bool NPC::hasDialog(int hist)
+{
+	bool retval = false;
+
+	for (int i_hist = 0; i_hist < NPC_MAX_DIALOG; i_hist++)
 	{
-		console->log("%d", arglist[loop]);
-
-		loop++;
+		if (this->dialogs[i_hist] == hist)
+		{
+			retval = true;
+			break;
+		}
 	}
-	
-	va_end(arglist);
 
+	return (retval);
+}
+
+
+void NPC::proc_print(SDL_Point offset)
+{
+	for (int i = 0; i < MAX_NPC; i++)
+	{
+		if (NPC::allNPC[i] != NULL)
+		{
+			NPC::allNPC[i]->print_onMap(offset);
+		}
+	}
 }
 
 
@@ -787,6 +792,7 @@ void NPC::load_history(void)
 	int			index;
 	int 		dialog_idx;
 	int			history_lenght = 0;
+
 	console->log("Load history");
 
 	/* reset dialogs */
@@ -798,7 +804,7 @@ void NPC::load_history(void)
 	{
 		if (line.c_str()[0] == '#')
 			continue;
-		
+
 		index = line.find(";");
 
 		/* if error continue */
@@ -849,8 +855,9 @@ Player::Player(const char *entityName, const char *texturePath) : Entity(entityN
 		
 		this->deck[i_wfu] = new Waifu(wfu_params);
 	}
-
-	this->inDialog = -1;	
+	this->dialogTarget = NULL;
+	this->inDialog = false;	
+	this->history = 0;
 }
 
 
@@ -865,11 +872,11 @@ void Player::proc(int *ptr_map)
 	static int32_t ignoreMove = 0;
 
 	/* deplacement proc */
-	if (this->canMove() && (this->inDialog < 0))
+	if (this->canMove() && !this->inDialog)
 	{
 		SDL_Point futurePos = this->position;
 
-		if (event->getKey(SDL_GetScancodeFromKey(SDLK_z)) )
+		if (event->getKeyK(SDLK_z) )
 		{
 			if (this->orientation != Direction::NORTH)
 			{
@@ -883,7 +890,7 @@ void Player::proc(int *ptr_map)
 				this->move(Direction::NORTH, map->getTile(futurePos));
 			}
 		}
-		else if (event->getKey(SDL_GetScancodeFromKey(SDLK_s)) )
+		else if (event->getKeyK(SDLK_s) )
 		{
 			if (this->orientation != Direction::SOUTH)
 			{
@@ -897,7 +904,7 @@ void Player::proc(int *ptr_map)
 				this->move(Direction::SOUTH, map->getTile(futurePos));
 			}
 		}
-		else if (event->getKey(SDL_GetScancodeFromKey(SDLK_q)) )
+		else if (event->getKeyK(SDLK_q) )
 		{
 			if (this->orientation != Direction::WEST)
 			{
@@ -911,7 +918,7 @@ void Player::proc(int *ptr_map)
 				this->move(Direction::WEST, map->getTile(futurePos));
 			}
 		}
-		else if (event->getKey(SDL_GetScancodeFromKey(SDLK_d)) )
+		else if (event->getKeyK(SDLK_d) )
 		{
 			if (this->orientation != Direction::EAST)
 			{
@@ -972,7 +979,7 @@ void Player::proc(int *ptr_map)
 	{
 		SDL_Point	talkingPos = this->position;
 		NPC			*npcTarget;
-
+		
 		switch (this->orientation)
 		{
 			case Direction::NORTH: talkingPos.y -= 1; break;
@@ -981,22 +988,66 @@ void Player::proc(int *ptr_map)
 			case Direction::EAST:  talkingPos.x += 1; break;
 
 			default:
-				console->log("default orientation : curr loc");
+				console->log("Dialog test on player pos");
 				break;
 		}
 
 		npcTarget = NPC::getNPC(talkingPos);
 
-		if (npcTarget != NULL)
+		if (!this->inDialog)
 		{
-			console->log("dialog");
 
-			this->inDialog = -this->inDialog;
-			if (this->inDialog > 0)
+
+			if (npcTarget != NULL)
 			{
-				this->dialogTarget = npcTarget;
+				if (npcTarget->hasDialog(this->history) )
+				{
+					this->dialogText	= NPC::history[this->history];
+					this->dialogTarget	= npcTarget;
+
+					this->history++;
+				}
+				else
+				{
+					if (npcTarget->hasDialog(this->history-1))
+					{
+						this->dialogText	= NPC::history[this->history-1];
+						this->dialogTarget	= npcTarget;	
+					}
+					else
+					{
+						this->dialogText = npcTarget->rdmDialogs[rand() % SDL_arraysize(npcTarget->rdmDialogs)];
+					}
+					
+				}
+
+				this->inDialog = true;
+
+			}
+
+		}
+		else
+		{
+			if (npcTarget != NULL && npcTarget->hasDialog(this->history) )
+			{
+				this->dialogText	= NPC::history[this->history];
+				this->dialogTarget	= npcTarget;
+
+				this->i_dglChar = 0;	/* reload cpt */
+
+				this->history++;
+
+				this->inDialog = true;
+			}
+			else
+			{
+				this->inDialog = false;
 			}
 		}
+
+		if (this->inDialog)
+			console->log("dialog : %s", this->dialogText.c_str());
+
 	}
 
 
@@ -1033,7 +1084,7 @@ bool Player::print_onMap(SDL_Point offset)
 	}
 
 	/* display dialog */
-	if (this->inDialog > 0)
+	if (this->inDialog)
 	{
 		SDL_Rect textArea;
 		string ttp;
