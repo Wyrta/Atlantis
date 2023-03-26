@@ -28,9 +28,6 @@ class Game
 		Map		*map;
 		Player	*player;
 
-		NPC		*mob0;
-		NPC		*mob1;
-		NPC		*mob2;
 	public:
 
 		Game()
@@ -39,9 +36,6 @@ class Game
 
 			this->map		= NULL;
 			this->player	= NULL;
-			this->mob0		= NULL;
-			this->mob1		= NULL;
-			this->mob2		= NULL;
 		}
 
 		~Game()
@@ -57,26 +51,11 @@ class Game
 			NPC::load_history();
 
 			this->map		= new Map("test");
+			NPC::load_all("test");
 
-			this->player	= new Player("Mob_random", "img/entity/player2.png");
-
-			this->mob0		= new NPC("IA_0", "img/entity/mobTest.png");
-			this->mob1		= new NPC("IA_1", "img/entity/mobTest.png");
-			this->mob2		= new NPC("IA_2", "img/entity/mobTest.png");
-
-			this->mob0->addDialog(0);
-			this->mob0->addDialog(1);
-			this->mob0->addDialog(2);
-
-			this->mob1->addDialog(3);
-			this->mob1->addDialog(4);
-			this->mob1->addDialog(5);
-
+			this->player	= new Player("player", "img/entity/player2.png");
 			this->player->setAnimation(3, -1, {0, 0, 22, 22});
 
-			this->mob0->setPosition(1, 1);
-			this->mob1->setPosition(1, 3);
-			this->mob2->setPosition(1, 5);
 
 			this->loaded = true;
 		}
@@ -85,16 +64,11 @@ class Game
 		{
 			delete (this->map);
 			delete (this->player);
-			delete (this->mob0);
-			delete (this->mob1);
-			delete (this->mob2);
-			
+
+			NPC::unload_all();
 			Tile::unload_all_texture();
 			Text::unload_font();
 			
-			this->mob0 		= NULL;
-			this->mob1 		= NULL;
-			this->mob2 		= NULL;
 			this->map		= NULL;
 			this->player	= NULL;
 			this->loaded	= false;
@@ -108,7 +82,7 @@ class Game
 			if (event->getKeyUp(SDL_SCANCODE_F3))
 			{
 				Printable::debug = !Printable::debug;
-				console->log("debug = %s", (Printable::debug) ? "Enable" : "Disable");
+				console->log("%s debug", (Printable::debug) ? "Enable" : "Disable");
 			}
 
 			this->player->proc((int *)map);

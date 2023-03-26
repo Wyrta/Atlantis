@@ -126,6 +126,7 @@ Printable::Printable(const char *objname, const char *filepath)
 }
 
 
+
 Printable::~Printable()
 {
 	if (this->destroy_texture)
@@ -258,8 +259,7 @@ void Printable::proc_debug(void)
 
 Tile::Tile(Tile_params params) : Printable({params.x, params.y, TILESIZE, TILESIZE})
 {
-	this->position.x = params.x;
-	this->position.y = params.y;
+	this->setPosition(params.x, params.y);
 
 	this->walkable = params.walkable;
 
@@ -731,6 +731,18 @@ Waifu::~Waifu()
 
 NPC::NPC(const char *entityName, const char *texturePath) : Entity(entityName, texturePath)
 {
+	this->load(NULL);
+}
+
+
+NPC::NPC(NPC_params params) : Entity(params.name, params.path)
+{
+	this->load(&params);
+}
+
+
+void NPC::load(NPC_params *params)
+{
 	for (int i = 0; i < MAX_NPC; i++)
 	{
 		if (NPC::allNPC[i] == NULL)
@@ -743,8 +755,15 @@ NPC::NPC(const char *entityName, const char *texturePath) : Entity(entityName, t
 
 	for (int cpt = 0; cpt < NPC_MAX_DIALOG; cpt++)
 	{
-		this->dialogs[cpt] = -1;
+		this->dialogs[cpt] = -69;
 	}
+
+	if (params != NULL)
+	{
+		this->setPosition(params->x, params->y);
+	}
+
+	// console->log("new NPC num: %d at 0x%x", this->i_npc, NPC::allNPC[this->i_npc]);
 
 }
 
@@ -859,9 +878,118 @@ void NPC::load_history(void)
 //		console->log("Set dialog %d : %s", dialog_idx, NPC::history[dialog_idx].c_str());
 	}
 
-	console->log("Succesfully load %d dialog(s)", history_lenght);
+	console->log("Succesfully load %d dialog%s", history_lenght, (history_lenght <= 1) ? "" : "s");
 
 	config.close();
+}
+
+
+void NPC::load_all(string mapname)
+{
+	ifstream	config("config/NPC.cnf");
+	string		line;
+	int 		nb_NPC = 0;
+	bool 		mapOK  = false;
+
+	mapname = "[" + mapname + "]";
+
+	console->log("Load NPC (map: %s)", mapname.c_str());
+
+	/* reset entity */
+	NPC::unload_all();
+	
+	while (getline(config, line) )
+	{
+		if (line.c_str()[0] == '#')
+			continue;
+
+		if (line.c_str()[0] == '[')
+		{
+			if (line == mapname)
+				mapOK = true;
+			else
+				mapOK = false;
+
+			continue;
+		}
+
+		if (mapOK)
+		{
+			NPC_params params;
+			string str_name, str_path, str_posX, str_posY;
+			int	l_idx = 0;
+			int r_idx = 0;
+			int dialogsIdx = 0;
+			int nb_dialogsIdx = 0;
+
+			r_idx = line.find(";");
+			str_name = line.substr(l_idx, r_idx - l_idx);
+
+			l_idx = r_idx + 1;
+			r_idx = line.find(";", l_idx);
+			str_path = line.substr(l_idx, r_idx - l_idx);
+
+			l_idx = r_idx + 1;
+			r_idx = line.find(";", l_idx);
+			str_posX = line.substr(l_idx, r_idx - l_idx);
+			
+			l_idx = r_idx + 1;
+			r_idx = line.find(";", l_idx);
+			str_posY = line.substr(l_idx, r_idx - l_idx);
+
+			SDL_strlcpy(params.name, str_name.c_str(), 64);
+			SDL_strlcpy(params.path, str_path.c_str(), 64);
+			params.x = atoi(str_posX.c_str());
+			params.y = atoi(str_posY.c_str());
+
+			// console->log("name:%s path:%s x:%d y:%d", params.name, params.path, params.x, params.y);
+
+			NPC *npc = new NPC(params);
+
+			nb_NPC++;
+
+			/* dialog generation */
+
+			l_idx = r_idx + 1;
+			r_idx = line.find(";", l_idx);
+			while (r_idx != (int)string::npos)
+			{
+				string strDialog;
+
+				if (l_idx > r_idx)
+				{
+					console->log(log_t::ERROR, "\tInvalid index l_idx > r_idx (%s > %s)", l_idx, r_idx);
+					return;
+				}
+
+				strDialog  = line.substr(l_idx, r_idx - l_idx);
+				dialogsIdx = atoi(strDialog.c_str());
+
+				nb_dialogsIdx++;
+
+				npc->addDialog(dialogsIdx);
+
+				l_idx = r_idx + 1;
+				r_idx = line.find(";", l_idx);
+			}
+
+			// console->log("Found %d dialog%s", nb_dialogsIdx, (nb_dialogsIdx <= 1) ? "" : "s");
+		}
+	}
+
+	console->log("Succesfully load %d NPC%s (map: %s)", nb_NPC, (nb_NPC <= 1) ? "" : "s", mapname.c_str());
+
+	config.close();
+}
+
+
+void NPC::unload_all(void)
+{
+	for (int i = 0; i < MAX_NPC; i++)
+	{
+		if (NPC::allNPC[i] != NULL)
+			delete (NPC::allNPC[i]);
+	}
 }
 
 
@@ -1024,8 +1152,6 @@ void Player::proc(int *ptr_map)
 
 		if (!this->inDialog)
 		{
-
-
 			if (npcTarget != NULL)
 			{
 				if (npcTarget->hasDialog(this->history) )

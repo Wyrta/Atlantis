@@ -1,0 +1,8 @@
+# [mapname]
+# name;path;x;y;some;dialogs;with;semicolons;
+
+
+[test]
+IA_0;img/entity/mobTest.png;1;1;0;1;2;
+IA_1;img/entity/mobTest.png;1;3;3;4;5;
+IA_2;img/entity/mobTest.png;1;5;

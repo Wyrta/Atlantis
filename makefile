@@ -31,7 +31,7 @@ all: cleanAll $(EXEC) clean
 
 
 $(EXEC): $(OBJ) $(METADAT)
-	$(info Assemble the exe $@ ...)
+	$(info Assemble $@ ...)
 	$(CC) -o $@ $^ $(LDFLAGS) $(LIB)
 
 %.o: %.cpp

@@ -100,6 +100,16 @@ typedef struct {
 	int xp;
 } Waifu_params;
 
+typedef struct {
+	int x;
+	int y;
+
+	char name[64];
+
+	char path[512];
+} NPC_params;
+
+
 
 class Printable
 {
@@ -230,25 +240,31 @@ class NPC : public Entity
 {
 	private:
 		int dialogs[NPC_MAX_DIALOG];
-		int nb_dialog;
+		int nb_dialog = 0;
+
+		void load(NPC_params *params);
 
 	public:
+		NPC(NPC_params params);
 		NPC(const char *entityName, const char *texturePath);
 		~NPC();
 
-		int			i_npc;
+		int			i_npc = -1;
 
 		static void	proc_print(SDL_Point offset);
 		
 		static NPC	*getNPC(SDL_Point pos);
 		static NPC	*allNPC[MAX_NPC];
 
-		void addDialog(int dialog);
-		bool hasDialog(int hist);
-		const string rdmDialogs[3] = {"Bonjour", "Enchanter monsieur", "Il fait beau dehord vous ne trouvez pas ?"};
+		void		addDialog(int dialog);
+		bool		hasDialog(int hist);
+		const string  rdmDialogs[3] = {"Bonjour", "Enchanter monsieur", "Il fait beau dehord vous ne trouvez pas ?"};
 
-		static void	load_history(void);
+		static void	  load_history(void);
 		static string history[MAX_DIALOG];
+
+		static void load_all(string mapname);
+		static void unload_all(void);
 };
 
 

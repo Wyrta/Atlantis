@@ -8,14 +8,6 @@ using namespace std;
 extern Console *console;
 extern SDL_Rect screen;
 
-Tile_params maps_TEST[] = {
-#include "maps/test.rc"
-};
-
-Tile_params maps_TEST2[] = {
-#include "maps/test2.rc"
-};
-
 
 Map::Map(string mapname)
 {
@@ -159,7 +151,7 @@ void Map::load(const char *filename)
 		}
 	}
 
-	console->log("Succesfully load map %s (%d Tiles in %d Lines)", filename, nb_tiles, nb_lines);
+	console->log("Successfully load map %s (%d Tiles in %d Lines)", filename, nb_tiles, nb_lines);
 
 	config.close();
 }
