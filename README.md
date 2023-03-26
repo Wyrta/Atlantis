@@ -8,7 +8,6 @@ https://www.deviantart.com/chaoticcherrycake
 https://www.spriters-resource.com/game_boy_advance/pokemonemerald/
 
 # TODO
-- dialog
 - multiligns text 
 - change map
 - zoom (modify tile dim)
@@ -16,5 +15,6 @@ https://www.spriters-resource.com/game_boy_advance/pokemonemerald/
 - improve player movement : if already moving dont apply ignoreMove
 - System class to store some info : performance graph (tick missed..), save/load function
 - dynamic map loader (use <Tile>vector)
-	tile ex : NAME,X,Y,DIR	=> GRASS,0,0,ALL
-	map  ex : TILE;TILE;    => GRASS,0,0,ALL;GRASS,0,1,ALL;GRASS,1,0,ALL;GRASS,1,1,ALL;
+	tile ex : X,Y,NAME,DIR	=> 0,0,GRASS,ALL
+	map  ex : TILE;TILE;    => 0,0,GRASS,ALL;0,1,GRASS,ALL;1,0,GRASS,ALL;1,1,GRASS,ALL;
+							   

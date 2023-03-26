@@ -20,6 +20,9 @@ class Map {
         Map(Map_lvl mapname);
         ~Map();
 
+		void load_map(char *filename);
+
+
         void		print(void);
 
 		void		focus(SDL_Point pos);
