@@ -24,25 +24,14 @@ class Console {
 		Console(SDL_Rect *);
 		~Console();
 
-//		void log(string );
 		void log(const char *, ...);
-//		void log(log_t , string );
 		void log(log_t , const char *, ...);
-
-//		void print(void);
-//		void input(void);
 
 		void print_all(void);
 
 
 	private:
 		string buffer[BUF_LENGTH];
-
-//		SDL_Rect size;
-//		SDL_Rect *gameScreen; 
-
-//		SDL_Texture *lign[MAX_LOG_LENGTH];
-//		SDL_Rect	 lignRect[MAX_LOG_LENGTH];
 
 		Uint32 last_msg_time;
         int first_log, last_log;

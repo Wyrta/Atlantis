@@ -172,6 +172,9 @@ class Tile : public Printable
 		SDL_Point	getPosition(void)	{ return (this->position); }
 		Direction	getWalkable(void) 	{ return (this->walkable); }
 
+		static Tile_type getTiletype(string str);
+		static Direction getTileDir(string str);
+
 		static void load_all_texture(void);
 		static void unload_all_texture(void);
 };

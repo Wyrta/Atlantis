@@ -6,21 +6,8 @@
 extern SDL_Renderer *render;
 extern EventManager *event;
 
-Console::Console(SDL_Rect *screen) {
-//	size.w = screen->w / 5;
-//	size.h = screen->h / 5;
-//	size.x = 10;
-//	size.y = (4*(screen->h / 5)) - 10;
-
-//	gameScreen = screen;
-
-//	for(int i = 0; i < BUFFER_LENGTH; i++) {
-//		this->buffer[i].clear();
-//	}
-
-//	for(int i = 0; i < MAX_LOG_LENGTH; i++) {
-//		this->lign[i] = NULL;
-//	}
+Console::Console(SDL_Rect *screen)
+{
 
 	this->last_msg_time = SDL_GetTicks();
     this->first_log     = 0;
@@ -29,14 +16,13 @@ Console::Console(SDL_Rect *screen) {
 	this->buffer[0].assign("Console init");
 }
 
-Console::~Console() {
-//	for(int i = 0; i < MAX_LOG_LENGTH; i++)
-//	{
-//		SDL_DestroyTexture(this->lign[i]);
-//	}
+Console::~Console()
+{
+
 }
 
-void Console::log(const char *format, ...) {
+void Console::log(const char *format, ...)
+{
 	/* args parsing */
 	va_list arglist;
 	char buff[BUF_LENGTH];
@@ -145,10 +131,11 @@ void Console::log(log_t type, const char *format, ...)
 			default: sprintf(event_type, "Unkonw event"); break;
 		}
 
-		snprintf(message, BUF_LENGTH, "[%s] %08d : %s %s", type_str, this->last_msg_time, event_type, buff);
+		snprintf(message, BUF_LENGTH, "%08d [%s] : %s %s", this->last_msg_time, type_str, event_type, buff);
 	}
-	else {
-		snprintf(message, BUF_LENGTH, "[%s] %08d : %s", type_str, this->last_msg_time, buff);
+	else
+	{
+		snprintf(message, BUF_LENGTH, "%08d [%s] : %s", this->last_msg_time, type_str, buff);
 	}
 
 	this->buffer[this->last_log].assign(message);
@@ -167,60 +154,3 @@ void Console::print_all(void) {
 		cout << "\t" << cpt << " :\t\"" << this->buffer[cpt] << "\"" << endl;
 	}
 }
-
-/* WARNING : need to be optimized */
-#if 0
-void Console::print(void)
-{
-	if (this->last_msg_time + 5000 <= SDL_GetTicks())
-		return;
-
-	int lignToDisplay[MAX_LOG_LENGTH];
-	int cpt = 0;
-
-	size.w = this->gameScreen->w / 5;
-	size.h = this->gameScreen->h / 5;
-	size.x = 10;
-	size.y = this->gameScreen->h - (this->gameScreen->h / 5) - 10;
-
-	for(int i = 0; i < MAX_LOG_LENGTH; i++)
-	{
-		lignToDisplay[i] = -1;
-		SDL_DestroyTexture(this->lign[i]);
-	}
-
-	for(int i = 0; i < BUFFER_LENGTH; i++)
-	{
-		if (this->buffer[i].length() > 0)
-		{
-			lignToDisplay[MAX_LOG_LENGTH - 1] = i;
-
-			for(int i = 1; i < MAX_LOG_LENGTH; i++)
-				lignToDisplay[i - 1] = lignToDisplay[i];
-
-			lignToDisplay[MAX_LOG_LENGTH - 1] = -1;
-		}
-	}
-
-	for(int i = 0; i < MAX_LOG_LENGTH; i++)
-	{
-		if (lignToDisplay[i] != -1)
-		{
-			this->lign[cpt]	   = write(render, &this->lignRect[cpt], DebugMenu::debugFont, this->buffer[lignToDisplay[i]].c_str(), {255, 255, 255});
-			this->lignRect[cpt].x = this->size.x + 3;
-			this->lignRect[cpt].y = (this->size.y + this->size.h) - ((cpt * this->lignRect[cpt].h) + this->lignRect[cpt].h);
-			cpt++;
-		}
-	}
-
-	SDL_SetRenderDrawColor(render, 30, 30, 30, 200);
-	SDL_RenderFillRect(render, &this->size);
-
-	for(int i = 0; i < MAX_LOG_LENGTH; i++)
-	{
-		if (this->lign[i] != NULL)
-			SDL_RenderCopy(render, this->lign[i], NULL, &this->lignRect[i]);
-	}
-
-}
-#endif

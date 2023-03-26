@@ -39,7 +39,6 @@ SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 		if(rectangle != NULL)
 			SDL_QueryTexture(texture, NULL, NULL, &rectangle->w, &rectangle->h);
 
-		console->log("Create texture : \"%s\" at 0x%x", path, (unsigned int) texture);
 		return (texture);
 	}
 	else
@@ -422,6 +421,82 @@ void Tile::print_debug(void)
 }
 
 
+Tile_type Tile::getTiletype(string str)
+{
+	Tile_type type = Tile_type::EMPTY;
+
+	if (str == "DIRT")
+		type = Tile_type::DIRT;
+	else if (str == "DIRT_PATH_1")
+		type = Tile_type::DIRT_PATH_1;
+	else if (str == "DIRT_PATH_2")
+		type = Tile_type::DIRT_PATH_2;
+	else if (str == "DIRT_PATH_3")
+		type = Tile_type::DIRT_PATH_3;
+	else if (str == "DIRT_PATH_4")
+		type = Tile_type::DIRT_PATH_4;
+	else if (str == "DIRT_NE_GRASS")
+		type = Tile_type::DIRT_NE_GRASS;
+	else if (str == "DIRT_NW_GRASS")
+		type = Tile_type::DIRT_NW_GRASS;
+	else if (str == "DIRT_SE_GRASS")
+		type = Tile_type::DIRT_SE_GRASS;
+	else if (str == "DIRT_SW_GRASS")
+		type = Tile_type::DIRT_SW_GRASS;
+	else if (str == "GRASS_E_W_DIRT")
+		type = Tile_type::GRASS_E_W_DIRT;
+	else if (str == "GRASS_N_S_DIRT")
+		type = Tile_type::GRASS_N_S_DIRT;
+	else if (str == "GRASS_NE_DIRT")
+		type = Tile_type::GRASS_NE_DIRT;
+	else if (str == "GRASS_NW_DIRT")
+		type = Tile_type::GRASS_NW_DIRT;
+	else if (str == "GRASS_S_N_DIRT")
+		type = Tile_type::GRASS_S_N_DIRT;
+	else if (str == "GRASS_SE_DIRT")
+		type = Tile_type::GRASS_SE_DIRT;
+	else if (str == "GRASS_SW_DIRT")
+		type = Tile_type::GRASS_SW_DIRT;
+	else if (str == "GRASS_W_E_DIRT")
+		type = Tile_type::GRASS_W_E_DIRT;
+	else if (str == "GRASS_1")
+		type = Tile_type::GRASS_1;
+	else if (str == "GRASS_2")
+		type = Tile_type::GRASS_2;
+	else if (str == "GRASS_3")
+		type = Tile_type::GRASS_3;
+	else if (str == "TINYBUSH_1")
+		type = Tile_type::TINYBUSH_1;
+	else if (str == "TINYBUSH_2")
+		type = Tile_type::TINYBUSH_2;
+	else if (str == "TINYBUSH_3")
+		type = Tile_type::TINYBUSH_3;
+	else if (str == "TINYBUSH_4")
+		type = Tile_type::TINYBUSH_4;
+
+	return (type);
+}
+
+Direction Tile::getTileDir(string str)
+{
+	Direction dir = Direction::NONE;
+	
+	if (str == "NORTH")
+		dir = Direction::NORTH;
+	else if (str == "SOUTH")
+		dir = Direction::SOUTH;
+	else if (str == "WEST")
+		dir = Direction::WEST;
+	else if (str == "EAST")
+		dir = Direction::EAST;
+	else if (str == "ALL")
+		dir = Direction::ALL;
+	else if (str == "NONE")
+		dir = Direction::NONE;
+
+	return (dir);
+}
+
 void Tile::load_all_texture()
 {
 	ifstream	config("config/tiles.cnf");
@@ -452,54 +527,7 @@ void Tile::load_all_texture()
 
 		string str_tileType = line.substr(0, index);
 
-		if (str_tileType == "DIRT")
-			tileType = Tile_type::DIRT;
-		if (str_tileType == "DIRT_PATH_1")
-			tileType = Tile_type::DIRT_PATH_1;
-		if (str_tileType == "DIRT_PATH_2")
-			tileType = Tile_type::DIRT_PATH_2;
-		if (str_tileType == "DIRT_PATH_3")
-			tileType = Tile_type::DIRT_PATH_3;
-		if (str_tileType == "DIRT_PATH_4")
-			tileType = Tile_type::DIRT_PATH_4;
-		if (str_tileType == "DIRT_NE_GRASS")
-			tileType = Tile_type::DIRT_NE_GRASS;
-		if (str_tileType == "DIRT_NW_GRASS")
-			tileType = Tile_type::DIRT_NW_GRASS;
-		if (str_tileType == "DIRT_SE_GRASS")
-			tileType = Tile_type::DIRT_SE_GRASS;
-		if (str_tileType == "DIRT_SW_GRASS")
-			tileType = Tile_type::DIRT_SW_GRASS;
-		if (str_tileType == "GRASS_E_W_DIRT")
-			tileType = Tile_type::GRASS_E_W_DIRT;
-		if (str_tileType == "GRASS_N_S_DIRT")
-			tileType = Tile_type::GRASS_N_S_DIRT;
-		if (str_tileType == "GRASS_NE_DIRT")
-			tileType = Tile_type::GRASS_NE_DIRT;
-		if (str_tileType == "GRASS_NW_DIRT")
-			tileType = Tile_type::GRASS_NW_DIRT;
-		if (str_tileType == "GRASS_S_N_DIRT")
-			tileType = Tile_type::GRASS_S_N_DIRT;
-		if (str_tileType == "GRASS_SE_DIRT")
-			tileType = Tile_type::GRASS_SE_DIRT;
-		if (str_tileType == "GRASS_SW_DIRT")
-			tileType = Tile_type::GRASS_SW_DIRT;
-		if (str_tileType == "GRASS_W_E_DIRT")
-			tileType = Tile_type::GRASS_W_E_DIRT;
-		if (str_tileType == "GRASS_1")
-			tileType = Tile_type::GRASS_1;
-		if (str_tileType == "GRASS_2")
-			tileType = Tile_type::GRASS_2;
-		if (str_tileType == "GRASS_3")
-			tileType = Tile_type::GRASS_3;
-		if (str_tileType == "TINYBUSH_1")
-			tileType = Tile_type::TINYBUSH_1;
-		if (str_tileType == "TINYBUSH_2")
-			tileType = Tile_type::TINYBUSH_2;
-		if (str_tileType == "TINYBUSH_3")
-			tileType = Tile_type::TINYBUSH_3;
-		if (str_tileType == "TINYBUSH_4")
-			tileType = Tile_type::TINYBUSH_4;
+		tileType = getTiletype(str_tileType);
 
 		file = line.substr(index+1, line.length());
 
@@ -828,7 +856,7 @@ void NPC::load_history(void)
 		NPC::history[dialog_idx].assign(line.substr(index+1, line.length()) );
 		
 		history_lenght++;
-		console->log("Set dialog %d : %s", dialog_idx, NPC::history[dialog_idx].c_str());
+//		console->log("Set dialog %d : %s", dialog_idx, NPC::history[dialog_idx].c_str());
 	}
 
 	console->log("Succesfully load %d dialog(s)", history_lenght);

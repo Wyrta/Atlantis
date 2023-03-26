@@ -8,20 +8,10 @@ using namespace std;
 #include "Printable.hpp"
 #include "../include/SDL/SDL.h"
 
-
-typedef enum {
-	TEST,
-	TEST2,
-	LAST_MLVL		/* Dont use */
-} Map_lvl;
-
 class Map {
     public:
-        Map(Map_lvl mapname);
+        Map(string mapname);
         ~Map();
-
-		void load_map(char *filename);
-
 
         void		print(void);
 
@@ -30,10 +20,13 @@ class Map {
 		SDL_Point	getPosition(void) { return (this->position); }
 		Tile		*getTile(SDL_Point pos);
     private:
-		Map_lvl		name;
+		string		name;
 		SDL_Point	position;
 		
-		vector<Tile> tilemap;
+		vector<Tile *> tilemap;
+
+		void load(const char *filename);
+		void reset(void);
 };
 
 #endif /* _map_hpp_ */

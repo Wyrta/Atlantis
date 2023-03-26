@@ -56,7 +56,7 @@ class Game
 			Text::load_font();
 			NPC::load_history();
 
-			this->map		= new Map(Map_lvl::TEST);
+			this->map		= new Map("test");
 
 			this->player	= new Player("Mob_random", "img/entity/player2.png");
 
