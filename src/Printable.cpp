@@ -18,12 +18,12 @@ extern EventManager	*event;
 bool				Printable::debug = false;
 int 				Printable::tilesize = 64;
 vector<Printable *> Printable::toDebug; 
+int 				Printable::stack_debug = 0;
 SDL_Texture			*Tile::texture[Tile_type::LAST_TTYPE];
 TTF_Font			*Text::fonts[Font_type::LAST_FONT];
 NPC					*NPC::allNPC[MAX_NPC];
 Entity				*Entity::allEntity[MAX_ENTITY];
 string 				NPC::history[MAX_DIALOG];
-
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -241,6 +241,7 @@ void Printable::proc_debug(void)
 		}
 	}
 	Printable::toDebug.clear();
+	Printable::stack_debug = 0;
 }
 
 
@@ -391,7 +392,7 @@ void Tile::print_debug(void)
 	advancedInfo.w = 200;
 	advancedInfo.h = 100;
 	advancedInfo.x = mouse.x + 4;
-	advancedInfo.y = mouse.y - advancedInfo.h - 4;
+	advancedInfo.y = mouse.y + 4 + Printable::stack_debug;
 
 	Text posText(posbuffer, Font_type::AVARA, {advancedInfo.x+4, advancedInfo.y+4});
 	Text typText(typbuffer, Font_type::AVARA, {advancedInfo.x+4, advancedInfo.y+4+posText.getHitbox().h});//typText.getHitbox().h+5});
@@ -412,6 +413,8 @@ void Tile::print_debug(void)
 	posText.print_onMap();
 	typText.print_onMap();
 	wlkText.print_onMap();
+
+	Printable::stack_debug += advancedInfo.h + 4;
 }
 
 
@@ -687,13 +690,81 @@ bool Entity::print_onMap(SDL_Point offset)
 			break;
 	}
 
+	if ((mouse.x < (offsetRect.x + offsetRect.w)) & (mouse.x > offsetRect.x))
+	{
+		if ((mouse.y < (offsetRect.y + offsetRect.h)) & (mouse.y > offsetRect.y))
+		{
+			if (mouse.left)
+				SDL_SetRenderDrawColor(render, 64, 32, 32, 64);
+			else
+				SDL_SetRenderDrawColor(render, 255, 128, 128, 64);
+
+			SDL_RenderFillRect(render, &offsetRect);
+
+			if (this->debug)
+			{
+				Printable::toDebug.push_back(this);
+			}
+		}
+	}
+
+
 	return (this->print(&this->src_rect, &offsetRect));
 }
 
 
 void Entity::print_debug(void)
 {
+	SDL_Rect advancedInfo;
 
+	char posbuffer[512];
+	char typbuffer[64];
+	char dirbuffer[64];
+
+	int lenght = 0;
+
+	sprintf(posbuffer, "[Pos]: %2d %2d", this->position.x, this->position.y);
+	sprintf(typbuffer, "[Type]: %s", this->name.c_str());
+	
+
+	switch (this->orientation)
+	{
+		case Direction::NORTH: sprintf(dirbuffer, "[Dir]: NORTH"); break;
+		case Direction::SOUTH: sprintf(dirbuffer, "[Dir]: SOUTH"); break;
+		case Direction::WEST:  sprintf(dirbuffer, "[Dir]: WEST");  break;
+		case Direction::EAST:  sprintf(dirbuffer, "[Dir]: EAST");  break;
+		case Direction::ALL:   sprintf(dirbuffer, "[Dir]: ALL");   break;
+		case Direction::NONE:  sprintf(dirbuffer, "[Dir]: NONE");  break;
+
+	default: sprintf(dirbuffer, "[Dir]: UNKONW"); break;
+	}
+	
+	advancedInfo.w = 200;
+	advancedInfo.h = 100;
+	advancedInfo.x = mouse.x + 4;
+	advancedInfo.y = mouse.y + 4 + Printable::stack_debug;
+
+	Text posText(posbuffer, Font_type::AVARA, {advancedInfo.x+4, advancedInfo.y+4});
+	Text typText(typbuffer, Font_type::AVARA, {advancedInfo.x+4, advancedInfo.y+4+posText.getHitbox().h});
+	Text dirText(dirbuffer, Font_type::AVARA, {advancedInfo.x+4, advancedInfo.y+8+2*posText.getHitbox().h});
+
+	if (lenght < posText.getHitbox().w)
+		lenght = posText.getHitbox().w;
+	if (lenght < typText.getHitbox().w)
+		lenght = typText.getHitbox().w;
+	if (lenght < dirText.getHitbox().w)
+		lenght = dirText.getHitbox().w;
+		
+	advancedInfo.w = lenght + 8;
+
+	SDL_SetRenderDrawColor(render, 255, 128, 128, 200);
+	SDL_RenderFillRect(render, &advancedInfo);
+
+	posText.print_onMap();
+	typText.print_onMap();
+	dirText.print_onMap();
+
+	Printable::stack_debug += advancedInfo.h + 4;
 }
 
 
@@ -1262,6 +1333,24 @@ bool Player::print_onMap(SDL_Point offset)
 	else
 	{
 		this->i_dglChar = 0;
+	}
+
+	if ((mouse.x < (offsetRect.x + offsetRect.w)) & (mouse.x > offsetRect.x))
+	{
+		if ((mouse.y < (offsetRect.y + offsetRect.h)) & (mouse.y > offsetRect.y))
+		{
+			if (mouse.left)
+				SDL_SetRenderDrawColor(render, 64, 32, 32, 64);
+			else
+				SDL_SetRenderDrawColor(render, 255, 128, 128, 64);
+
+			SDL_RenderFillRect(render, &offsetRect);
+
+			if (this->debug)
+			{
+				Printable::toDebug.push_back(this);
+			}
+		}
 	}
 
 	return (this->print(&this->src_rect, &offsetRect));

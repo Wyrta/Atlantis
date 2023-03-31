@@ -134,6 +134,7 @@ class Printable
 		int			current_animation;
 
 		static vector<Printable *> toDebug;
+		static int 	stack_debug;
 		bool 		destroy_texture = true;
 
 	public:
