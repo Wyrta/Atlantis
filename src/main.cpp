@@ -1,12 +1,3 @@
-/**
- * Author : Wyrta
- * Aim : an rpg
- * License : Sills gaming
- * Date : 25/05/2021 - abort
- *		10/03/2022
- *
- */
-
 #include <string>
 
 #include "../include/SDL/SDL.h"
@@ -18,18 +9,16 @@
 #include "Statemachine.hpp"
 #include "EventManager.hpp"
 
-//#include "Printable.hpp"
-
-
 using namespace std;
 
-string  		app_version		= "Atlantis v23w10";
+string  		app_version		= "Atlantis v23w13";
 SDL_Window		*window 		= NULL;
 SDL_Renderer	*render 		= NULL;
 Console			*console 		= NULL;
 EventManager	*event			= NULL;
 SDL_Rect		screen;
 Mouse_t			mouse;
+int 			i_tick			= 0;
 
 //EventManager	*eventManager	= NULL;
 
@@ -55,7 +44,6 @@ int main(int argc, char *argv[])
 	Uint32	lastTicks		= SDL_GetTicks();
 	Uint32	currentTicks	= SDL_GetTicks();
 	int 	syncTick		= 0;
-	int 	i_tick			= 0;
 
 	while (state != EXIT) {
 		SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);

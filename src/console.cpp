@@ -2,9 +2,12 @@
 #include "EventManager.hpp"
 
 #include <iostream>
+#include <fstream> 
+#include <chrono>
 
 extern SDL_Renderer *render;
 extern EventManager *event;
+extern int 			i_tick;
 
 Console::Console(SDL_Rect *screen)
 {
@@ -14,11 +17,22 @@ Console::Console(SDL_Rect *screen)
     this->last_log      = 0;
 
 	this->buffer[0].assign("Console init");
+
+	const int64_t time_ms = chrono::duration_cast< chrono::milliseconds >(chrono::system_clock::now().time_since_epoch() ).count();
+	
+	char filename[64];
+	snprintf(filename, 64, "logs/atlantis_%I64d.log", time_ms);
+
+	printf(filename);
+
+	logFile = new ofstream(filename);
 }
 
 Console::~Console()
 {
 
+	logFile->close();
+	delete (logFile);
 }
 
 void Console::log(const char *format, ...)
@@ -42,6 +56,12 @@ void Console::log(log_t type, const char *format, ...)
 	vsnprintf(buff, BUF_LENGTH, format, arglist);
 	va_end(arglist);
 
+	const int64_t time_ms = chrono::duration_cast< chrono::milliseconds >(chrono::system_clock::now().time_since_epoch() ).count();
+	const int hour	= (int) ((time_ms / (1000*60*60)) % 24);
+	const int min	= (int) ((time_ms / (1000*60))    % 60);
+	const int sec	= (int) (time_ms  / 1000)		  % 60 ;
+	const int ms	= time_ms % 1000;
+
 	this->last_msg_time = SDL_GetTicks();
 	SDL_memset(message, 0, BUF_LENGTH);
 	SDL_memset(type_str, 0, 16);
@@ -51,7 +71,8 @@ void Console::log(log_t type, const char *format, ...)
 	if (this->last_log == LOG_LENGHT)
 		this->last_log = 0;
 
-	if (this->last_log == this->first_log) {
+	if (this->last_log == this->first_log)
+	{
 		this->first_log++;
 		if (this->first_log == LOG_LENGHT)
 			this->first_log = 0;
@@ -67,7 +88,8 @@ void Console::log(log_t type, const char *format, ...)
 		default: snprintf(type_str, 16, "???"); break;
 	}
 
-	if (type == EVENT) {
+	if (type == EVENT)
+	{
 		char event_type[32];
 		switch (event->event.type)
 		{
@@ -131,16 +153,18 @@ void Console::log(log_t type, const char *format, ...)
 			default: sprintf(event_type, "Unkonw event"); break;
 		}
 
-		snprintf(message, BUF_LENGTH, "%08d [%s] : %s %s", this->last_msg_time, type_str, event_type, buff);
+		snprintf(message, BUF_LENGTH, "%02d:%02d:%02d:%03d %06d [%s] : %s %s", hour, min, sec, ms, i_tick, type_str, event_type, buff);
 	}
 	else
 	{
-		snprintf(message, BUF_LENGTH, "%08d [%s] : %s", this->last_msg_time, type_str, buff);
+		snprintf(message, BUF_LENGTH, "%02d:%02d:%02d:%03d %06d [%s] : %s", hour, min, sec, ms, i_tick, type_str, buff);
 	}
+
 
 	this->buffer[this->last_log].assign(message);
 
 	cout << this->buffer[this->last_log] << endl;
+	*this->logFile << this->buffer[this->last_log] << endl;
 }
 
 

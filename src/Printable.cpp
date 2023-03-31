@@ -16,6 +16,7 @@ extern EventManager	*event;
 /* static var creation */
 
 bool				Printable::debug = false;
+int 				Printable::tilesize = 64;
 vector<Printable *> Printable::toDebug; 
 SDL_Texture			*Tile::texture[Tile_type::LAST_TTYPE];
 TTF_Font			*Text::fonts[Font_type::LAST_FONT];
@@ -101,6 +102,7 @@ Printable::Printable(SDL_Rect size)
 	this->name.assign(printableName);
 	this->path.assign("");
 
+	/* texture ptr should be set after */
 	this->texture = NULL;
 
 	this->destroy_texture = false;
@@ -109,8 +111,6 @@ Printable::Printable(SDL_Rect size)
 	this->dst_rect.y = size.y;
 	this->dst_rect.w = size.w;
 	this->dst_rect.h = size.h;
-
-	/* texture ptr should be set after */
 }
 
 
@@ -143,7 +143,7 @@ void Printable::setAnimation(int n_frames, int ttl, SDL_Rect size)
 
 	if (ttl == -1)
 	{
-		ttl = (TILESIZE / ENTITYSPEED) / n_frames;
+		ttl = ANIMATION_SPEED / n_frames;
 	}
 
 	this->nb_frames			= n_frames;
@@ -178,12 +178,6 @@ bool Printable::print(SDL_Rect *src, SDL_Rect *dst)
 
 	if (this->animated)
 	{
-/*	Horizontal animated tiles
-		src->x = src_rect.w * this->current_frame;
-		src->y = src_rect.h * this->current_animation;
-*/
-
-/*	Vertical animated tiles */
 		src->x = src_rect.w * this->current_animation;
 		src->y = src_rect.h * this->current_frame;
 
@@ -257,7 +251,7 @@ void Printable::proc_debug(void)
  ************************************************************************************************
  */
 
-Tile::Tile(Tile_params params) : Printable({params.x, params.y, TILESIZE, TILESIZE})
+Tile::Tile(Tile_params params) : Printable({params.x, params.y, Printable::tilesize, Printable::tilesize})
 {
 	this->setPosition(params.x, params.y);
 
@@ -310,8 +304,8 @@ bool Tile::print_onMap(SDL_Point offset)
 	SDL_Rect offsetRect;
 	bool retval;
 
-	offsetRect.x = offset.x + (this->position.x*TILESIZE);
-	offsetRect.y = offset.y + (this->position.y*TILESIZE);
+	offsetRect.x = offset.x + (this->position.x*Printable::tilesize);
+	offsetRect.y = offset.y + (this->position.y*Printable::tilesize);
 	offsetRect.w = this->dst_rect.w;
 	offsetRect.h = this->dst_rect.h;
 
@@ -575,8 +569,8 @@ Entity::Entity(const char *entityName, const char *texturePath) : Printable(enti
 	this->position.x = 0;
 	this->position.y = 0;
 
-	this->positionScreen.x = this->position.x*TILESIZE;
-	this->positionScreen.y = this->position.y*TILESIZE;
+	this->positionScreen.x = 0;
+	this->positionScreen.y = 0;
 	
 	this->src_rect.x = 0;
 	this->src_rect.y = 0;
@@ -585,8 +579,8 @@ Entity::Entity(const char *entityName, const char *texturePath) : Printable(enti
 
 	this->dst_rect.x = this->positionScreen.x;
 	this->dst_rect.y = this->positionScreen.y;
-	this->dst_rect.w = TILESIZE;
-	this->dst_rect.h = TILESIZE;
+	this->dst_rect.w = Printable::tilesize;
+	this->dst_rect.h = Printable::tilesize;
 
 	this->moving = Direction::NONE;
 }
@@ -653,7 +647,7 @@ void Entity::proc(void)
 				break;
 		}
 
-		if ((this->positionScreen.x == this->position.x*TILESIZE) && (this->positionScreen.y == this->position.y*TILESIZE))
+		if ((this->positionScreen.x == this->position.x*Printable::tilesize) && (this->positionScreen.y == this->position.y*Printable::tilesize))
 		{
 			this->moving = Direction::NONE;
 		}
@@ -1124,7 +1118,7 @@ void Player::proc(int *ptr_map)
 				break;
 		}
 
-		if ((this->positionScreen.x == this->position.x*TILESIZE) && (this->positionScreen.y == this->position.y*TILESIZE))
+		if ((this->positionScreen.x == this->position.x*Printable::tilesize) && (this->positionScreen.y == this->position.y*Printable::tilesize))
 		{
 			this->moving = Direction::NONE;
 		}
@@ -1283,7 +1277,7 @@ bool Player::print_onMap(SDL_Point offset)
  ************************************************************************************************
  */
 
-Text::Text(const char *content, Font_type fontype, SDL_Point pos) : Printable((SDL_Rect){pos.x, pos.y, TILESIZE, TILESIZE})
+Text::Text(const char *content, Font_type fontype, SDL_Point pos) : Printable((SDL_Rect){pos.x, pos.y, Printable::tilesize, Printable::tilesize})
 {
 	SDL_Rect	rect;
 	this->text.assign(content);

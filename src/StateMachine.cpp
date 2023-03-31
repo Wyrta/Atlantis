@@ -28,6 +28,8 @@ class Game
 		Map		*map;
 		Player	*player;
 
+		string mapName = "test";
+
 	public:
 
 		Game()
@@ -50,10 +52,10 @@ class Game
 			Text::load_font();
 			NPC::load_history();
 
-			this->map		= new Map("test");
-			NPC::load_all("test");
+			this->map = new Map(mapName);
+			NPC::load_all(mapName);
 
-			this->player	= new Player("player", "img/entity/player2.png");
+			this->player = new Player("player", "img/entity/player2.png");
 			this->player->setAnimation(3, -1, {0, 0, 22, 22});
 
 
@@ -88,11 +90,29 @@ class Game
 			this->player->proc((int *)map);
 
 			this->map->focus(player->getPosition_screen());
+
+			this->print();
+
+			/* Reload game */
+			if (event->getKeyUp(SDL_SCANCODE_F5))
+			{
+				console->log("Reload game");
+				this->unload();
+			}
+		}
+
+		void print(void)
+		{
+			/* Print Map */
 			this->map->print();
 
+			/* Print NPC */
 			NPC::proc_print(map->getPosition());
+			
+			/* Print Player*/
 			this->player->print_onMap(map->getPosition());
 			
+			/* Print Debug */
 			Printable::proc_debug();
 		}
 };
@@ -121,6 +141,10 @@ class Menu
 
 		}
 
+		void print(void)
+		{
+
+		}
 };
 
 Game *gameCnf = NULL;

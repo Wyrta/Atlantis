@@ -13,10 +13,11 @@ SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path);
 SDL_Texture *write(SDL_Rect *rect, TTF_Font *font, const char *text, SDL_Color color);
 TTF_Font	*createFont(const char *path, int size);
 
-#define TILESIZE		64
 #define IGNORE_DELAY	10
 #define ENTITYSPEED		2
 #define DECK_SIZE		6
+
+#define ANIMATION_SPEED	32
 
 #define MAX_DIALOG		64
 #define NPC_MAX_DIALOG	16
@@ -125,7 +126,6 @@ class Printable
 		SDL_Rect	dst_rect;
 
 		bool		animated = false;
-		int			nb_animation;
 		int 		nb_frames;
 		int 		frame_ttl;
 
@@ -133,8 +133,8 @@ class Printable
 		int			current_time;
 		int			current_animation;
 
-		static vector<Printable *>toDebug;
-		bool destroy_texture = true;
+		static vector<Printable *> toDebug;
+		bool 		destroy_texture = true;
 
 	public:
 		Printable(SDL_Rect size);
@@ -155,6 +155,8 @@ class Printable
 		SDL_Rect	getHitbox(void) { return this->texture_rect; }
 		void		setHitbox(void) { SDL_QueryTexture(this->texture, NULL, NULL, &this->texture_rect.w, &this->texture_rect.h); }
 
+		static int 	tilesize;
+
 };
 
 
@@ -171,7 +173,7 @@ class Tile : public Printable
 	public:
 	
 		Tile(Tile_params params);
-		Tile(Tile_type tiletype = EMPTY, SDL_Rect info = {0, 0, TILESIZE, TILESIZE});
+		Tile(Tile_type tiletype = EMPTY, SDL_Rect info = {0, 0, Printable::tilesize , Printable::tilesize });
 		~Tile();
 
 		bool		print_onMap(SDL_Point offset);
@@ -217,7 +219,7 @@ class Entity : public Printable
 
 		SDL_Point		getPosition(void)			{ return this->position; }
 		SDL_Point		getPosition_screen(void)	{ return this->positionScreen; }
-		void 			setPosition(int x, int y)	{ this->position.x = x; this->position.y = y; this->positionScreen.x = x*TILESIZE; this->positionScreen.y = y*TILESIZE;}
+		void 			setPosition(int x, int y)	{ this->position.x = x; this->position.y = y; this->positionScreen.x = x*Printable::tilesize; this->positionScreen.y = y*Printable::tilesize ;}
 		Direction		isMoving(void)				{ return this->moving; }
 		bool			canMove(void)				{ return (this->moving == Direction::NONE); }
 };

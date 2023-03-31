@@ -35,6 +35,8 @@ class Console {
 
 		Uint32 last_msg_time;
         int first_log, last_log;
+
+		ofstream *logFile;
 };
 
 #endif /* _console_hpp_ */

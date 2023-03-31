@@ -1,12 +1,14 @@
 CC=g++
-
 RM=del
+ZIP=7z
+
 
 CFLAGS=-Wall -O
 
-LDFLAGS=-I include -L lib
+LDFLAGS=-I include -L lib lib/libstdc++.a
 
 EXEC=game\Atlantis.exe
+VER=23w13
 
 SRC=$(wildcard src/*.cpp)
 
@@ -18,7 +20,6 @@ $(info Src find : $(SRC))
 $(info Obj find : $(OBJ))
 
 LIB= -lmingw32 \
-	 -static-libstdc++ \
 	 -lSDL2main \
 	 -lSDL2 \
 	 -lSDL2_ttf \
@@ -26,8 +27,11 @@ LIB= -lmingw32 \
 	 -lSDL2_image
 
 
-
 all: cleanAll $(EXEC) clean
+
+zip: $(EXEC) clean
+	-$(RM) $(VER).zip
+	$(ZIP) a -tzip $(VER).zip game/
 
 
 $(EXEC): $(OBJ) $(METADAT)
@@ -35,11 +39,11 @@ $(EXEC): $(OBJ) $(METADAT)
 	$(CC) -o $@ $^ $(LDFLAGS) $(LIB)
 
 %.o: %.cpp
-	$(info Compilation of $@ ...)
+	$(info $@ ...)
 	@$(CC) -o $@ -c $< $(CFLAGS) $(LIB)
 
 %.res : %.rc
-	$(info Compilation of $@ ...)
+	$(info $@ ...)
 	@windres $< -O coff -o $@
 
 clean:
