@@ -16,6 +16,10 @@ typedef struct Mouse_s
 
 	bool left;
 	bool right;
+
+/* > 0 UP 
+< 0 DOWN */
+	int wheel;	
 } Mouse_t;
 
 class EventManager

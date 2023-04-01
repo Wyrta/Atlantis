@@ -19,6 +19,7 @@ extern SDL_Window	*window;
 extern Console      *console;
 extern EventManager	*event;
 extern SDL_Rect     screen;
+extern Mouse_t		mouse;
 
 
 static void bt0_proc(Button *btn);
@@ -98,6 +99,17 @@ class Game
 			{
 				Printable::debug = !Printable::debug;
 				console->log("%s debug", (Printable::debug) ? "Enable" : "Disable");
+			}
+
+			if (mouse.wheel > 0)
+			{
+				// Printable::tilesize++;
+				console->log("Zoom");
+			}
+			else if (mouse.wheel < 0)
+			{
+				// Printable::tilesize--;
+				console->log("deZoom");
 			}
 
 			this->player->proc((int *)map);

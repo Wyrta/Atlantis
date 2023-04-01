@@ -25,6 +25,8 @@ void EventManager::pollEvent(void)
 	
 	bool log = true; 
 
+	mouse.wheel = 0;
+
 	/* store last value of the keyboard */
 	for (int i = 0; i < SDL_Scancode::SDL_NUM_SCANCODES; i++)
 	{
@@ -44,6 +46,7 @@ void EventManager::pollEvent(void)
 				case SDL_WINDOWEVENT: {
 					if (this->event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
 						SDL_GetWindowSize(window, &screen.w, &screen.h);
+					log = false;
 				} break;
 				case SDL_MOUSEMOTION:
 				case SDL_MOUSEBUTTONDOWN:
@@ -52,11 +55,35 @@ void EventManager::pollEvent(void)
 					Uint32 mask = SDL_GetMouseState(&mouse.x, &mouse.y);
 					mouse.left  = (mask & SDL_BUTTON_LMASK);
 					mouse.right = (mask & SDL_BUTTON_RMASK);
+					log = false;
 				} break;
-				case SDL_MOUSEWHEEL:		break;
+				case SDL_MOUSEWHEEL:
+				{
+					if(event.wheel.y > 0) // scroll up
+					{
+						// console->log("Wheel UP");	// Put code for handling "scroll up" here!
+						mouse.wheel++;
+					}
+					else if(event.wheel.y < 0) // scroll down
+					{
+						// console->log("Wheel DOWN");	// Put code for handling "scroll down" here!
+						mouse.wheel--;
+					}
+
+					if(event.wheel.x > 0) // scroll right
+					{
+						console->log("Wheel RIGHT");	// ...
+					}
+					else if(event.wheel.x < 0) // scroll left
+					{
+						console->log("Wheel LEFT");	// ...
+					}
+					log = false;
+				}break;
 				case SDL_KEYDOWN: {
 					if (this->getKeySC(SDL_SCANCODE_ESCAPE))	/* ESCAPE */
 						*this->appState = EXIT;
+					log = false;
 				} break;
 				case SDL_KEYUP: {
 
@@ -66,7 +93,7 @@ void EventManager::pollEvent(void)
 				default: log = false; break;
 			}
 
-			log = false;	/* dont need to log */
+				/* dont need to log */
 
 
 			if (log)
