@@ -24,6 +24,7 @@ TTF_Font	*createFont(const char *path, int size);
 
 #define MAX_NPC			64
 #define MAX_ENTITY		(MAX_NPC+1)
+#define MAX_BUTTON		32
 
 typedef enum {
 	NORTH,
@@ -69,6 +70,13 @@ typedef enum {
 	DUNO,
 	LAST_FONT		/* Dont use */
 } Font_type;
+
+
+typedef enum {
+	TXT,
+	IMG,
+	NON
+} Button_type;
 
 
 typedef struct {
@@ -122,6 +130,9 @@ class Printable
 		std::string	name = "";
 		std::string	path = "";
 
+		SDL_Point position;
+		SDL_Point positionTile;
+
 		SDL_Rect	src_rect;
 		SDL_Rect	dst_rect;
 
@@ -149,7 +160,9 @@ class Printable
 
 		bool		print(void);
 		bool		print(SDL_Rect *src_rect, SDL_Rect *dst_rect);
+		bool		print(SDL_Point pos);
 		virtual void print_debug(void);
+		virtual void print_onMap(SDL_Point offset);
 
 		void		setTexture(const char *filepath);
 		void		setTexture(SDL_Texture *ptr_texture);
@@ -169,20 +182,18 @@ class Tile : public Printable
 		Tile_type type;
 		Direction walkable;
 
-		SDL_Point position;
-
 	public:
 	
 		Tile(Tile_params params);
 		Tile(Tile_type tiletype = EMPTY, SDL_Rect info = {0, 0, Printable::tilesize , Printable::tilesize });
 		~Tile();
 
-		bool		print_onMap(SDL_Point offset);
+		void		print_onMap(SDL_Point offset);
 		void		print_debug(void);
 
 		void		setPosition(int x, int y);
 
-		SDL_Point	getPosition(void)	{ return (this->position); }
+		SDL_Point	getPosition(void)	{ return (this->positionTile); }
 		Direction	getWalkable(void) 	{ return (this->walkable); }
 
 		static Tile_type getTiletype(string str);
@@ -198,8 +209,6 @@ class Entity : public Printable
 	private:
 
 	protected:
-		SDL_Point	position;
-		SDL_Point 	positionScreen;
 		Direction	moving;
 		Direction	orientation;
 
@@ -207,7 +216,7 @@ class Entity : public Printable
 		Entity(const char *entityName, const char *texturePath);
 		~Entity();
 
-		bool			print_onMap(SDL_Point offset);
+		void			print_onMap(SDL_Point offset);
 		void			print_debug(void);
 
 		virtual void	proc(void);
@@ -218,9 +227,9 @@ class Entity : public Printable
 
 		void			move(Direction direction, Tile *tile);
 
-		SDL_Point		getPosition(void)			{ return this->position; }
-		SDL_Point		getPosition_screen(void)	{ return this->positionScreen; }
-		void 			setPosition(int x, int y)	{ this->position.x = x; this->position.y = y; this->positionScreen.x = x*Printable::tilesize; this->positionScreen.y = y*Printable::tilesize ;}
+		SDL_Point		getPosition(void)			{ return this->positionTile; }
+		SDL_Point		getPosition_screen(void)	{ return this->position; }
+		void 			setPosition(int x, int y)	{ this->positionTile.x = x; this->positionTile.y = y; this->position.x = x*Printable::tilesize; this->position.y = y*Printable::tilesize ;}
 		Direction		isMoving(void)				{ return this->moving; }
 		bool			canMove(void)				{ return (this->moving == Direction::NONE); }
 };
@@ -252,12 +261,11 @@ class NPC : public Entity
 		NPC(const char *entityName, const char *texturePath);
 		~NPC();
 
-		int			i_npc = -1;
-
 		static void	proc_print(SDL_Point offset);
 		
-		static NPC	*getNPC(SDL_Point pos);
+		int			i_npc = -1;
 		static NPC	*allNPC[MAX_NPC];
+		static NPC	*getNPC(SDL_Point pos);
 
 		void		addDialog(int dialog);
 		bool		hasDialog(int hist);
@@ -287,7 +295,7 @@ class Player : public Entity
 		~Player();
 
 		virtual void proc(int *ptr_map);
-		virtual bool print_onMap(SDL_Point offset);
+		void 		 print_onMap(SDL_Point offset);
 
 };
 
@@ -297,7 +305,6 @@ class Text : public Printable
 	private:
 		string		text;
 		Font_type	type;
-		SDL_Point	position;
 
 		static TTF_Font *fonts[Font_type::LAST_FONT];
 
@@ -305,12 +312,54 @@ class Text : public Printable
 		Text(const char *content, Font_type fontype, SDL_Point pos = {0, 0});
 		~Text();
 		
-		bool		print_onMap(SDL_Point offset = {0, 0});
+		void 		print_onMap(SDL_Point offset = {0, 0});
+
+		void 		setPosition(int x, int y)	{ this->position.x = x; this->position.y = y; }
+		void 		setPosition(SDL_Point pos) { this->position = pos; }
 
 		string 		getText(void) { return (text); }
 
 		static void load_font(void);
 		static void unload_font(void);
+};
+
+
+class Button : public Printable
+{
+	private:
+		Text 	*text;
+
+		bool 	clicked;
+		bool 	hovered;
+
+		SDL_Rect  hitboxMap;
+
+		Button_type type;
+		SDL_Color   colorNormal;
+		SDL_Color   colorHovered;
+		SDL_Color   colorClicked;
+
+		void run_onClick(void) { if (this->onClick_func != NULL) this->onClick_func(this); }
+
+	public:
+		Button(SDL_Rect hitbox, Button_type type, string content = "");
+		~Button();
+
+		void	(*onClick_func)(Button *obj);	/* void onClick(Button *obj) */
+
+		void	setColor_Normal(SDL_Color color)  { this->colorNormal  = color; }
+		void	setColor_Hovered(SDL_Color color) { this->colorHovered = color; }
+		void	setColor_Clicked(SDL_Color color) { this->colorClicked = color; }
+
+		bool	fixed;	/* is sticked to the map */
+		int		margin;
+		void	print_onMap(SDL_Point offset = {0, 0});
+
+		int				i_btn = -1;
+		static Button	*allButton[MAX_BUTTON];
+		static void		procAll(void);
+		static void		printAll(SDL_Point offset);
+
 };
 
 

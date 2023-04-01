@@ -45,16 +45,10 @@ void EventManager::pollEvent(void)
 					if (this->event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
 						SDL_GetWindowSize(window, &screen.w, &screen.h);
 				} break;
-				case SDL_MOUSEMOTION: {
-					SDL_GetMouseState(&mouse.x, &mouse.y);
-					log = false;	/* dont need to log this on */
-				} break;
-				case SDL_MOUSEBUTTONDOWN: {
-					Uint32 mask = SDL_GetMouseState(&mouse.x, &mouse.y);
-					mouse.left  = (mask & SDL_BUTTON_LMASK);
-					mouse.right = (mask & SDL_BUTTON_RMASK);
-				} break;
-				case SDL_MOUSEBUTTONUP: {
+				case SDL_MOUSEMOTION:
+				case SDL_MOUSEBUTTONDOWN:
+				case SDL_MOUSEBUTTONUP:
+				{
 					Uint32 mask = SDL_GetMouseState(&mouse.x, &mouse.y);
 					mouse.left  = (mask & SDL_BUTTON_LMASK);
 					mouse.right = (mask & SDL_BUTTON_RMASK);
@@ -63,7 +57,6 @@ void EventManager::pollEvent(void)
 				case SDL_KEYDOWN: {
 					if (this->getKeySC(SDL_SCANCODE_ESCAPE))	/* ESCAPE */
 						*this->appState = EXIT;
-					log = false;
 				} break;
 				case SDL_KEYUP: {
 
@@ -72,6 +65,9 @@ void EventManager::pollEvent(void)
 
 				default: log = false; break;
 			}
+
+			log = false;	/* dont need to log */
+
 
 			if (log)
 			{

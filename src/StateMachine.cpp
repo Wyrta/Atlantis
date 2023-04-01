@@ -20,6 +20,10 @@ extern Console      *console;
 extern EventManager	*event;
 extern SDL_Rect     screen;
 
+
+static void bt0_proc(Button *btn);
+
+
 class Game
 {
 	private:
@@ -29,6 +33,8 @@ class Game
 		Player	*player;
 
 		string mapName = "test";
+
+		Button *btn;
 
 	public:
 
@@ -58,6 +64,10 @@ class Game
 			this->player = new Player("player", "img/entity/player2.png");
 			this->player->setAnimation(3, -1, {0, 0, 22, 22});
 
+			this->btn = new Button({screen.w - 110, screen.h - 110, 100, 100}, Button_type::TXT, "Bouton");
+
+
+			this->btn->onClick_func = bt0_proc;
 
 			this->loaded = true;
 		}
@@ -66,6 +76,7 @@ class Game
 		{
 			delete (this->map);
 			delete (this->player);
+			delete (this->btn);
 
 			NPC::unload_all();
 			Tile::unload_all_texture();
@@ -73,6 +84,8 @@ class Game
 			
 			this->map		= NULL;
 			this->player	= NULL;
+			this->btn		= NULL;
+
 			this->loaded	= false;
 		}
 
@@ -91,6 +104,8 @@ class Game
 
 			this->map->focus(player->getPosition_screen());
 
+			Button::procAll();
+
 			this->print();
 
 			/* Reload game */
@@ -103,14 +118,17 @@ class Game
 
 		void print(void)
 		{
+			SDL_Point mapPos = map->getPosition();
 			/* Print Map */
 			this->map->print();
 
 			/* Print NPC */
-			NPC::proc_print(map->getPosition());
+			NPC::proc_print(mapPos);
 			
 			/* Print Player*/
-			this->player->print_onMap(map->getPosition());
+			this->player->print_onMap(mapPos);
+
+			Button::printAll(mapPos);
 			
 			/* Print Debug */
 			Printable::proc_debug();
@@ -120,6 +138,12 @@ class Game
 class Menu
 {
 	private:
+	/*
+	gui_item
+		-button
+		-text
+		-dfgdfgdsfg
+	*/ 
 	public:
 		Menu()
 		{
@@ -269,4 +293,10 @@ int game(State *state)
 	gameCnf->proc(state);
 
     return (0);
+}
+
+
+void bt0_proc(Button *btn)
+{
+	console->log("Button %d cliked !!! ", btn->i_btn);
 }

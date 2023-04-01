@@ -24,6 +24,7 @@ TTF_Font			*Text::fonts[Font_type::LAST_FONT];
 NPC					*NPC::allNPC[MAX_NPC];
 Entity				*Entity::allEntity[MAX_ENTITY];
 string 				NPC::history[MAX_DIALOG];
+Button				*Button::allButton[MAX_BUTTON];
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -165,6 +166,17 @@ bool Printable::print()
 	return (this->print(&this->src_rect, &this->dst_rect));
 }
 
+bool Printable::print(SDL_Point pos)
+{
+	SDL_Rect dest;
+		dest.x = pos.x;
+		dest.y = pos.y;
+		dest.w = this->dst_rect.w;
+		dest.h = this->dst_rect.h;
+
+	return (this->print(NULL, &dest));
+}
+
 
 bool Printable::print(SDL_Rect *src, SDL_Rect *dst)
 {
@@ -215,7 +227,8 @@ void Printable::print_debug(void)
 
 void Printable::setTexture(const char *filepath)
 {
-	console->log("void Printable::setTexture(const char *filepath) > marche pas encore");
+	this->texture = createTexture(&this->texture_rect, filepath);
+	this->destroy_texture = true;
 }
 
 
@@ -242,6 +255,18 @@ void Printable::proc_debug(void)
 	}
 	Printable::toDebug.clear();
 	Printable::stack_debug = 0;
+}
+
+void Printable::print_onMap(SDL_Point offset)
+{
+	SDL_Rect offsetRect;
+
+	offsetRect.x = offset.x + this->dst_rect.x;
+	offsetRect.y = offset.y + this->dst_rect.y;
+	offsetRect.w = this->dst_rect.w;
+	offsetRect.h = this->dst_rect.h;
+
+	this->print(&this->texture_rect, &offsetRect);
 }
 
 
@@ -272,8 +297,11 @@ Tile::Tile(Tile_params params) : Printable({params.x, params.y, Printable::tiles
 
 Tile::Tile(Tile_type tiletype, SDL_Rect info) : Printable(info)
 {
-	this->position.x = info.x;
-	this->position.y = info.y;
+	this->positionTile.x = info.x;
+	this->positionTile.y = info.y;
+
+	this->position.x = this->positionTile.x * Printable::tilesize;
+	this->position.y = this->positionTile.y * Printable::tilesize;
 
 	this->type = tiletype;
 
@@ -295,22 +323,24 @@ Tile::~Tile()
 
 void Tile::setPosition(int x, int y)
 {
-	this->position.x = x;
-	this->position.y = y;
+	this->positionTile.x = x;
+	this->positionTile.y = y;
+
+	this->position.x = this->positionTile.x * Printable::tilesize;
+	this->position.y = this->positionTile.y * Printable::tilesize;
 }
 
 
-bool Tile::print_onMap(SDL_Point offset)
+void Tile::print_onMap(SDL_Point offset)
 {
 	SDL_Rect offsetRect;
-	bool retval;
 
-	offsetRect.x = offset.x + (this->position.x*Printable::tilesize);
-	offsetRect.y = offset.y + (this->position.y*Printable::tilesize);
+	offsetRect.x = offset.x + this->position.x;
+	offsetRect.y = offset.y + this->position.y;
 	offsetRect.w = this->dst_rect.w;
 	offsetRect.h = this->dst_rect.h;
 
-	retval = this->print(NULL, &offsetRect);
+	this->print(NULL, &offsetRect);
 
 	if ((mouse.x < (offsetRect.x + offsetRect.w)) & (mouse.x > offsetRect.x))
 	{
@@ -330,7 +360,6 @@ bool Tile::print_onMap(SDL_Point offset)
 		}
 	}
 
-	return (retval);
 }
 
 
@@ -344,7 +373,7 @@ void Tile::print_debug(void)
 
 	int lenght = 0;
 
-	sprintf(posbuffer, "[Pos]: %2d %2d", this->position.x, this->position.y);
+	sprintf(posbuffer, "[Pos]: %2d %2d", this->positionTile.x, this->positionTile.y);
 
 	switch (this->type)
 	{
@@ -569,19 +598,19 @@ Entity::Entity(const char *entityName, const char *texturePath) : Printable(enti
 		}
 	}
 
+	this->positionTile.x = 0;
+	this->positionTile.y = 0;
+
 	this->position.x = 0;
 	this->position.y = 0;
-
-	this->positionScreen.x = 0;
-	this->positionScreen.y = 0;
 	
 	this->src_rect.x = 0;
 	this->src_rect.y = 0;
 	this->src_rect.w = this->getHitbox().w;
 	this->src_rect.h = this->getHitbox().h;
 
-	this->dst_rect.x = this->positionScreen.x;
-	this->dst_rect.y = this->positionScreen.y;
+	this->dst_rect.x = this->position.x;
+	this->dst_rect.y = this->position.y;
 	this->dst_rect.w = Printable::tilesize;
 	this->dst_rect.h = Printable::tilesize;
 
@@ -605,16 +634,16 @@ void Entity::move(Direction direction, Tile *tile)
 		switch (direction)
 		{
 			case Direction::NORTH:
-				this->position.y -= 1;
+				this->positionTile.y -= 1;
 				break;
 			case Direction::SOUTH: 
-				this->position.y += 1;
+				this->positionTile.y += 1;
 				break;
 			case Direction::WEST:  
-				this->position.x -= 1;
+				this->positionTile.x -= 1;
 				break;
 			case Direction::EAST:  
-				this->position.x += 1;
+				this->positionTile.x += 1;
 				break;
 
 			default:
@@ -634,38 +663,37 @@ void Entity::proc(void)
 		switch (this->moving)
 		{
 			case Direction::NORTH: 
-				this->positionScreen.y -= ENTITYSPEED;
+				this->position.y -= ENTITYSPEED;
 				break;
 			case Direction::SOUTH: 
-				this->positionScreen.y += ENTITYSPEED;
+				this->position.y += ENTITYSPEED;
 				break;
 			case Direction::WEST:  
-				this->positionScreen.x -= ENTITYSPEED;
+				this->position.x -= ENTITYSPEED;
 				break;
 			case Direction::EAST:  
-				this->positionScreen.x += ENTITYSPEED;
+				this->position.x += ENTITYSPEED;
 				break;
 
 			default:
 				break;
 		}
 
-		if ((this->positionScreen.x == this->position.x*Printable::tilesize) && (this->positionScreen.y == this->position.y*Printable::tilesize))
+		if ((this->position.x == (this->positionTile.x*Printable::tilesize)) && (this->position.y == (this->positionTile.y*Printable::tilesize)))
 		{
 			this->moving = Direction::NONE;
 		}
-
 	}
 
 	/* TODO EMBUSH, DIALOG*/
 }
 
 
-bool Entity::print_onMap(SDL_Point offset)
+void Entity::print_onMap(SDL_Point offset)
 {
 	SDL_Rect offsetRect;
-	offsetRect.x = offset.x + this->positionScreen.x;
-	offsetRect.y = offset.y + this->positionScreen.y;
+	offsetRect.x = offset.x + this->position.x;
+	offsetRect.y = offset.y + this->position.y;
 	offsetRect.w = this->dst_rect.w;
 	offsetRect.h = this->dst_rect.h;
 
@@ -708,8 +736,7 @@ bool Entity::print_onMap(SDL_Point offset)
 		}
 	}
 
-
-	return (this->print(&this->src_rect, &offsetRect));
+	this->print(&this->src_rect, &offsetRect);
 }
 
 
@@ -723,7 +750,7 @@ void Entity::print_debug(void)
 
 	int lenght = 0;
 
-	sprintf(posbuffer, "[Pos]: %2d %2d", this->position.x, this->position.y);
+	sprintf(posbuffer, "[Pos]: %2d %2d", this->positionTile.x, this->positionTile.y);
 	sprintf(typbuffer, "[Type]: %s", this->name.c_str());
 	
 
@@ -1095,7 +1122,7 @@ void Player::proc(int *ptr_map)
 	/* deplacement proc */
 	if (this->canMove() && !this->inDialog)
 	{
-		SDL_Point futurePos = this->position;
+		SDL_Point futurePos = this->positionTile;
 
 		if (event->getKeyK(SDLK_z) )
 		{
@@ -1173,23 +1200,23 @@ void Player::proc(int *ptr_map)
 		switch (this->moving)
 		{
 			case Direction::NORTH: 
-				this->positionScreen.y -= ENTITYSPEED;
+				this->position.y -= ENTITYSPEED;
 				break;
 			case Direction::SOUTH: 
-				this->positionScreen.y += ENTITYSPEED;
+				this->position.y += ENTITYSPEED;
 				break;
 			case Direction::WEST:  
-				this->positionScreen.x -= ENTITYSPEED;
+				this->position.x -= ENTITYSPEED;
 				break;
 			case Direction::EAST:  
-				this->positionScreen.x += ENTITYSPEED;
+				this->position.x += ENTITYSPEED;
 				break;
 
 			default:
 				break;
 		}
 
-		if ((this->positionScreen.x == this->position.x*Printable::tilesize) && (this->positionScreen.y == this->position.y*Printable::tilesize))
+		if ((this->position.x == this->positionTile.x*Printable::tilesize) && (this->position.y == this->positionTile.y*Printable::tilesize))
 		{
 			this->moving = Direction::NONE;
 		}
@@ -1198,7 +1225,7 @@ void Player::proc(int *ptr_map)
 	/* dialog proc */		
 	if (event->getKeyUp(SDL_GetScancodeFromKey(SDLK_e)) )
 	{
-		SDL_Point	talkingPos = this->position;
+		SDL_Point	talkingPos = this->positionTile;
 		NPC			*npcTarget;
 		
 		switch (this->orientation)
@@ -1275,11 +1302,11 @@ void Player::proc(int *ptr_map)
 }
 
 
-bool Player::print_onMap(SDL_Point offset)
+void Player::print_onMap(SDL_Point offset)
 {
 	SDL_Rect offsetRect;
-	offsetRect.x = offset.x + this->positionScreen.x;
-	offsetRect.y = offset.y + this->positionScreen.y;
+	offsetRect.x = offset.x + this->position.x;
+	offsetRect.y = offset.y + this->position.y;
 	offsetRect.w = this->dst_rect.w;
 	offsetRect.h = this->dst_rect.h;
 
@@ -1353,7 +1380,7 @@ bool Player::print_onMap(SDL_Point offset)
 		}
 	}
 
-	return (this->print(&this->src_rect, &offsetRect));
+	this->print(&this->src_rect, &offsetRect);
 }
 
 
@@ -1391,16 +1418,19 @@ Text::~Text()
 }
 
 
-bool Text::print_onMap(SDL_Point offset)
+void Text::print_onMap(SDL_Point offset)
 {
 	SDL_Rect offsetRect;
 
-	offsetRect.x = dst_rect.x + offset.x;
-	offsetRect.y = dst_rect.y + offset.y;
+	this->position.x = this->dst_rect.x;
+	this->position.y = this->dst_rect.y;
+
+	offsetRect.x = this->position.x + offset.x;
+	offsetRect.y = this->position.y + offset.y;
 	offsetRect.w = this->dst_rect.w;
 	offsetRect.h = this->dst_rect.h;
 
-	return (this->print(NULL, &offsetRect));
+	this->print(NULL, &offsetRect);
 }
 
 
@@ -1424,3 +1454,196 @@ void Text::unload_font(void)
 	}
 }
 
+
+
+
+/*
+ ************************************************************************************************
+ *		Button class																			*
+ *																								*
+ ************************************************************************************************
+ */
+
+Button::Button(SDL_Rect hitbox, Button_type typ, string content) : Printable(hitbox)
+{
+	for (int i = 0; i < MAX_BUTTON; i++)
+	{
+		if (Button::allButton[i] == NULL)
+		{
+			this->i_btn			 = i;
+			Button::allButton[i] = this;
+			break;
+		}
+	}
+	
+	this->clicked		= false;
+	this->fixed			= false;
+	this->type			= typ;
+
+	this->position.x	= hitbox.x;
+	this->position.y	= hitbox.y;
+	this->dst_rect.w	= hitbox.w;
+	this->dst_rect.h	= hitbox.h;
+
+	this->margin		= 5;
+
+	this->colorNormal	= { 0x4F, 0x4F, 0x4F, SDL_ALPHA_OPAQUE};
+	this->colorHovered	= { 0x80, 0x80, 0x80, SDL_ALPHA_OPAQUE};
+	this->colorClicked	= { 0xDF, 0xDF, 0xDF, SDL_ALPHA_OPAQUE};
+
+	if (content == "")
+	{
+		this->type = Button_type::NON;
+	}
+
+	switch (this->type)
+	{
+		case Button_type::TXT:
+			this->text = new Text(content.c_str(), Font_type::AVARA);
+			this->text->setPosition(
+				this->position.x + ((hitbox.w - this->text->getHitbox().w) / 2),
+				this->position.y + ((hitbox.h - this->text->getHitbox().h) / 2)
+			);
+			break;
+
+		case Button_type::IMG:
+			this->setTexture(content.c_str());
+			break;
+
+		case Button_type::NON:
+			break;
+	
+	default: break;
+	}
+
+	this->onClick_func = NULL;
+}
+
+Button::~Button()
+{
+	Button::allButton[this->i_btn] = NULL;
+
+	delete (this->text);
+}
+
+void Button::print_onMap(SDL_Point offset)
+{
+	if (this->fixed)
+	{
+		this->hitboxMap.x = this->position.x + offset.x;
+		this->hitboxMap.y = this->position.y + offset.y;
+	}
+	else
+	{
+		this->hitboxMap.x = this->position.x;
+		this->hitboxMap.y = this->position.y;
+	}
+	this->hitboxMap.w = this->dst_rect.w;
+	this->hitboxMap.h = this->dst_rect.h;
+
+	if (this->hovered)
+	{
+		if (this->clicked)
+			SDL_SetRenderDrawColor(render, this->colorClicked.r, this->colorClicked.g, this->colorClicked.b, this->colorClicked.a);
+		else
+			SDL_SetRenderDrawColor(render, this->colorHovered.r, this->colorHovered.g, this->colorHovered.b, this->colorHovered.a);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(render, this->colorNormal.r, this->colorNormal.g, this->colorNormal.b, this->colorNormal.a);
+	}
+
+	switch (this->type)
+	{
+		case Button_type::TXT:
+			SDL_RenderFillRect(render, &this->hitboxMap);
+			this->text->print({ this->position.x + margin, this->position.y + margin});
+			break;
+
+		case Button_type::IMG:
+			this->print(NULL, &this->hitboxMap);
+			break;
+
+		case Button_type::NON:
+			SDL_RenderFillRect(render, &this->hitboxMap);
+			break;
+	
+		default: 
+			SDL_RenderFillRect(render, &this->hitboxMap); 
+			break;
+	}
+
+}
+
+
+void Button::procAll(void)
+{
+	Button *procBtn = NULL;
+
+	for (int i = 0; i < MAX_BUTTON; i++)
+	{
+		if (Button::allButton[i] != NULL)
+		{
+			procBtn = Button::allButton[i];
+
+			procBtn->hovered = false;
+			if ((mouse.x < (procBtn->hitboxMap.x + procBtn->hitboxMap.w)) & (mouse.x > procBtn->hitboxMap.x))
+			{
+				if ((mouse.y < (procBtn->hitboxMap.y + procBtn->hitboxMap.h)) & (mouse.y > procBtn->hitboxMap.y))
+				{
+					procBtn->hovered = true;
+
+					/* if newly clicked */
+					if (mouse.left && !procBtn->clicked)
+						procBtn->run_onClick();
+
+					if (mouse.left)
+						procBtn->clicked = true;
+					else
+						procBtn->clicked = false;
+				}
+			}
+
+			switch (procBtn->type)
+			{
+				case Button_type::TXT:
+					procBtn->text->setPosition(
+						procBtn->position.x + ((procBtn->hitboxMap.w - procBtn->text->getHitbox().w) / 2),
+						procBtn->position.y + ((procBtn->hitboxMap.h - procBtn->text->getHitbox().h) / 2)
+					);
+					break;
+
+				case Button_type::IMG:
+					procBtn->dst_rect.x = procBtn->position.x;
+					procBtn->dst_rect.y = procBtn->position.y;
+					procBtn->dst_rect.w = procBtn->getHitbox().w;
+					procBtn->dst_rect.h = procBtn->getHitbox().h;
+					break;
+
+				case Button_type::NON:
+					/* dunno */
+					break;
+			
+				default: 
+					break;
+			}
+
+		}
+	}
+}
+
+
+void Button::printAll(SDL_Point offset)
+{
+	Button *procBtn = NULL;
+
+	for (int i = 0; i < MAX_BUTTON; i++)
+	{
+		if (Button::allButton[i] != NULL)
+		{
+			procBtn = Button::allButton[i];
+
+			procBtn->print_onMap(offset);
+		}
+	}
+}

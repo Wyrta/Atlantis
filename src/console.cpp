@@ -11,7 +11,6 @@ extern int 			i_tick;
 
 Console::Console(SDL_Rect *screen)
 {
-
 	this->last_msg_time = SDL_GetTicks();
     this->first_log     = 0;
     this->last_log      = 0;
@@ -23,14 +22,11 @@ Console::Console(SDL_Rect *screen)
 	char filename[64];
 	snprintf(filename, 64, "logs/atlantis_%I64d.log", time_ms);
 
-	printf(filename);
-
 	logFile = new ofstream(filename);
 }
 
 Console::~Console()
 {
-
 	logFile->close();
 	delete (logFile);
 }
