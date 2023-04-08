@@ -13,18 +13,20 @@ SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path);
 SDL_Texture *write(SDL_Rect *rect, TTF_Font *font, const char *text, SDL_Color color);
 TTF_Font	*createFont(const char *path, int size);
 
-#define IGNORE_DELAY	10
-#define ENTITYSPEED		2
-#define DECK_SIZE		6
+#define IGNORE_DELAY		10
+#define ENTITYSPEED			2
+#define DECK_SIZE			6
 
-#define ANIMATION_SPEED	32
+#define ANIMATION_SPEED		32
 
-#define MAX_DIALOG		64
-#define NPC_MAX_DIALOG	16
+#define MAX_DIALOG			64
+#define NPC_MAX_DIALOG		16
 
-#define MAX_NPC			64
-#define MAX_ENTITY		(MAX_NPC+1)
-#define MAX_BUTTON		32
+#define MAX_NPC				64
+#define MAX_ENTITY			(MAX_NPC+1)
+#define MAX_BUTTON			32
+#define MAX_ENTITY_FIGHT	4
+#define MAX_SPELL			4
 
 typedef enum {
 	NORTH,
@@ -100,6 +102,38 @@ typedef enum {
 } Waifu_type;
 
 
+
+typedef enum {
+	choose,
+	choose_waifu,
+	choose_atk,
+	choose_item,
+	animate_atk
+} Fight_status;
+
+
+typedef enum {
+	typPLAYER,
+	typNPC,
+	typWAIFU
+} Fighter_type;
+
+typedef enum {
+	BALL_FIRE,
+	BALL_AIR,
+	BALL_WATER,
+	BALL_EARTH,
+} Spell_type;
+
+
+typedef enum {
+	FIRE,
+	AIR,
+	WATER,
+	EARTH,
+} Element_type;
+
+
 typedef struct {
 	char name[64];
 	char texture_path[512];
@@ -127,8 +161,8 @@ class Printable
 		SDL_Rect	texture_rect;
 
 	protected:
-		std::string	name = "";
-		std::string	path = "";
+		string	name = "";
+		string	path = "";
 
 		SDL_Point position;
 		SDL_Point positionTile;
@@ -169,6 +203,8 @@ class Printable
 		SDL_Rect	getHitbox(void) { return this->texture_rect; }
 		void		setHitbox(void) { SDL_QueryTexture(this->texture, NULL, NULL, &this->texture_rect.w, &this->texture_rect.h); }
 
+		string		getName() { return (name); }
+
 		static int 	tilesize;
 
 };
@@ -204,9 +240,48 @@ class Tile : public Printable
 };
 
 
+class Spell
+{
+	private:
+		int power;
+		int accuracy;
+		int speed;
+		string name;
+		Element_type type;
+	public:
+		Spell(Spell_type spelltype);
+		~Spell();
+
+		int getPower(void)		{ return (this->power); 	}
+		int getAccuracy(void)	{ return (this->accuracy); 	}
+		string getName(void)	{ return (this->name); 		}
+
+};
+
+class Waifu : public Printable
+{
+	private:
+		int pv;
+		int atk;
+		int def;
+		int atk_spd;
+
+		Spell *spell[MAX_SPELL];
+
+		string name;
+
+	public:
+		Waifu(Waifu_params params);
+		~Waifu();
+
+		string getName(void)	{ return (this->name); }
+};
+
+
 class Entity : public Printable
 {
 	private:
+		Waifu			*deck[DECK_SIZE];
 
 	protected:
 		Direction	moving;
@@ -224,7 +299,6 @@ class Entity : public Printable
 		static Entity	*allEntity[MAX_ENTITY];
 		int				i_ent;
 
-
 		void			move(Direction direction, Tile *tile);
 
 		SDL_Point		getPosition(void)			{ return this->positionTile; }
@@ -232,19 +306,11 @@ class Entity : public Printable
 		void 			setPosition(int x, int y)	{ this->positionTile.x = x; this->positionTile.y = y; this->position.x = x*Printable::tilesize; this->position.y = y*Printable::tilesize ;}
 		Direction		isMoving(void)				{ return this->moving; }
 		bool			canMove(void)				{ return (this->moving == Direction::NONE); }
-};
 
+		Waifu			*getWaifu(int index);
+		bool 			addWaifu(Waifu *waifu);
+		virtual Waifu  *chooseWaifu(void);
 
-class Waifu : public Entity
-{
-	private:
-		int pv;
-		int atk;
-		int def;
-		int atk_spd;
-	public:
-		Waifu(Waifu_params params);
-		~Waifu();
 };
 
 
@@ -271,6 +337,8 @@ class NPC : public Entity
 		bool		hasDialog(int hist);
 		const string  rdmDialogs[3] = {"Bonjour", "Enchanter monsieur", "Il fait beau dehord vous ne trouvez pas ?"};
 
+		Waifu		 *chooseWaifu(void);
+
 		static void	  load_history(void);
 		static string history[MAX_DIALOG];
 
@@ -282,7 +350,6 @@ class NPC : public Entity
 class Player : public Entity
 {
 	private:
-		Waifu			*deck[DECK_SIZE];
 		unsigned int	i_dglChar;
 
 		NPC				*dialogTarget;
@@ -297,6 +364,7 @@ class Player : public Entity
 		virtual void proc(int *ptr_map);
 		void 		 print_onMap(SDL_Point offset);
 
+		Waifu		 *chooseWaifu(void);
 };
 
 
@@ -339,13 +407,14 @@ class Button : public Printable
 		SDL_Color   colorHovered;
 		SDL_Color   colorClicked;
 
-		void run_onClick(void) { if (this->onClick_func != NULL) this->onClick_func(this); }
+		void run_onClick(void) { if (this->onClick_func != NULL) this->onClick_func(this, onClick_arg); }
 
 	public:
 		Button(SDL_Rect hitbox, Button_type type, string content = "");
 		~Button();
 
-		void	(*onClick_func)(Button *obj);	/* void onClick(Button *obj) */
+		void	(*onClick_func)(Button *obj, void *arg);	/* void onClick(Button *obj, void *arg) */
+		void 	*onClick_arg = NULL;
 
 		void	setColor_Normal(SDL_Color color)  { this->colorNormal  = color; }
 		void	setColor_Hovered(SDL_Color color) { this->colorHovered = color; }
@@ -354,6 +423,8 @@ class Button : public Printable
 		bool	fixed;	/* is sticked to the map */
 		int		margin;
 		void	print_onMap(SDL_Point offset = {0, 0});
+		void	print(void);
+		void	proc(void);
 
 		int				i_btn = -1;
 		static Button	*allButton[MAX_BUTTON];
@@ -362,6 +433,64 @@ class Button : public Printable
 
 };
 
+
+class Fighter
+{
+	private:
+		Fighter_type type;
+
+		Player *player;
+		Waifu  *waifu;
+		NPC    *npc;
+
+		Waifu  *onFieldWaifu;
+	public:
+		Fighter(Player *ptr_player);
+		Fighter(Waifu  *ptr_waifu);
+		Fighter(NPC    *ptr_npc);
+		~Fighter();
+
+		Fighter_type getType(void) { return (this->type); }
+		void  *getPtr(void);
+
+		Waifu *getWaifu(void);
+		Spell *getAttack(void);
+};
+
+
+class Fight
+{
+	private:
+		Fighter *fighters[MAX_ENTITY_FIGHT];
+
+		Button *btn_fight;
+		Button *btn_bag;
+		Button *btn_waifu;
+		Button *btn_run;
+
+		Button *playerChooseWaifu[DECK_SIZE];
+
+		bool fight;
+		Fight_status status;
+
+	public:
+		Fight();
+		~Fight();
+
+		bool 			add(Player	*player);
+		bool 			add(NPC		*NPC);
+		bool 			add(Waifu	*waifu);
+		void 			clear(void);
+
+		bool 			isFighting(void) 			 { return (this->fight); }
+		void 			setFight(bool value = true)	 { this->fight = value; this->status = Fight_status::choose;  }
+
+		void			setStatus(Fight_status stat) { this->status = stat;   }
+		Fight_status	getStatus(void)				 { return (this->status); }
+
+		void 			proc(void);
+		void 			display(void);
+};
 
 
 #endif /* _printable_hpp_ */

@@ -11,7 +11,7 @@
 
 using namespace std;
 
-string  		app_version		= "Atlantis v23w13";
+string  		app_version		= "Atlantis v23w14";
 SDL_Window		*window 		= NULL;
 SDL_Renderer	*render 		= NULL;
 Console			*console 		= NULL;

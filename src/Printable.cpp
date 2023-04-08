@@ -88,6 +88,39 @@ SDL_Texture *write(SDL_Rect *rect, TTF_Font *font, const char *text, SDL_Color c
 }
 
 
+void procBtn_fight(Button *btn, void *fight)
+{
+	Fight *fight_ptr = (Fight*)fight;
+	fight_ptr->setStatus(Fight_status::choose_atk);
+	console->log("procBtn_fight");
+
+}
+
+
+void procBtn_bag(Button *btn, void *fight)
+{
+	Fight *fight_ptr = (Fight*)fight;
+	fight_ptr->setStatus(Fight_status::choose_item);
+	console->log("procBtn_bag");
+}
+
+
+void procBtn_waifu(Button *btn, void *fight)
+{
+	Fight *fight_ptr = (Fight*)fight;
+	fight_ptr->setStatus(Fight_status::choose_waifu);
+	console->log("procBtn_waifu");
+}
+
+
+void procBtn_run(Button *btn, void *fight)
+{
+	Fight *fight_ptr = (Fight*)fight;
+	fight_ptr->setFight(false);
+	console->log("procBtn_run");
+}
+
+
 /*
  ************************************************************************************************
  *		Printable class																			*
@@ -112,6 +145,11 @@ Printable::Printable(SDL_Rect size)
 	this->dst_rect.y = size.y;
 	this->dst_rect.w = size.w;
 	this->dst_rect.h = size.h;
+
+	texture_rect.x = 0;
+	texture_rect.y = 0;
+	texture_rect.w = size.w;
+	texture_rect.h = size.h;
 }
 
 
@@ -557,7 +595,7 @@ void Tile::load_all_texture()
 
 		file = line.substr(index+1, line.length());
 
-		file.insert(0, "textures/");
+		file.insert(0, "textures/tiles/");
 
 		Tile::texture[tileType] = createTexture(NULL, file.c_str());
 	}
@@ -596,6 +634,11 @@ Entity::Entity(const char *entityName, const char *texturePath) : Printable(enti
 			NPC::allEntity[i] = this;
 			break;
 		}
+	}
+
+	for (int i_wfu = 0; i_wfu < DECK_SIZE; i_wfu++)
+	{
+		this->deck[i_wfu] = NULL;
 	}
 
 	this->positionTile.x = 0;
@@ -794,6 +837,89 @@ void Entity::print_debug(void)
 	Printable::stack_debug += advancedInfo.h + 4;
 }
 
+Waifu *Entity::getWaifu(int index)
+{
+	if ((0 <= index) && (index < DECK_SIZE))
+		return (this->deck[index]);
+	else
+		return (NULL);
+}
+
+
+bool Entity::addWaifu(Waifu *waifu)
+{
+	bool retval = false;
+
+	for (int i_wfu = 0; i_wfu < DECK_SIZE; i_wfu++)
+	{
+		if (this->deck[i_wfu] == NULL)
+		{
+			this->deck[i_wfu] = waifu;
+			retval = true;
+			break;
+		}
+	}
+
+	return (retval);
+}
+
+
+Waifu *Entity::chooseWaifu(void)
+{
+	return (NULL);
+}
+
+
+/*
+ ************************************************************************************************
+ *		Spell class																				*
+ *																								*
+ ************************************************************************************************
+ */
+
+Spell::Spell(Spell_type spelltype)
+{
+	switch (spelltype)
+	{
+		case Spell_type::BALL_FIRE:
+			this->name = "Fire Ball";
+			this->accuracy = 80;
+			this->power = 20;
+			this->type = Element_type::FIRE;
+			this->speed = 30;
+			break;
+		case Spell_type::BALL_AIR:
+			this->name = "Air Ball";
+			this->accuracy = 100;
+			this->power = 20;
+			this->type = Element_type::AIR;
+			this->speed = 20;
+			break;
+		case Spell_type::BALL_WATER:
+			this->name = "Water Ball";
+			this->accuracy = 80;
+			this->power = 20;
+			this->type = Element_type::WATER;
+			this->speed = 30;
+			break;
+		case Spell_type::BALL_EARTH:
+			this->name = "Earth Ball";
+			this->accuracy = 100;
+			this->power = 20;
+			this->type = Element_type::EARTH;
+			this->speed = 20;
+			break;
+	default:
+		break;
+	}
+}
+
+
+Spell::~Spell()
+{
+	
+}
+
 
 /*
  ************************************************************************************************
@@ -802,7 +928,7 @@ void Entity::print_debug(void)
  ************************************************************************************************
  */
 
-Waifu::Waifu(Waifu_params params) : Entity(params.name, params.texture_path)
+Waifu::Waifu(Waifu_params params) : Printable(params.name, params.texture_path)
 {
 
 }
@@ -856,7 +982,6 @@ void NPC::load(NPC_params *params)
 	}
 
 	// console->log("new NPC num: %d at 0x%x", this->i_npc, NPC::allNPC[this->i_npc]);
-
 }
 
 
@@ -910,6 +1035,22 @@ bool NPC::hasDialog(int hist)
 
 	return (retval);
 }
+
+
+Waifu *NPC::chooseWaifu(void)
+{
+	Waifu *waifu = NULL;
+
+	for (int i_wfu = 0; i_wfu < DECK_SIZE; i_wfu++)
+	{
+		waifu = getWaifu(i_wfu);
+		if (waifu != NULL)
+			break;
+	}
+
+	return (waifu);
+}
+
 
 
 void NPC::proc_print(SDL_Point offset)
@@ -1095,14 +1236,13 @@ void NPC::unload_all(void)
 Player::Player(const char *entityName, const char *texturePath) : Entity(entityName, texturePath)
 {
 	Waifu_params wfu_params;
-	for (int i_wfu = 0; i_wfu < DECK_SIZE; i_wfu++)
-	{
-		sprintf(wfu_params.name, "TWO_B");
-		sprintf(wfu_params.texture_path, "img/entity/mobTest.png");
-		wfu_params.type = Waifu_type::TWO_B;
-		
-		this->deck[i_wfu] = new Waifu(wfu_params);
-	}
+
+	sprintf(wfu_params.name, "TWO_B");
+	sprintf(wfu_params.texture_path, "textures/waifus/2b.png");
+	wfu_params.type = Waifu_type::TWO_B;
+	
+	this->addWaifu(new Waifu(wfu_params));
+
 	this->dialogTarget = NULL;
 	this->inDialog = false;	
 	this->history = 0;
@@ -1384,6 +1524,13 @@ void Player::print_onMap(SDL_Point offset)
 }
 
 
+Waifu *Player::chooseWaifu(void)
+{
+	Waifu *waifu = NULL;
+
+
+	return (waifu);
+}
 
 
 /*
@@ -1561,7 +1708,7 @@ void Button::print_onMap(SDL_Point offset)
 			break;
 
 		case Button_type::IMG:
-			this->print(NULL, &this->hitboxMap);
+			Printable::print(NULL, &this->hitboxMap);
 			break;
 
 		case Button_type::NON:
@@ -1570,6 +1717,94 @@ void Button::print_onMap(SDL_Point offset)
 	
 		default: 
 			SDL_RenderFillRect(render, &this->hitboxMap); 
+			break;
+	}
+
+}
+
+
+void Button::print(void)
+{
+	this->hitboxMap.x = this->position.x;
+	this->hitboxMap.y = this->position.y;
+	this->hitboxMap.w = this->dst_rect.w;
+	this->hitboxMap.h = this->dst_rect.h;
+
+	if (this->hovered)
+	{
+		if (this->clicked)
+			SDL_SetRenderDrawColor(render, this->colorClicked.r, this->colorClicked.g, this->colorClicked.b, this->colorClicked.a);
+		else
+			SDL_SetRenderDrawColor(render, this->colorHovered.r, this->colorHovered.g, this->colorHovered.b, this->colorHovered.a);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(render, this->colorNormal.r, this->colorNormal.g, this->colorNormal.b, this->colorNormal.a);
+	}
+
+	switch (this->type)
+	{
+		case Button_type::TXT:
+			SDL_RenderFillRect(render, &this->dst_rect);
+			this->text->print({ this->position.x + margin, this->position.y + margin});
+			break;
+
+		case Button_type::IMG:
+			Printable::print(NULL, &this->dst_rect);
+			break;
+
+		case Button_type::NON:
+			SDL_RenderFillRect(render, &this->dst_rect);
+			break;
+	
+		default: 
+			SDL_RenderFillRect(render, &this->dst_rect); 
+			break;
+	}
+
+}
+
+void Button::proc(void)
+{
+	this->hovered = false;
+	if ((mouse.x < (this->hitboxMap.x + this->hitboxMap.w)) & (mouse.x > this->hitboxMap.x))
+	{
+		if ((mouse.y < (this->hitboxMap.y + this->hitboxMap.h)) & (mouse.y > this->hitboxMap.y))
+		{
+			this->hovered = true;
+
+			/* if newly clicked */
+			if (mouse.left && !this->clicked)
+				this->run_onClick();
+
+			if (mouse.left)
+				this->clicked = true;
+			else
+				this->clicked = false;
+		}
+	}
+
+	switch (this->type)
+	{
+		case Button_type::TXT:
+			this->text->setPosition(
+				this->position.x + ((this->hitboxMap.w - this->text->getHitbox().w) / 2),
+				this->position.y + ((this->hitboxMap.h - this->text->getHitbox().h) / 2)
+			);
+			break;
+
+		case Button_type::IMG:
+			this->dst_rect.x = this->position.x;
+			this->dst_rect.y = this->position.y;
+			this->dst_rect.w = this->getHitbox().w;
+			this->dst_rect.h = this->getHitbox().h;
+			break;
+
+		case Button_type::NON:
+			/* dunno */
+			break;
+	
+		default: 
 			break;
 	}
 
@@ -1586,48 +1821,7 @@ void Button::procAll(void)
 		{
 			procBtn = Button::allButton[i];
 
-			procBtn->hovered = false;
-			if ((mouse.x < (procBtn->hitboxMap.x + procBtn->hitboxMap.w)) & (mouse.x > procBtn->hitboxMap.x))
-			{
-				if ((mouse.y < (procBtn->hitboxMap.y + procBtn->hitboxMap.h)) & (mouse.y > procBtn->hitboxMap.y))
-				{
-					procBtn->hovered = true;
-
-					/* if newly clicked */
-					if (mouse.left && !procBtn->clicked)
-						procBtn->run_onClick();
-
-					if (mouse.left)
-						procBtn->clicked = true;
-					else
-						procBtn->clicked = false;
-				}
-			}
-
-			switch (procBtn->type)
-			{
-				case Button_type::TXT:
-					procBtn->text->setPosition(
-						procBtn->position.x + ((procBtn->hitboxMap.w - procBtn->text->getHitbox().w) / 2),
-						procBtn->position.y + ((procBtn->hitboxMap.h - procBtn->text->getHitbox().h) / 2)
-					);
-					break;
-
-				case Button_type::IMG:
-					procBtn->dst_rect.x = procBtn->position.x;
-					procBtn->dst_rect.y = procBtn->position.y;
-					procBtn->dst_rect.w = procBtn->getHitbox().w;
-					procBtn->dst_rect.h = procBtn->getHitbox().h;
-					break;
-
-				case Button_type::NON:
-					/* dunno */
-					break;
-			
-				default: 
-					break;
-			}
-
+			procBtn->proc();
 		}
 	}
 }
@@ -1647,3 +1841,364 @@ void Button::printAll(SDL_Point offset)
 		}
 	}
 }
+
+
+
+
+/*
+ ************************************************************************************************
+ *		Fighter class																			*
+ *																								*
+ ************************************************************************************************
+ */
+
+Fighter::Fighter(Player *ptr_player)
+{
+	this->type   = Fighter_type::typPLAYER;
+	this->player = ptr_player;
+	this->waifu  = NULL;
+	this->npc    = NULL;
+}
+
+
+Fighter::Fighter(Waifu *ptr_waifu)
+{
+	this->type   = Fighter_type::typWAIFU;
+	this->player = NULL;
+	this->waifu  = ptr_waifu;
+	this->npc    = NULL;
+}
+
+
+Fighter::Fighter(NPC *ptr_npc)
+{
+	this->type   = Fighter_type::typNPC;
+	this->player = NULL;
+	this->waifu  = NULL;
+	this->npc    = ptr_npc;
+}
+
+
+Fighter::~Fighter()
+{
+	this->player = NULL;
+	this->waifu  = NULL;
+	this->npc    = NULL;
+}
+
+
+Waifu *Fighter::getWaifu()
+{
+	Waifu *wfu = NULL;
+
+	if (this->onFieldWaifu == NULL)
+	{
+		switch (this->type)
+		{
+			case Fighter_type::typPLAYER:
+				wfu = this->player->chooseWaifu();
+				break;
+			case Fighter_type::typNPC:
+				wfu = this->npc->chooseWaifu();
+				break;
+
+			case Fighter_type::typWAIFU:
+				wfu = this->waifu;
+				break;
+		default:
+			break;
+		}
+
+		this->onFieldWaifu = wfu;
+	}
+	else
+	{
+		wfu = this->onFieldWaifu;
+	}
+
+	return (wfu);
+}
+
+
+Spell *Fighter::getAttack()
+{
+	return (NULL);
+}
+
+
+
+void *Fighter::getPtr(void)
+{
+	void *ptr = NULL;
+	switch (this->type)
+	{
+		case Fighter_type::typPLAYER:
+			ptr = this->player;
+			break;
+		case Fighter_type::typNPC:
+			ptr = this->npc;
+			break;
+
+		case Fighter_type::typWAIFU:
+			ptr = this->waifu;
+			break;
+	default:
+		break;
+	}
+
+	return (ptr);
+}
+
+/*
+ ************************************************************************************************
+ *		Fight class																				*
+ *																								*
+ ************************************************************************************************
+ */
+
+Fight::Fight()
+{
+	for (int i = 0; i < MAX_ENTITY_FIGHT; i++)
+	{
+		this->fighters[i] = NULL;
+	}
+
+	for (int i = 0; i < DECK_SIZE; i++)
+	{
+		this->playerChooseWaifu[i] = NULL;
+	}
+	
+
+	SDL_Rect btn;
+
+	btn.w = screen.w/10;
+	btn.h = screen.h/10;
+
+	btn.x = screen.w - btn.w - 5;
+	btn.y = screen.w - btn.w - 5;
+
+	this->btn_fight	= new Button({screen.w - 2*(btn.w + 5), screen.h - 2*(btn.h + 5), btn.w, btn.h}, Button_type::TXT, "Fight");
+	this->btn_bag	= new Button({screen.w - (btn.w + 5), 	screen.h - 2*(btn.h + 5), btn.w, btn.h}, Button_type::TXT, "Bag");
+	this->btn_waifu	= new Button({screen.w - 2*(btn.w + 5), screen.h - (btn.h + 5), btn.w, btn.h}, Button_type::TXT, "Waifus");
+	this->btn_run	= new Button({screen.w - (btn.w + 5), 	screen.h - (btn.h + 5), btn.w, btn.h}, Button_type::TXT, "Run");
+
+
+	this->btn_fight->onClick_func 	= procBtn_fight;
+	this->btn_bag->onClick_func 	= procBtn_bag;
+	this->btn_waifu->onClick_func 	= procBtn_waifu;
+	this->btn_run->onClick_func 	= procBtn_run;
+
+	this->btn_fight->onClick_arg	= (void *)this;
+	this->btn_bag->onClick_arg		= (void *)this;
+	this->btn_waifu->onClick_arg	= (void *)this;
+	this->btn_run->onClick_arg		= (void *)this;
+
+	this->fight = false;
+}
+
+
+Fight::~Fight()
+{
+	this->clear();
+
+	delete (this->btn_fight);
+	delete (this->btn_bag);
+	delete (this->btn_waifu);
+	delete (this->btn_run);
+}
+
+
+bool Fight::add(Player *player)
+{
+	bool retval = false;
+	for (int i = 0; i < MAX_ENTITY_FIGHT; i++)
+	{
+		if (this->fighters[i] == NULL)
+		{
+			this->fighters[i] = new Fighter(player);
+			retval = true;
+			break;
+		}
+	}
+	return (retval);
+}
+
+
+bool Fight::add(NPC *NPC)
+{
+	bool retval = false;
+	for (int i = 0; i < MAX_ENTITY_FIGHT; i++)
+	{
+		if (this->fighters[i] == NULL)
+		{
+			this->fighters[i] = new Fighter(NPC);
+			retval = true;
+			break;
+		}
+	}
+	return (retval);
+}
+
+
+bool Fight::add(Waifu *waifu)
+{
+	bool retval = false;
+	for (int i = 0; i < MAX_ENTITY_FIGHT; i++)
+	{
+		if (this->fighters[i] == NULL)
+		{
+			this->fighters[i] = new Fighter(waifu);
+			retval = true;
+			break;
+		}
+	}
+	return (retval);
+}
+
+
+void Fight::clear(void)
+{
+	for (int i = 0; i < MAX_ENTITY_FIGHT; i++)
+	{
+		if (this->fighters[i] != NULL)
+		{
+			delete (this->fighters[i]);
+			this->fighters[i] = NULL;
+		}
+	}
+}
+
+
+
+void Fight::display(void)
+{
+	for (int i = 0; i < DECK_SIZE; i++)
+	{
+		if (this->playerChooseWaifu[i] != NULL)
+		{
+			console->log("%d", i);
+			//delete (this->playerChooseWaifu[i]);
+			//this->playerChooseWaifu[i] = NULL;
+		}
+	}
+	
+	switch (this->status)
+	{
+		case Fight_status::choose:
+			this->btn_fight->print();
+			this->btn_bag->print();
+			this->btn_waifu->print();
+			this->btn_run->print();
+			
+			break;
+		case Fight_status::animate_atk:
+		
+		
+			break;
+		case Fight_status::choose_atk:
+			for (int i = 0; i < MAX_ENTITY_FIGHT; i++)
+			{
+				if (this->fighters[i] != NULL)
+				{
+					Spell *spell = this->fighters[i]->getAttack();
+					console->log("get spell %s", spell->getName().c_str() );
+				}
+			}
+		
+			break;
+		case Fight_status::choose_item:
+		
+		
+			break;
+		case Fight_status::choose_waifu:
+			for (int i = 0; i < MAX_ENTITY_FIGHT; i++)
+			{
+				if (this->fighters[i] != NULL)
+				{
+					if (this->fighters[i]->getType() == Fighter_type::typPLAYER )
+					{
+						console->log("Found fighter player type");
+
+						Player *player = (Player *)this->fighters[i]->getPtr();
+
+						console->log("found player %s", player->getName().c_str());
+
+						int btn_h, btn_w;
+						btn_h = (screen.h/DECK_SIZE) - (5*DECK_SIZE);
+						btn_w = 2*(screen.w/4);
+
+						for (int i = 0; i < DECK_SIZE; i++)
+						{
+							Waifu *pWaifu = player->getWaifu(i);
+							string name;
+							if (pWaifu != NULL)
+							{
+								name = pWaifu->getName();
+							}
+							else
+							{
+								name = "Empty";
+							}
+							console->log("waifu %s", name.c_str());
+							
+							if (this->playerChooseWaifu[i] == NULL)
+								this->playerChooseWaifu[i] = new Button({i*btn_h + i*DECK_SIZE, screen.w/4, btn_w, btn_h}, Button_type::TXT, name);
+							this->playerChooseWaifu[i]->print();
+						}
+						
+					}
+				}
+			}
+		
+			break;
+	default:
+		break;
+	}
+}
+
+void Fight::proc(void)
+{
+	switch (this->status)
+	{
+		case Fight_status::choose:
+			this->btn_fight->proc();
+			this->btn_bag->proc();
+			this->btn_waifu->proc();
+			this->btn_run->proc();
+		
+			break;
+		case Fight_status::animate_atk:
+			this->status = Fight_status::choose;
+		
+			break;
+		case Fight_status::choose_atk:
+			this->status = Fight_status::choose;
+		
+		
+			break;
+		case Fight_status::choose_item:
+			this->status = Fight_status::choose;
+		
+		
+			break;
+		case Fight_status::choose_waifu:
+			for (int i = 0; i < MAX_ENTITY_FIGHT; i++)
+			{
+				console->log("Search for waifu");
+				
+				// if (this->fighters[i] != NULL)
+				// {
+				// 	Waifu *waifu = this->fighters[i]->getWaifu();
+				// 	console->log("get waifu %s", waifu->getName().c_str() );
+// 
+				// }
+			}
+		
+			break;
+	default:
+		break;
+	}
+}
+
+
+

@@ -21,21 +21,15 @@ extern EventManager	*event;
 extern SDL_Rect     screen;
 extern Mouse_t		mouse;
 
-
-static void bt0_proc(Button *btn);
-
-
 class Game
 {
 	private:
 		bool loaded;
+		string mapName = "test";
 
 		Map		*map;
 		Player	*player;
-
-		string mapName = "test";
-
-		Button *btn;
+		Fight	*fight;
 
 	public:
 
@@ -62,13 +56,18 @@ class Game
 			this->map = new Map(mapName);
 			NPC::load_all(mapName);
 
-			this->player = new Player("player", "img/entity/player2.png");
+			this->player = new Player("player", "textures/entity/player2.png");
 			this->player->setAnimation(3, -1, {0, 0, 22, 22});
 
-			this->btn = new Button({screen.w - 110, screen.h - 110, 100, 100}, Button_type::TXT, "Bouton");
-
-
-			this->btn->onClick_func = bt0_proc;
+			this->fight = new Fight();
+			this->fight->add(this->player);
+			Waifu_params wpar;
+			snprintf(wpar.name, 64, "2B");
+			snprintf(wpar.texture_path, 512, "textures/waifus/2b.png");
+			wpar.lvl = 0;
+			wpar.xp = 0;
+			wpar.type = Waifu_type::TWO_B;
+			this->fight->add(new Waifu(wpar));
 
 			this->loaded = true;
 		}
@@ -77,7 +76,7 @@ class Game
 		{
 			delete (this->map);
 			delete (this->player);
-			delete (this->btn);
+			delete (this->fight);
 
 			NPC::unload_all();
 			Tile::unload_all_texture();
@@ -85,22 +84,33 @@ class Game
 			
 			this->map		= NULL;
 			this->player	= NULL;
-			this->btn		= NULL;
+			this->fight		= NULL;
 
 			this->loaded	= false;
 		}
 
 		void proc(State *state)
 		{
+			/* load if not loeded */
 			if (!this->loaded)
 				this->load();
 
+			/* advanced option proc */
 			if (event->getKeyUp(SDL_SCANCODE_F3))
 			{
 				Printable::debug = !Printable::debug;
 				console->log("%s debug", (Printable::debug) ? "Enable" : "Disable");
 			}
 
+			/* start fight */
+			if (event->getKeyUp(SDL_GetScancodeFromKey(SDLK_f)))
+			{
+				/* toggle fight value */
+				this->fight->setFight(!this->fight->isFighting());
+
+			}
+
+			/* whell up/down */
 			if (mouse.wheel > 0)
 			{
 				// Printable::tilesize++;
@@ -112,12 +122,20 @@ class Game
 				console->log("deZoom");
 			}
 
-			this->player->proc((int *)map);
+			/* fight proc OR map proc */
+			if (this->fight->isFighting())
+			{
+				this->fight->proc();
 
-			this->map->focus(player->getPosition_screen());
+			}
+			else
+			{
+				this->player->proc((int *)map);
+				this->map->focus(player->getPosition_screen());
 
-			Button::procAll();
+			}
 
+			/* print all */
 			this->print();
 
 			/* Reload game */
@@ -131,16 +149,19 @@ class Game
 		void print(void)
 		{
 			SDL_Point mapPos = map->getPosition();
+			
 			/* Print Map */
 			this->map->print();
 
 			/* Print NPC */
 			NPC::proc_print(mapPos);
 			
-			/* Print Player*/
+			/* Print Player */
 			this->player->print_onMap(mapPos);
 
-			Button::printAll(mapPos);
+			/* Print fight if needed */
+			if (this->fight->isFighting())
+				this->fight->display();
 			
 			/* Print Debug */
 			Printable::proc_debug();
@@ -305,10 +326,4 @@ int game(State *state)
 	gameCnf->proc(state);
 
     return (0);
-}
-
-
-void bt0_proc(Button *btn)
-{
-	console->log("Button %d cliked !!! ", btn->i_btn);
 }

@@ -5,7 +5,7 @@ ZIP=7z
 
 CFLAGS=-Wall -O
 
-LDFLAGS=-I include -L lib lib/libstdc++.a
+LDFLAGS=-I include -L lib -static-libstdc++ -static-libgcc -static-libstdc++
 
 EXEC=game\Atlantis.exe
 VER=23w13

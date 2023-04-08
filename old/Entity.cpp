@@ -126,7 +126,7 @@ void Entity::proc(void)
 
 void Entity::loadTexture(const char *entityName)
 {
-	string basePath = "./img/entity/";
+	string basePath = "./textures/entity/";
 	string name = entityName;
 	string extension = ".png";
 
