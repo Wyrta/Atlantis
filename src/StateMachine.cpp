@@ -21,9 +21,12 @@ extern EventManager	*event;
 extern SDL_Rect     screen;
 extern Mouse_t		mouse;
 
+#define MAX_SPELL	4
+
 
 static void bt0_proc(Button *btn);
-
+Entity *fighter_top;
+Entity *fighter_bot;
 
 class Game
 {
@@ -112,6 +115,27 @@ class Game
 				console->log("deZoom");
 			}
 
+			/* start fight */
+			if (event->getKeyUp(SDL_GetScancodeFromKey(SDLK_f)))
+			{
+				/* toggle fight value */
+
+				for (int i = 0; i < MAX_ENTITY; i++)
+				{
+					if ((Entity::allEntity[i] != NULL) && (this->player->canReach(Entity::allEntity[i])) )
+					{
+						*state		= State::FIGHT;
+						fighter_top = Entity::allEntity[i];
+						fighter_bot = this->player;
+
+						break;
+					}
+
+				}
+				
+
+			}
+
 			this->player->proc((int *)map);
 
 			this->map->focus(player->getPosition_screen());
@@ -183,8 +207,86 @@ class Menu
 		}
 };
 
+class Fight
+{
+	private:
+		bool loaded;
+
+		Button *spell[MAX_SPELL], *attack, *quit;
+
+	public:
+		Fight()
+		{
+			this->loaded = false;
+
+		}
+
+		~Fight()
+		{
+
+		}
+
+		void load(void)
+		{
+			this->loaded = true;
+
+			SDL_Rect buttonSize;
+				buttonSize.w = 128;
+				buttonSize.h = 32;
+
+			buttonSize.x = 0;
+			buttonSize.y = 0;
+			attack = new Button(buttonSize, Button_type::TXT, "Attack");
+			
+
+			buttonSize.x = 0;
+			buttonSize.y += 40;
+			quit = new Button(buttonSize, Button_type::TXT, "Quit");
+
+			for (int i = 0; i < MAX_SPELL; i++)
+			{
+				buttonSize.x = 0;
+				buttonSize.y += 40;
+				spell[i] = new Button(buttonSize, Button_type::TXT, "Spell");
+			}
+			
+		}
+
+		void unload(void)
+		{
+			this->loaded = false;
+
+			delete (attack);
+			delete (quit);
+			for (int i = 0; i < MAX_SPELL; i++)
+				delete (spell[i]);
+		}
+
+		void proc(void)
+		{
+			if (!this->loaded)
+				this->load();
+
+			Button::procAll();
+
+			this->print();
+		}
+
+		void print(void)
+		{
+			attack->print_onMap();
+			quit->print_onMap();
+			for (int i = 0; i < MAX_SPELL; i++)
+				spell[i]->print_onMap();
+		}
+};
+
+
+
+
 Game *gameCnf = NULL;
 Menu *menuCnf = NULL;
+Fight *fightCnf = NULL;
 
 int init(State *state)
 {
@@ -255,11 +357,12 @@ int init(State *state)
 	SDL_RenderFillRect(render, &screen);
 	SDL_RenderPresent(render);
 
-	console = new Console(&screen);
-	event   = new EventManager(state);
+	console  = new Console(&screen);
+	event    = new EventManager(state);
 
-	gameCnf = new Game();
-	menuCnf = new Menu();
+	gameCnf  = new Game();
+	menuCnf  = new Menu();
+	fightCnf = new Fight();
 
     *state = MENU;
 
@@ -274,6 +377,7 @@ int exit(State *state)
 
 	delete (gameCnf);
 	delete (menuCnf);
+	delete (fightCnf);
 
     delete (console);
 	delete (event);
@@ -303,6 +407,13 @@ int menu(State *state)
 int game(State *state)
 {
 	gameCnf->proc(state);
+
+    return (0);
+}
+
+int fight(State *state)
+{
+	fightCnf->proc();
 
     return (0);
 }

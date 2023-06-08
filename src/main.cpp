@@ -45,17 +45,19 @@ int main(int argc, char *argv[])
 	Uint32	currentTicks	= SDL_GetTicks();
 	int 	syncTick		= 0;
 
-	while (state != EXIT) {
+	while (state != EXIT)
+	{
 		SDL_SetRenderDrawColor(render, 0, 0, 0, SDL_ALPHA_OPAQUE);
 		SDL_RenderFillRect(render, &screen);
 		event->pollEvent();
 
 		switch (state)
 		{
-			case INIT: state = MENU; break;
-			case GAME: menu(&state); break;
-			case MENU: game(&state); break;
-			case EXIT: break;
+			case INIT:  state = MENU;  break;
+			case GAME:  game(&state);  break;
+			case FIGHT: fight(&state); break;
+			case MENU:  menu(&state);  break;
+			case EXIT:  break;
 			
 			default: state = EXIT; break;
 		}

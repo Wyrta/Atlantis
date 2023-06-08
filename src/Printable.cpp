@@ -794,6 +794,40 @@ void Entity::print_debug(void)
 	Printable::stack_debug += advancedInfo.h + 4;
 }
 
+bool Entity::canReach(Entity *entity)
+{
+	SDL_Point targetPos;
+	switch (this->orientation)
+	{
+		case NORTH:
+			targetPos.x = this->positionTile.x;
+			targetPos.y = this->positionTile.y+1;
+			break;
+		case SOUTH:
+			targetPos.x = this->positionTile.x;
+			targetPos.y = this->positionTile.y-1;
+			break;
+		case WEST: 
+			targetPos.x = this->positionTile.x-1;
+			targetPos.y = this->positionTile.y;
+			break;
+		case EAST: 
+			targetPos.x = this->positionTile.x+1;
+			targetPos.y = this->positionTile.y;
+			break;
+		case ALL: 
+		default:
+			targetPos.x = this->positionTile.x;
+			targetPos.y = this->positionTile.y;
+			break;
+	}
+
+	if ((targetPos.x == entity->getPosition().x) && 
+		(targetPos.y == entity->getPosition().y) )
+		return (true);
+	else
+		return (false);
+}
 
 /*
  ************************************************************************************************
@@ -1557,7 +1591,7 @@ void Button::print_onMap(SDL_Point offset)
 	{
 		case Button_type::TXT:
 			SDL_RenderFillRect(render, &this->hitboxMap);
-			this->text->print({ this->position.x + margin, this->position.y + margin});
+			this->text->print({ this->position.x + this->margin, this->position.y + this->margin});
 			break;
 
 		case Button_type::IMG:

@@ -232,6 +232,7 @@ class Entity : public Printable
 		void 			setPosition(int x, int y)	{ this->positionTile.x = x; this->positionTile.y = y; this->position.x = x*Printable::tilesize; this->position.y = y*Printable::tilesize ;}
 		Direction		isMoving(void)				{ return this->moving; }
 		bool			canMove(void)				{ return (this->moving == Direction::NONE); }
+		bool			canReach(Entity *entity);
 };
 
 
