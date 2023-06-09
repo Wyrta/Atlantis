@@ -1,0 +1,6 @@
+# id ; name ; power ; speed ; precision ; type
+0;attack1;60;60;100;atk
+1;attack2;80;50;90;atk
+2;attack3;100;40;80;atk
+3;buf1;30;80;80;buf
+4;nerf1;30;90;80;nrf

@@ -11,11 +11,13 @@
 
 typedef struct Mouse_s
 {
-	int x;
-	int y;
+	int x, y;
 
-	bool left;
-	bool right;
+	bool left, right;
+
+	bool click_left, click_right;
+
+	bool last_left, last_right;	/* dont use */
 
 /* > 0 UP 
 < 0 DOWN */

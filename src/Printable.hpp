@@ -15,7 +15,10 @@ TTF_Font	*createFont(const char *path, int size);
 
 #define IGNORE_DELAY	10
 #define ENTITYSPEED		2
+
 #define DECK_SIZE		6
+#define MAX_SPELL		4
+#define SPELLBOOK_SIZE	128
 
 #define ANIMATION_SPEED	32
 
@@ -88,6 +91,14 @@ typedef struct {
 	Direction walkable;
 } Tile_params;
 
+typedef struct {
+	int power;
+	int speed;
+	int precision;
+
+	std::string name;
+	std::string type;
+} Spell;
 
 typedef enum {
 	TWO_B,
@@ -204,6 +215,28 @@ class Tile : public Printable
 };
 
 
+class Waifu : public Printable
+{
+	private:
+		int hp;
+		int atk;
+		int def;
+		int speed;
+
+		int spellsID[MAX_SPELL];
+	public:
+		Waifu(Waifu_params params);
+		~Waifu();
+
+		bool canFight(void);
+		string attack(Waifu *target, int spellIdx);
+		
+		static Spell	spellsBook[SPELLBOOK_SIZE];
+		static void		load_all(void);
+		static void		unload_all(void);
+};
+
+
 class Entity : public Printable
 {
 	private:
@@ -211,6 +244,7 @@ class Entity : public Printable
 	protected:
 		Direction	moving;
 		Direction	orientation;
+		Waifu		*deck[DECK_SIZE];
 
 	public:
 		Entity(const char *entityName, const char *texturePath);
@@ -224,7 +258,6 @@ class Entity : public Printable
 		static Entity	*allEntity[MAX_ENTITY];
 		int				i_ent;
 
-
 		void			move(Direction direction, Tile *tile);
 
 		SDL_Point		getPosition(void)			{ return this->positionTile; }
@@ -233,19 +266,8 @@ class Entity : public Printable
 		Direction		isMoving(void)				{ return this->moving; }
 		bool			canMove(void)				{ return (this->moving == Direction::NONE); }
 		bool			canReach(Entity *entity);
-};
 
-
-class Waifu : public Entity
-{
-	private:
-		int pv;
-		int atk;
-		int def;
-		int atk_spd;
-	public:
-		Waifu(Waifu_params params);
-		~Waifu();
+		Waifu			*getWaifu(int idx = 0);
 };
 
 
@@ -283,7 +305,6 @@ class NPC : public Entity
 class Player : public Entity
 {
 	private:
-		Waifu			*deck[DECK_SIZE];
 		unsigned int	i_dglChar;
 
 		NPC				*dialogTarget;
@@ -347,6 +368,8 @@ class Button : public Printable
 		~Button();
 
 		void	(*onClick_func)(Button *obj);	/* void onClick(Button *obj) */
+		
+		bool	pressed(void)					  { return (this->clicked); }
 
 		void	setColor_Normal(SDL_Color color)  { this->colorNormal  = color; }
 		void	setColor_Hovered(SDL_Color color) { this->colorHovered = color; }
@@ -354,6 +377,7 @@ class Button : public Printable
 
 		bool	fixed;	/* is sticked to the map */
 		int		margin;
+		bool	enable;
 		void	print_onMap(SDL_Point offset = {0, 0});
 
 		int				i_btn = -1;

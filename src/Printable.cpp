@@ -25,6 +25,7 @@ NPC					*NPC::allNPC[MAX_NPC];
 Entity				*Entity::allEntity[MAX_ENTITY];
 string 				NPC::history[MAX_DIALOG];
 Button				*Button::allButton[MAX_BUTTON];
+Spell 				Waifu::spellsBook[SPELLBOOK_SIZE];
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -829,6 +830,26 @@ bool Entity::canReach(Entity *entity)
 		return (false);
 }
 
+Waifu *Entity::getWaifu(int idx)
+{
+	for (int i = 0; i < DECK_SIZE; i++)
+	{
+		if ((this->deck[i] != NULL) && (this->deck[i]->canFight()) )
+			return (this->deck[i]);
+	}
+	
+	return (NULL);
+}
+
+std::string Waifu::attack(Waifu *target, int spellIdx)
+{
+	std::string report = "";
+
+
+
+	return (report);
+}
+
 /*
  ************************************************************************************************
  *		Waifu class																				*
@@ -836,13 +857,91 @@ bool Entity::canReach(Entity *entity)
  ************************************************************************************************
  */
 
-Waifu::Waifu(Waifu_params params) : Entity(params.name, params.texture_path)
+Waifu::Waifu(Waifu_params params) : Printable(params.name, params.texture_path)
 {
 
 }
 
 
 Waifu::~Waifu()
+{
+
+}
+
+bool Waifu::canFight(void)
+{
+	if (this->hp > 0)
+		return (true);
+	else
+		return (false);
+}
+
+void Waifu::load_all(void)
+{
+//Spell	Waifu::spellsBook[SPELLBOOK_SIZE];
+
+	ifstream	config("config/spells.cnf");
+	string		line;
+	int 		nb_spells = 0;
+
+	console->log("Load spells");
+
+	while (getline(config, line) )
+	{
+		if (line.c_str()[0] == '#')
+			continue;
+
+		string str_id, str_name, str_power, str_speed, str_precision, str_type;
+		int id, power, speed, precision;
+		int	l_idx = 0;
+		int r_idx = 0;
+
+		r_idx = line.find(";");
+		str_id = line.substr(l_idx, r_idx - l_idx);
+
+		l_idx = r_idx + 1;
+		r_idx = line.find(";", l_idx);
+		str_name = line.substr(l_idx, r_idx - l_idx);
+
+		l_idx = r_idx + 1;
+		r_idx = line.find(";", l_idx);
+		str_power = line.substr(l_idx, r_idx - l_idx);
+		
+		l_idx = r_idx + 1;
+		r_idx = line.find(";", l_idx);
+		str_speed = line.substr(l_idx, r_idx - l_idx);
+
+		l_idx = r_idx + 1;
+		r_idx = line.find(";", l_idx);
+		str_precision = line.substr(l_idx, r_idx - l_idx);
+
+		l_idx = r_idx + 1;
+		r_idx = line.find(";", l_idx);
+		str_type = line.substr(l_idx, r_idx - l_idx);
+
+		id		  =	atoi(str_id.c_str());
+		power	  =	atoi(str_power.c_str());
+		speed	  =	atoi(str_speed.c_str());
+		precision =	atoi(str_precision.c_str());
+
+		//console->log("id:%d name:%s power:%d speed:%d precision:%d type:%s", id, str_name.c_str(), power, speed, precision, str_type.c_str());
+
+		Waifu::spellsBook[id].name		= str_name;
+		Waifu::spellsBook[id].type		= str_type;
+		Waifu::spellsBook[id].power		= power;
+		Waifu::spellsBook[id].precision	= precision;
+		Waifu::spellsBook[id].speed		= speed;
+
+		nb_spells++;
+	}
+
+	console->log("Succesfully load %d spells", nb_spells);
+
+	config.close();
+}
+
+
+void Waifu::unload_all(void)
 {
 
 }
@@ -1513,6 +1612,7 @@ Button::Button(SDL_Rect hitbox, Button_type typ, string content) : Printable(hit
 	this->clicked		= false;
 	this->fixed			= false;
 	this->type			= typ;
+	this->enable		= true;
 
 	this->position.x	= hitbox.x;
 	this->position.y	= hitbox.y;
@@ -1562,6 +1662,9 @@ Button::~Button()
 
 void Button::print_onMap(SDL_Point offset)
 {
+	if (!this->enable)
+		return;
+
 	if (this->fixed)
 	{
 		this->hitboxMap.x = this->position.x + offset.x;
@@ -1620,6 +1723,9 @@ void Button::procAll(void)
 		{
 			procBtn = Button::allButton[i];
 
+			if (!procBtn->enable)
+				continue;
+
 			procBtn->hovered = false;
 			if ((mouse.x < (procBtn->hitboxMap.x + procBtn->hitboxMap.w)) & (mouse.x > procBtn->hitboxMap.x))
 			{
@@ -1628,7 +1734,7 @@ void Button::procAll(void)
 					procBtn->hovered = true;
 
 					/* if newly clicked */
-					if (mouse.left && !procBtn->clicked)
+					if (mouse.click_left)
 						procBtn->run_onClick();
 
 					if (mouse.left)

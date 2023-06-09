@@ -11,6 +11,15 @@ extern Mouse_t		mouse;
 EventManager::EventManager(State *state)
 {
 	this->appState = state;
+	
+	mouse.x = 0;
+	mouse.y = 0;
+	mouse.left = false;
+	mouse.right = false;
+	mouse.click_left = false;
+	mouse.click_right = false;
+	mouse.last_left = false;
+	mouse.last_right = false;
 }
 
 EventManager::~EventManager()
@@ -38,7 +47,12 @@ void EventManager::pollEvent(void)
 	{
 		hasEvent = SDL_PollEvent(&this->event);
 		
-		if (hasEvent) {
+		/* reset click value */
+		mouse.click_left = false;
+		mouse.click_right = false; 
+		
+		if (hasEvent)
+		{
 
 			switch (this->event.type)
 			{
@@ -55,6 +69,7 @@ void EventManager::pollEvent(void)
 					Uint32 mask = SDL_GetMouseState(&mouse.x, &mouse.y);
 					mouse.left  = (mask & SDL_BUTTON_LMASK);
 					mouse.right = (mask & SDL_BUTTON_RMASK);
+
 					log = false;
 				} break;
 				case SDL_MOUSEWHEEL:
@@ -93,9 +108,7 @@ void EventManager::pollEvent(void)
 				default: log = false; break;
 			}
 
-				/* dont need to log */
-
-
+			/* if need to log */
 			if (log)
 			{
 				if (eventPolling > 0)
@@ -107,6 +120,28 @@ void EventManager::pollEvent(void)
 		
 		eventPolling++;
 	} while ((eventPolling < MAX_EVENT_POLL) && (hasEvent == 1));
+
+
+	if (mouse.left)
+	{
+		if (mouse.left != mouse.last_left)
+		{
+			mouse.click_left = true;
+		}
+	}
+
+	if (mouse.right)
+	{
+		if (mouse.right != mouse.last_right)
+		{
+			mouse.click_right = true;
+		}
+	}
+
+	/* save current value */
+	mouse.last_left  = mouse.left;
+	mouse.last_right = mouse.right;
+
 }
 
 bool EventManager::getKeySC(SDL_Scancode key)

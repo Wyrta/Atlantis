@@ -21,10 +21,16 @@ extern EventManager	*event;
 extern SDL_Rect     screen;
 extern Mouse_t		mouse;
 
-#define MAX_SPELL	4
-
 
 static void bt0_proc(Button *btn);
+
+static void bp_quit(Button *btn);
+static void bp_attack(Button *btn);
+static void bp_spell0(Button *btn);
+static void bp_spell1(Button *btn);
+static void bp_spell2(Button *btn);
+static void bp_spell3(Button *btn);
+
 Entity *fighter_top;
 Entity *fighter_bot;
 
@@ -213,12 +219,25 @@ class Fight
 		bool loaded;
 
 		Button *spell[MAX_SPELL], *attack, *quit;
+		Waifu *waifu_top, *waifu_bot;
+		string atkReport_top, atkReport_bot;
+
 
 	public:
+		bool is_quit, is_attack;
+
 		Fight()
 		{
 			this->loaded = false;
+			this->waifu_top = NULL;
+			this->waifu_bot = NULL;
 
+			this->spell[0]	= NULL;
+			this->spell[1]	= NULL;
+			this->spell[2]	= NULL;
+			this->spell[3]	= NULL;
+			this->quit		= NULL;
+			this->attack	= NULL;
 		}
 
 		~Fight()
@@ -228,33 +247,58 @@ class Fight
 
 		void load(void)
 		{
-			this->loaded = true;
+			this->loaded	= true;
+			this->is_quit	= false;
+			this->is_attack	= false;
+
+			/* load buttons */
 
 			SDL_Rect buttonSize;
 				buttonSize.w = 128;
 				buttonSize.h = 32;
 
-			buttonSize.x = 0;
-			buttonSize.y = 0;
-			attack = new Button(buttonSize, Button_type::TXT, "Attack");
-			
+			buttonSize.x = screen.x + screen.w - 140*2;
+			buttonSize.y = screen.y + screen.h - 40*2;
 
-			buttonSize.x = 0;
+			attack = new Button(buttonSize, Button_type::TXT, "Attack");
+			attack->onClick_func = bp_attack;
+			
 			buttonSize.y += 40;
 			quit = new Button(buttonSize, Button_type::TXT, "Quit");
+			quit->onClick_func = bp_quit;
 
-			for (int i = 0; i < MAX_SPELL; i++)
-			{
-				buttonSize.x = 0;
-				buttonSize.y += 40;
-				spell[i] = new Button(buttonSize, Button_type::TXT, "Spell");
-			}
+			buttonSize.x = screen.x + screen.w - 140*2;
+			buttonSize.y = screen.y + screen.h - 40*2;
+
+			spell[0] = new Button(buttonSize, Button_type::TXT, "Spell 0");
+			buttonSize.x += 140;
+			spell[1] = new Button(buttonSize, Button_type::TXT, "Spell 1");
+			buttonSize.y += 40;
+			buttonSize.x -= 140;
+			spell[2] = new Button(buttonSize, Button_type::TXT, "Spell 2");
+			buttonSize.x += 140;
+			spell[3] = new Button(buttonSize, Button_type::TXT, "Spell 3");
 			
+			spell[0]->onClick_func = bp_spell0;
+			spell[1]->onClick_func = bp_spell1;
+			spell[2]->onClick_func = bp_spell2;
+			spell[3]->onClick_func = bp_spell3;
+
+			spell[0]->enable	= false;
+			spell[1]->enable	= false;
+			spell[2]->enable	= false;
+			spell[3]->enable	= false;
+
+			quit->enable		= false;
+			attack->enable		= false;
+
 		}
 
 		void unload(void)
 		{
-			this->loaded = false;
+			this->loaded	= false;
+			this->is_quit	= false;
+			this->is_attack	= false;
 
 			delete (attack);
 			delete (quit);
@@ -262,22 +306,81 @@ class Fight
 				delete (spell[i]);
 		}
 
-		void proc(void)
+		void proc(State *state)
 		{
 			if (!this->loaded)
 				this->load();
 
+			if (this->is_attack)
+			{
+				spell[0]->enable	= true;
+				spell[1]->enable	= true;
+				spell[2]->enable	= true;
+				spell[3]->enable	= true;
+
+				quit->enable		= false;
+				attack->enable		= false;
+			}
+			else
+			{
+				spell[0]->enable	= false;
+				spell[1]->enable	= false;
+				spell[2]->enable	= false;
+				spell[3]->enable	= false;
+
+				quit->enable		= true;
+				attack->enable		= true;
+			}
+
 			Button::procAll();
 
 			this->print();
+
+			/* load waifu if needed */
+			this->waifu_top = fighter_top->getWaifu();
+			this->waifu_bot = fighter_bot->getWaifu();
+
+			if ((this->waifu_top == NULL) || (this->waifu_bot == NULL))
+			{
+				this->procFinish(state);
+				return;
+			}
+
+			for (int i = 0; i < MAX_SPELL; i++)
+			{
+				if (spell[i]->pressed() )
+				{
+					this->atkReport_bot = this->waifu_bot->attack(this->waifu_top, i);
+					this->atkReport_top = this->waifu_top->attack(this->waifu_bot, i);
+					break;
+				}
+			}
+			
+
+			if (this->is_quit)
+			{
+				this->unload();
+				*state = State::GAME;
+				return;
+			}
 		}
 
 		void print(void)
 		{
-			attack->print_onMap();
-			quit->print_onMap();
 			for (int i = 0; i < MAX_SPELL; i++)
 				spell[i]->print_onMap();
+
+			attack->print_onMap();
+			quit->print_onMap();
+
+			this->waifu_top->print();
+			this->waifu_bot->print();
+		}
+
+		void procFinish(State *state)
+		{
+			/* jsp encore */
+			*state = State::GAME;
 		}
 };
 
@@ -368,11 +471,15 @@ int init(State *state)
 
 	console->log("Game loaded successfully");
 
+	Waifu::load_all();
+
     return (0);
 }
 
 int exit(State *state)
 {
+	Waifu::unload_all();
+
 	console->log("Exit game ...");
 
 	delete (gameCnf);
@@ -413,13 +520,52 @@ int game(State *state)
 
 int fight(State *state)
 {
-	fightCnf->proc();
+	fightCnf->proc(state);
 
     return (0);
+}
+
+
+void bp_quit(Button *btn)
+{
+	console->log("Proc button quit");
+	fightCnf->is_quit = true;
+}
+
+void bp_attack(Button *btn)
+{
+	console->log("Proc button atk");
+	fightCnf->is_attack = true;
 }
 
 
 void bt0_proc(Button *btn)
 {
 	console->log("Button %d cliked !!! ", btn->i_btn);
+	fightCnf->is_attack = false;
 }
+
+void bp_spell0(Button *btn)
+{
+	console->log("Proc button spell 0");
+	fightCnf->is_attack = false;
+}
+
+void bp_spell1(Button *btn)
+{
+	console->log("Proc button spell 1");
+	fightCnf->is_attack = false;
+}
+
+void bp_spell2(Button *btn)
+{
+	console->log("Proc button spell 2");
+	fightCnf->is_attack = false;
+}
+
+void bp_spell3(Button *btn)
+{
+	console->log("Proc button spell 3");
+	fightCnf->is_attack = false;
+}
+
