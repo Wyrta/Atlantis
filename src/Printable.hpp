@@ -19,6 +19,7 @@ TTF_Font	*createFont(const char *path, int size);
 #define DECK_SIZE		6
 #define MAX_SPELL		4
 #define SPELLBOOK_SIZE	128
+#define MAX_WAIFU		64
 
 #define ANIMATION_SPEED	32
 
@@ -229,9 +230,10 @@ class Waifu : public Printable
 		~Waifu();
 
 		bool canFight(void);
-		string attack(Waifu *target, int spellIdx);
+		string attack(Waifu *target, int spell_num);
 		
 		static Spell	spellsBook[SPELLBOOK_SIZE];
+		static Waifu	*bestiary[MAX_WAIFU];
 		static void		load_all(void);
 		static void		unload_all(void);
 };
@@ -268,6 +270,8 @@ class Entity : public Printable
 		bool			canReach(Entity *entity);
 
 		Waifu			*getWaifu(int idx = 0);
+		bool			addWaifu(Waifu_params params);
+		bool			addWaifu(Waifu waifu);
 };
 
 

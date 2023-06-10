@@ -405,8 +405,8 @@ int init(State *state)
 	int RAMsize  = SDL_GetSystemRAM();
 
 	printf("Hardware info\r\n");
-	printf("\tCPU %d core %dMB L1 cache\r\n", CPUcount, CPUcache);
-	printf("\t%dMB of RAM\r\n\r\n", RAMsize);
+	printf("  CPU %d core %dMB L1 cache\r\n", CPUcount, CPUcache);
+	printf("  %dMB of RAM\r\n\r\n", RAMsize);
 
 	/* Main SDL initialisation */
 	window	= SDL_CreateWindow(app_version.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screen.w, screen.h, SDL_WINDOW_RESIZABLE);

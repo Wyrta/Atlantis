@@ -26,6 +26,7 @@ Entity				*Entity::allEntity[MAX_ENTITY];
 string 				NPC::history[MAX_DIALOG];
 Button				*Button::allButton[MAX_BUTTON];
 Spell 				Waifu::spellsBook[SPELLBOOK_SIZE];
+Waifu				*Waifu::bestiary[MAX_WAIFU];
 
 SDL_Texture *createTexture(SDL_Rect *rectangle, const char *path)
 {
@@ -533,7 +534,7 @@ void Tile::load_all_texture()
 	Tile_type tileType;
 	string    file;
 
-	console->log("Load tiles");
+	console->log("Load tiles...");
 
 	/* reset tile */
 	for (int i = 0; i < Tile_type::LAST_TTYPE; i++)
@@ -841,14 +842,10 @@ Waifu *Entity::getWaifu(int idx)
 	return (NULL);
 }
 
-std::string Waifu::attack(Waifu *target, int spellIdx)
-{
-	std::string report = "";
+		bool			addWaifu(Waifu_params params);
+		bool			addWaifu(Waifu waifu);
 
 
-
-	return (report);
-}
 
 /*
  ************************************************************************************************
@@ -876,15 +873,27 @@ bool Waifu::canFight(void)
 		return (false);
 }
 
+std::string Waifu::attack(Waifu *target, int spell_num)
+{
+	std::string report = "";
+	int spellIdx = this->spellsID[spell_num];
+
+	report = this->name + " attack > " + target->name + " with " + Waifu::spellsBook[spellIdx].name;
+	console->log(report.c_str());
+
+	return (report);
+}
+
 void Waifu::load_all(void)
 {
-//Spell	Waifu::spellsBook[SPELLBOOK_SIZE];
+	/* spell load */
 
 	ifstream	config("config/spells.cnf");
 	string		line;
+
 	int 		nb_spells = 0;
 
-	console->log("Load spells");
+	console->log("Load spells...");
 
 	while (getline(config, line) )
 	{
@@ -936,6 +945,61 @@ void Waifu::load_all(void)
 	}
 
 	console->log("Succesfully load %d spells", nb_spells);
+
+	config.close();
+
+	/* waifu load */
+
+	config.open("config/waifu.cnf");
+	line = "";
+	int 		nb_waifu = 0;
+
+	console->log("Load waifus...");
+
+	while (getline(config, line) )
+	{
+		if (line.c_str()[0] == '#')
+			continue;
+
+		string str_type, str_texture, str_spell0, str_spell1, str_spell2, str_spell3;
+		int spell0, spell1, spell2, spell3;
+		int	l_idx = 0;
+		int r_idx = 0;
+
+		r_idx = line.find(";");
+		str_type = line.substr(l_idx, r_idx - l_idx);
+
+		l_idx = r_idx + 1;
+		r_idx = line.find(";", l_idx);
+		str_texture = line.substr(l_idx, r_idx - l_idx);
+
+		l_idx = r_idx + 1;
+		r_idx = line.find(";", l_idx);
+		str_spell0 = line.substr(l_idx, r_idx - l_idx);
+
+		l_idx = r_idx + 1;
+		r_idx = line.find(";", l_idx);
+		str_spell1 = line.substr(l_idx, r_idx - l_idx);
+
+		l_idx = r_idx + 1;
+		r_idx = line.find(";", l_idx);
+		str_spell2 = line.substr(l_idx, r_idx - l_idx);
+
+		l_idx = r_idx + 1;
+		r_idx = line.find(";", l_idx);
+		str_spell3 = line.substr(l_idx, r_idx - l_idx);
+
+		spell0 = atoi(str_spell0.c_str());
+		spell1 = atoi(str_spell1.c_str());
+		spell2 = atoi(str_spell2.c_str());
+		spell3 = atoi(str_spell3.c_str());
+
+		// console->log("type:%s texture:%s spell0:%d spell1:%d spell2:%d spell3:%d", str_type.c_str(), str_texture.c_str(), spell0, spell1, spell2, spell3);
+
+		nb_waifu++;
+	}
+
+	console->log("Succesfully load %d waifus", nb_waifu);
 
 	config.close();
 }
@@ -1065,7 +1129,7 @@ void NPC::load_history(void)
 	int 		dialog_idx;
 	int			history_lenght = 0;
 
-	console->log("Load history");
+	console->log("Load history...");
 
 	/* reset dialogs */
 	for (int i = 0; i < MAX_DIALOG; i++)
@@ -1118,7 +1182,7 @@ void NPC::load_all(string mapname)
 
 	mapname = "[" + mapname + "]";
 
-	console->log("Load NPC (map: %s)", mapname.c_str());
+	console->log("Load NPC (map: %s)...", mapname.c_str());
 
 	/* reset entity */
 	NPC::unload_all();
@@ -1569,8 +1633,8 @@ void Text::print_onMap(SDL_Point offset)
 
 void Text::load_font(void)
 {
-	console->log("Load fonts");
-	
+	console->log("Load fonts...");
+
 	Text::fonts[Font_type::AVARA]	= createFont("Avara.ttf", 16);
 	Text::fonts[Font_type::DUNO]	= NULL;
 }

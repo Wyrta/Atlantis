@@ -1,6 +1,6 @@
-# type ; texture
-TWO_B;mobTest.png
-A_TWO;mobTest.png
-NINE_S;mobTest.png
-KAINE;mobTest.png
-NIER;mobTest.png
+# type ; texture ; spell 0 ; spell 1 ; spell 2 ; spell 3
+TWO_B;mobTest.png;0;1;2;3
+A_TWO;mobTest.png;0;1;2;3
+NINE_S;mobTest.png;0;1;2;4
+KAINE;mobTest.png;0;1;2;3
+NIER;mobTest.png;0;1;2;4
