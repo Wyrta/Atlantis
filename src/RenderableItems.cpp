@@ -85,7 +85,27 @@ SDL_Texture* RenderableItems::getTexture(std::string name, SDL_FRect* size) {
     }
     return NULL;
 }
+
 /**********************************************************************************************************************/
+
+void RenderableGroups::render(SDL_Renderer *renderer) {
+    for (int i = 0; i < this->items.size(); i++) {
+        this->items[i]->render(renderer);
+    }
+}
+
+void RenderableGroups::addItem(RenderableItems *item) {
+    this->items.push_back(item);
+}
+
+
+RenderableGroups::RenderableGroups(SDL_FPoint pos) : RenderableItems(pos) {
+
+}
+
+
+/**********************************************************************************************************************/
+
 
 Sprite::Sprite(std::string path, SDL_FPoint pos) : RenderableItems(pos) {
     this->name = path;
@@ -141,7 +161,7 @@ void AnimatedSprite::render(SDL_Renderer* renderer) {
 
 /**********************************************************************************************************************/
 
-TextSprite::TextSprite(std::string newContent, TTF_Font* font, SDL_Color color) {
+TextSprite::TextSprite(std::string newContent, TTF_Font* font, SDL_Color color, SDL_FPoint pos) : RenderableItems(pos) {
     if (font == NULL)
         SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "font == NULL");
 
@@ -154,6 +174,11 @@ void TextSprite::updateText(std::string newContent) {
     this->content = newContent;
     this->update = true;
 }
+
+std::string TextSprite::getText(void) {
+    return content;
+}
+
 
 void TextSprite::render(SDL_Renderer* renderer) {
     if (this->update) {

@@ -32,7 +32,21 @@ public:
     SDL_FRect area = {0, 0, 10, 10};
     virtual void render(SDL_Renderer *renderer) = 0;
 
+    void move(SDL_FPoint newPos, int duration);
+    void changePos(SDL_FPoint newPos);
+
     RenderableItems(SDL_FPoint pos = {0,0});
+};
+
+class RenderableGroups : public RenderableItems {
+private:
+    std::vector<RenderableItems*> items;
+    
+public:
+    void render(SDL_Renderer *renderer);
+    void addItem(RenderableItems *item);
+
+    RenderableGroups(SDL_FPoint pos = {0,0});
 };
 
 class Sprite : public RenderableItems {
@@ -70,8 +84,9 @@ public:
     SDL_Color color;
 
 public:
-    TextSprite(std::string newContent, TTF_Font* font, SDL_Color color);
+    TextSprite(std::string newContent, TTF_Font* font, SDL_Color color, SDL_FPoint pos = {0,0});
     void updateText(std::string newContent);
+    std::string getText(void);
 
     void render(SDL_Renderer *renderer);
 };
