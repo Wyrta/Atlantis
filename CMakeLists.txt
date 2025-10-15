@@ -95,6 +95,7 @@ endmacro()
 copy_helper("assets/mobTest.png")
 copy_helper("assets/npcTest.png")
 copy_helper("assets/Inter-VariableFont.ttf")
+copy_helper("assets/JackOfGears-YzD1v.ttf")
 
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES 
     # On macOS, make a proper .app bundle instead of a bare executable
