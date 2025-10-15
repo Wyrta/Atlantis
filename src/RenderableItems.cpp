@@ -91,7 +91,7 @@ Sprite::Sprite(std::string path, SDL_FPoint pos) : RenderableItems(pos) {
     this->name = path;
 
     this->texture = RenderableItems::getTexture(this->name, &this->area);
-    SDL_Log("0x%x", this->texture);
+    // SDL_Log("0x%x", this->texture);
 }
 
 void Sprite::render(SDL_Renderer* renderer) {
@@ -157,6 +157,7 @@ void TextSprite::updateText(std::string newContent) {
 
 void TextSprite::render(SDL_Renderer* renderer) {
     if (this->update) {
+	SDL_DestroyTexture(this->texture);
         this->texture = write(renderer, &this->area, this->font, this->content.c_str(), this->color);
         this->update = false;
     }
