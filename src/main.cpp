@@ -83,6 +83,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     *appstate = new AppContext{
        .window = window,
        .renderer = renderer,
+       .renderEngine = RenderEngine(renderer),
     };
     
     SDL_SetRenderVSync(renderer, SDL_RENDERER_VSYNC_ADAPTIVE);
@@ -93,7 +94,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     SDL_AddTimer(10, (SDL_TimerCallback)SDL_AppWorker, appstate);
 
     auto* app = (AppContext*)*appstate;
-    app->renderEngine.loadTextures(renderer);
+    app->renderEngine.loadTextures();
     TTF_Font* fontInter = TTF_OpenFont("assets/Inter-VariableFont.ttf", 24);
     app->renderEngine.items.push_back(new TextSprite("Hello world !", fontInter, (SDL_Color){255,0,255,255}));
     
@@ -184,13 +185,12 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
 SDL_AppResult SDL_AppIterate(void *appstate) {
     auto* app = (AppContext*)appstate;
     
-    SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
-    SDL_RenderFillRect(app->renderer, NULL);   // clear render
+    app->renderEngine.clearScreen();
 
     TextSprite* text = (TextSprite*)app->renderEngine.getItem(0);
     text->updateText(std::to_string(SDL_GetTicks()) + " ms");
 
-    app->renderEngine.render(app->renderer);
+    app->renderEngine.render();
 
     SDL_RenderPresent(app->renderer);
 

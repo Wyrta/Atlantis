@@ -15,12 +15,16 @@
 
 class RenderEngine {
 private:
+    SDL_Renderer* renderer;
 public:
-    RenderableItems* getItem(int id);
-    void render(SDL_Renderer* renderer);
     std::vector<RenderableItems*> items;
 
-    int loadTextures(SDL_Renderer* renderer);
+    RenderableItems* getItem(int id);
+    void render(void);
+    int loadTextures(void);
+    void clearScreen(void);
+    void setRenderer(SDL_Renderer* renderer);
+    RenderEngine(SDL_Renderer* renderer);
 
 };
 

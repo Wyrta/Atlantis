@@ -3,6 +3,11 @@
 namespace fs = std::filesystem;
 
 
+RenderEngine::RenderEngine(SDL_Renderer* renderer) {
+    this->renderer = renderer;
+}
+
+
 RenderableItems* RenderEngine::getItem(int id)
 {
     for(std::vector<RenderableItems*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
@@ -14,15 +19,18 @@ RenderableItems* RenderEngine::getItem(int id)
     return NULL;
 }
 
-void RenderEngine::render(SDL_Renderer* renderer)
-{
+void RenderEngine::setRenderer(SDL_Renderer* renderer) {
+    this->renderer = renderer;
+}
+
+void RenderEngine::render(void) {
     for(std::vector<RenderableItems*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
-        (*it)->render(renderer);
+        (*it)->render(this->renderer);
     }
 }
 
-int RenderEngine::loadTextures(SDL_Renderer* renderer) {
+int RenderEngine::loadTextures(void) {
     std::string path = "assets";
     int nbTexture = 0;
 
@@ -33,7 +41,7 @@ int RenderEngine::loadTextures(SDL_Renderer* renderer) {
             SDL_Log("File found: %s", filename.c_str());
             
             SDL_FRect size;
-            SDL_Texture* texture = createTexture(renderer, &size, filename.c_str());
+            SDL_Texture* texture = createTexture(this->renderer, &size, filename.c_str());
             
             std::string name = filename.substr(filename.find("/")+1);
             SDL_Log("Texture name: %s", name.c_str());
@@ -47,4 +55,9 @@ int RenderEngine::loadTextures(SDL_Renderer* renderer) {
     SDL_Log("Loaded %d textures", nbTexture);
 
     return nbTexture;
+}
+
+void RenderEngine::clearScreen(void) {
+    SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
+    SDL_RenderFillRect(this->renderer, NULL);   // clear render
 }
