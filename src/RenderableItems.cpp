@@ -1,6 +1,12 @@
 #include "RenderableItems.hpp"
 #include <unistd.h>
 
+#define ASSERT_RENDERER     \
+    if (renderer == NULL) { \
+        SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error renderer == NULL");\
+        return;\
+    }\
+
 
 uint32_t RenderableItems::nbId = 0;
 std::vector<Texture> RenderableItems::textures;
@@ -63,10 +69,12 @@ SDL_Texture *write(SDL_Renderer* render, SDL_FRect *rect, TTF_Font *font, const 
 
 /**********************************************************************************************************************/
 
-RenderableItems::RenderableItems(SDL_FPoint pos): id(RenderableItems::nbId++) {
+RenderableItems::RenderableItems(SDL_FPoint pos, GameItem* eventHandler): id(RenderableItems::nbId++) {
     SDL_Log("New RenderableItems with id %d", this->id);
     this->area.x = pos.x;
     this->area.y = pos.y;
+
+    this->eventHandler = eventHandler;
 }
 
 
@@ -95,9 +103,46 @@ void RenderableItems::setPosition(SDL_FPoint newPos) {
     this->area.y = newPos.y;
 }
 
+SDL_FPoint RenderableItems::calculateReelPosition(SDL_FPoint position) {
+    SDL_FPoint reelPosition;
+    reelPosition.x = this->area.x - position.x;
+    reelPosition.y = this->area.y - position.y;
+
+    return reelPosition;
+}
+
+void RenderableItems::onHover(SDL_FPoint position) {
+    position = this->calculateReelPosition(position);
+
+    if (eventHandler == NULL)
+        return;
+    eventHandler->onHover(position);
+}
+
+void RenderableItems::onClick(SDL_FPoint position) {
+    position = this->calculateReelPosition(position);
+    if (eventHandler == NULL)
+        return;
+    eventHandler->onClick(position);
+}
+
+void RenderableItems::onHold(SDL_FPoint position) {
+    position = this->calculateReelPosition(position);
+    if (eventHandler == NULL)
+        return;
+    eventHandler->onHold(position);
+}
+
+void RenderableItems::setEventHandler(GameItem* eventHandler) {
+    this->eventHandler = eventHandler;
+}
+
+
 /**********************************************************************************************************************/
 
 void RenderableGroups::render(SDL_Renderer *renderer) {
+    ASSERT_RENDERER
+    
     for (int i = 0; i < this->items.size(); i++) {
         SDL_FPoint position;
         position.x = this->offset[i].x + this->area.x;
@@ -110,8 +155,11 @@ void RenderableGroups::render(SDL_Renderer *renderer) {
 
 void RenderableGroups::addItem(RenderableItems *item) {
     SDL_FPoint position;
-    position.x = item->area.x;
-    position.y = item->area.y;
+    SDL_FRect itemArea;
+    itemArea = item->getArea();
+
+    position.x = itemArea.x;
+    position.y = itemArea.y;
 
     this->offset.push_back(position);
 
@@ -133,23 +181,24 @@ RenderableGroups::RenderableGroups(SDL_FPoint pos) : RenderableItems(pos) {
 
 Sprite::Sprite(std::string path, SDL_FPoint pos) : RenderableItems(pos) {
     this->name = path;
-
-    this->texture = RenderableItems::getTexture(this->name, &this->area);
-    // SDL_Log("0x%x", this->texture);
+    SDL_FRect tmpArea;
+    this->texture = RenderableItems::getTexture(this->name, &tmpArea);
+    this->area.x = pos.x;
+    this->area.y = pos.y;
+    this->area.w = tmpArea.w;
+    this->area.h = tmpArea.h;
 }
 
 void Sprite::render(SDL_Renderer* renderer) {
-    if (renderer == NULL) {
-        SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error Sprite::render renderer == NULL");
-        return;
-    }
+    ASSERT_RENDERER
 
     if (this->texture == NULL) {
         SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error Sprite::render texture == NULL");
         return;
     }
 
-	SDL_RenderTexture(renderer, this->texture, NULL, &this->area);
+    SDL_FRect area = this->area;
+	SDL_RenderTexture(renderer, this->texture, NULL, &area);
 }
 
 /**********************************************************************************************************************/
@@ -168,6 +217,8 @@ AnimatedSprite::AnimatedSprite(std::vector<std::string> names, int frameDuration
 }
 
 void AnimatedSprite::render(SDL_Renderer* renderer) {
+    ASSERT_RENDERER
+
     this->frames[this->currentFrameID]->render(renderer);
 
     if ((this->currentFrameTicks - this->lastFrameTicks) >= this->frameDuration) {
@@ -210,13 +261,23 @@ std::string TextSprite::getText(void) {
 
 
 void TextSprite::render(SDL_Renderer* renderer) {
+    ASSERT_RENDERER
+    
     if (this->update) {
-	SDL_DestroyTexture(this->texture);
-        this->texture = write(renderer, &this->area, this->font, this->content.c_str(), this->color);
+	    SDL_DestroyTexture(this->texture);
+        SDL_FRect area;
+        this->texture = write(renderer, &area, this->font, this->content.c_str(), this->color);
+        this->area = area;
         this->update = false;
     }
 
-	SDL_RenderTexture(renderer, this->texture, NULL, &this->area);
+    if (renderer == NULL) {
+        SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error TextSprite::render renderer == NULL");
+        return;
+    }
+
+    SDL_FRect area = this->area;
+	SDL_RenderTexture(renderer, this->texture, NULL, &area);
 }
 
 /**********************************************************************************************************************/

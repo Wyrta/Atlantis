@@ -143,6 +143,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                 test.push_back("mobTest.png");
                 test.push_back("npcTest.png");
                 app->renderEngine.items.push_back(new AnimatedSprite(test, 200, mouse));
+                AnimatedSprite* item = (AnimatedSprite*)app->renderEngine.items[app->renderEngine.items.size()-1];
+                //SDL_Log("area: x%f y%f w%f h%f", item->getArea().x, item->getArea().y, item->getArea().w, item->getArea().h);
             }
             if (mouse_right == true) {
                 RenderableGroups* group = (RenderableGroups*)app->renderEngine.getItem(1);

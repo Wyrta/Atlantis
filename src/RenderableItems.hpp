@@ -10,9 +10,11 @@
 #include <string>
 #include <iterator>
 #include <vector>
+#include "GameItems.hpp"
 
 SDL_Texture *createTexture(SDL_Renderer* render, SDL_FRect* rectangle, const char* path);
 
+class GameItem;
 
 struct Texture {
     SDL_Texture* texture;
@@ -22,20 +24,32 @@ struct Texture {
 
 
 class RenderableItems {
+private:
+    GameItem* eventHandler;
+protected:
+    SDL_FRect area = {0, 0, 10, 10};
+
 public:
     const uint32_t id;
     static uint32_t nbId;
     
     static std::vector<Texture> textures;
     static SDL_Texture* getTexture(std::string name, SDL_FRect* size = NULL);
+    SDL_FPoint calculateReelPosition(SDL_FPoint position);
     
-    SDL_FRect area = {0, 0, 10, 10};
     virtual void render(SDL_Renderer *renderer) = 0;
 
     void move(SDL_FPoint newPos, int duration);
     void setPosition(SDL_FPoint newPos);
+    SDL_FRect getArea(void) {return this->area;};
 
-    RenderableItems(SDL_FPoint pos = {0,0});
+    RenderableItems(SDL_FPoint pos = {0,0}, GameItem* eventHandler = NULL);
+
+    void onHover(SDL_FPoint position);
+    void onClick(SDL_FPoint position);
+    void onHold(SDL_FPoint position);
+    void setEventHandler(GameItem* eventHandler);
+
 };
 
 class RenderableGroups : public RenderableItems {

@@ -4,7 +4,7 @@ namespace fs = std::filesystem;
 
 
 RenderEngine::RenderEngine(SDL_Renderer* renderer) {
-    this->renderer = renderer;
+    this->setRenderer(renderer);
 }
 
 
