@@ -33,7 +33,7 @@ public:
     virtual void render(SDL_Renderer *renderer) = 0;
 
     void move(SDL_FPoint newPos, int duration);
-    void changePos(SDL_FPoint newPos);
+    void setPosition(SDL_FPoint newPos);
 
     RenderableItems(SDL_FPoint pos = {0,0});
 };
@@ -41,6 +41,7 @@ public:
 class RenderableGroups : public RenderableItems {
 private:
     std::vector<RenderableItems*> items;
+    std::vector<SDL_FPoint> offset;
     
 public:
     void render(SDL_Renderer *renderer);
@@ -72,6 +73,7 @@ private:
 public:
     AnimatedSprite(std::vector<std::string> names, int frameDuration, SDL_FPoint pos = {0,0});
     void render(SDL_Renderer *renderer);
+    void changeFramerate(int frameDuration);
 };
 
 class TextSprite : public RenderableItems {

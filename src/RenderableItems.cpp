@@ -86,15 +86,39 @@ SDL_Texture* RenderableItems::getTexture(std::string name, SDL_FRect* size) {
     return NULL;
 }
 
+void RenderableItems::move(SDL_FPoint newPos, int duration) {
+    SDL_Log("Error RenderableItems::move not implemented");
+}
+
+void RenderableItems::setPosition(SDL_FPoint newPos) {
+    this->area.x = newPos.x;
+    this->area.y = newPos.y;
+}
+
 /**********************************************************************************************************************/
 
 void RenderableGroups::render(SDL_Renderer *renderer) {
     for (int i = 0; i < this->items.size(); i++) {
+        SDL_FPoint position;
+        position.x = this->offset[i].x + this->area.x;
+        position.y = this->offset[i].y + this->area.y;
+
+        this->items[i]->setPosition(position);
         this->items[i]->render(renderer);
     }
 }
 
 void RenderableGroups::addItem(RenderableItems *item) {
+    SDL_FPoint position;
+    position.x = item->area.x;
+    position.y = item->area.y;
+
+    this->offset.push_back(position);
+
+    position.x += this->area.x;
+    position.y += this->area.y;
+
+    item->setPosition(position);
     this->items.push_back(item);
 }
 
@@ -158,6 +182,11 @@ void AnimatedSprite::render(SDL_Renderer* renderer) {
         this->currentFrameTicks = SDL_GetTicks();
     }
 }
+
+void AnimatedSprite::changeFramerate(int frameDuration) {
+    this->frameDuration = frameDuration;
+}
+
 
 /**********************************************************************************************************************/
 

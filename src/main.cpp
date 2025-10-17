@@ -95,10 +95,14 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     auto* app = (AppContext*)*appstate;
     app->renderEngine.loadTextures(renderer);
     TTF_Font* fontInter = TTF_OpenFont("assets/Inter-VariableFont.ttf", 24);
-    TTF_Font* fontFhaNicholson = TTF_OpenFont("assets/JackOfGears-YzD1v.ttf", 32);
     app->renderEngine.items.push_back(new TextSprite("Hello world !", fontInter, (SDL_Color){255,0,255,255}));
-    app->renderEngine.items.push_back(new TextSprite("Enter text: ", fontFhaNicholson, (SDL_Color){255,255,0,255}, (SDL_FPoint){0,32}));
+    
+    RenderableGroups* group = new RenderableGroups({100, 100});
+    app->renderEngine.items.push_back(group);
 
+    group->addItem(new TextSprite("Hello world !", fontInter, (SDL_Color){255,0,255,255}, (SDL_FPoint){10, 10}));
+    group->addItem(new TextSprite("Hello world 2", fontInter, (SDL_Color){255,0,255,255}, (SDL_FPoint){10, 50}));
+    
     SDL_StartTextInput(app->window);
 
     SDL_Log("Application started successfully!");
@@ -139,42 +143,35 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                 test.push_back("npcTest.png");
                 app->renderEngine.items.push_back(new AnimatedSprite(test, 200, mouse));
             }
+            if (mouse_right == true) {
+                RenderableGroups* group = (RenderableGroups*)app->renderEngine.getItem(1);
+                group->setPosition(mouse);
+
+                AnimatedSprite* animation = (AnimatedSprite*)app->renderEngine.getItem(4);
+                if (animation != NULL) {
+                    animation->changeFramerate(3000);
+                }
+            }
         } break;
         case SDL_EVENT_MOUSE_WHEEL: {
 
         } break;
         case SDL_EVENT_KEY_DOWN: {
-            SDL_Log("Key pressed: %d", event->key.scancode);
+            // SDL_Log("Key pressed: %d", event->key.scancode);
 
             int key = event->key.scancode;
 
-                switch (key) {
-                    case 41: 
-                        app->app_quit = SDL_APP_SUCCESS;
-                        break;
-                    case 42: {
-                        TextSprite* item = (TextSprite*)app->renderEngine.getItem(1);
-                        std::string text = item->getText();
-                        text.pop_back();
-                        if (text.size() < ((std::string)"Enter text: ").size()) {
-                            text = "Enter text: ";
-                        }
-                        item->updateText(text);
-                    } break;
-                }
+            switch (key) {
+                case 41: 
+                    app->app_quit = SDL_APP_SUCCESS;
+                    break;
+                default: {
+                    
+                } break;
+            }
             } break;
-        case SDL_EVENT_KEY_UP: {
-            SDL_Log("Key up: %d", event->key.scancode);
-
-            } break;
-        case SDL_EVENT_TEXT_INPUT: {
-            SDL_TextInputEvent* textEvent = (SDL_TextInputEvent*)event;
-            std::string text(event->text.text);
-
-            TextSprite* item = (TextSprite*)app->renderEngine.getItem(1);
-            item->updateText(item->getText() + text);
-            break;
-        }
+        case SDL_EVENT_KEY_UP: break;
+        case SDL_EVENT_TEXT_INPUT: break;
 
         default:
             // SDL_Log("Event: %d", event->type);
@@ -193,15 +190,6 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     TextSprite* text = (TextSprite*)app->renderEngine.getItem(0);
     text->updateText(std::to_string(SDL_GetTicks()) + " ms");
 
-    text = (TextSprite*)app->renderEngine.getItem(1);
-    std::string content = text->getText();
-    if (content[content.size()-1] == '_')
-        content.pop_back();
-    else
-        content += "_";
-
-    text->updateText(content);
-    
     app->renderEngine.render(app->renderer);
 
     SDL_RenderPresent(app->renderer);
