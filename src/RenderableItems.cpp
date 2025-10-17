@@ -5,7 +5,7 @@
     if (renderer == NULL) { \
         SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error renderer == NULL");\
         return;\
-    }\
+    }
 
 
 uint32_t RenderableItems::nbId = 0;
@@ -73,7 +73,7 @@ RenderableItems::RenderableItems(SDL_FPoint pos, GameItem* eventHandler): id(Ren
     SDL_Log("New RenderableItems with id %d", this->id);
     this->area.x = pos.x;
     this->area.y = pos.y;
-
+    
     this->eventHandler = eventHandler;
 }
 
@@ -248,6 +248,8 @@ TextSprite::TextSprite(std::string newContent, TTF_Font* font, SDL_Color color, 
     this->updateText(newContent);
     this->font = font;
     this->color = color;
+
+    LOG_RECT(this->area)
 }
 
 void TextSprite::updateText(std::string newContent) {
@@ -265,17 +267,15 @@ void TextSprite::render(SDL_Renderer* renderer) {
     
     if (this->update) {
 	    SDL_DestroyTexture(this->texture);
-        SDL_FRect area;
+        SDL_FRect area = {0,0,0,0};
         this->texture = write(renderer, &area, this->font, this->content.c_str(), this->color);
         this->area = area;
         this->update = false;
     }
 
-    if (renderer == NULL) {
-        SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error TextSprite::render renderer == NULL");
-        return;
-    }
+    ASSERT_RENDERER
 
+    
     SDL_FRect area = this->area;
 	SDL_RenderTexture(renderer, this->texture, NULL, &area);
 }
