@@ -248,8 +248,6 @@ TextSprite::TextSprite(std::string newContent, TTF_Font* font, SDL_Color color, 
     this->updateText(newContent);
     this->font = font;
     this->color = color;
-
-    LOG_RECT(this->area)
 }
 
 void TextSprite::updateText(std::string newContent) {

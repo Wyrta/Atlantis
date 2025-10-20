@@ -127,6 +127,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
             } break;
 
         case SDL_EVENT_MOUSE_MOTION:
+            app->renderEngine.mouseMotion();
+            break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
         case SDL_EVENT_MOUSE_BUTTON_UP: {
             SDL_FPoint mouse;
@@ -136,6 +138,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
             bool mouse_middle = (mask & SDL_BUTTON_MMASK);
             bool mouse_x1 = (mask & SDL_BUTTON_X1MASK);
             bool mouse_x2 = (mask & SDL_BUTTON_X2MASK);
+
+            app->renderEngine.mouseClick();
+            break;
 
             // SDL_Log("Mouse position : x%f, y%f %s%s%s%s%s", mouse.x, mouse.y, mouse_left ? "click left " : "", mouse_right ? "click right " : "", mouse_middle ? "click middle " : "", mouse_x1 ? "click x1 " : "", mouse_x2 ? "click x2" : "");
             if (mouse_left == true) {

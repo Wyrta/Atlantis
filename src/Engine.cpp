@@ -61,3 +61,42 @@ void RenderEngine::clearScreen(void) {
     SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
     SDL_RenderFillRect(this->renderer, NULL);   // clear render
 }
+
+void RenderEngine::mouseMotion(void) {
+    SDL_FPoint mouse;
+    SDL_FRect itemArea;
+
+    for(std::vector<RenderableItems*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
+    {
+        itemArea = (*it)->getArea();
+
+        if (SDL_PointInRectFloat((const SDL_FPoint*)&mouse, (const SDL_FRect*)&itemArea) == false) 
+            continue;
+
+        (*it)->onHover(mouse);
+    }
+}
+
+void RenderEngine::mouseClick(void) {
+    SDL_FPoint mouse;
+    SDL_FRect itemArea;
+    Uint32 mask = SDL_GetMouseState(&mouse.x, &mouse.y);
+    bool left  = (mask & SDL_BUTTON_LMASK);
+    // bool right = (mask & SDL_BUTTON_RMASK);
+    // bool middle = (mask & SDL_BUTTON_MMASK);
+    // bool x1 = (mask & SDL_BUTTON_X1MASK);
+    // bool x2 = (mask & SDL_BUTTON_X2MASK);
+
+    for(std::vector<RenderableItems*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
+    {
+        itemArea = (*it)->getArea();
+
+        if (SDL_PointInRectFloat((const SDL_FPoint*)&mouse, (const SDL_FRect*)&itemArea) == false) 
+            continue;
+
+        if (left == true) {
+            SDL_Log("Click on %d", (*it)->id);
+            (*it)->onClick(mouse);
+        }
+    }
+}
