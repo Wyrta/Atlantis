@@ -1,5 +1,21 @@
 #include "GameItems.hpp"
 
+uint32_t GameItem::nbId = 0;
+
+GameItem::GameItem(SDL_FPoint position) : id(nbId++) {
+    this->position = position;
+    this->renderableItem = NULL;
+
+}
+
+void GameItem::setPosition(SDL_FPoint position) {
+    this->position = position;
+}
+
+void GameItem::setRenderableItem(RenderableItems* renderableItem) {
+    this->renderableItem = renderableItem;
+}
+
 void GameItem::onHover(SDL_FPoint position) {
 
 }
