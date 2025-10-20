@@ -142,6 +142,9 @@ void RenderableItems::setEventHandler(GameItem* eventHandler) {
 
 void RenderableGroups::render(SDL_Renderer *renderer) {
     ASSERT_RENDERER
+    SDL_FRect test = this->area;
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_RenderFillRect(renderer, &test);   // clear render
     
     for (int i = 0; i < this->items.size(); i++) {
         SDL_FPoint position;
@@ -168,6 +171,14 @@ void RenderableGroups::addItem(RenderableItems *item) {
 
     item->setPosition(position);
     this->items.push_back(item);
+
+    // update area
+    SDL_FRect src, dst;
+    src = this->area;
+    dst = {0.0, 0.0, 0.0, 0.0};
+    SDL_GetRectUnionFloat((const SDL_FRect*)&src, (const SDL_FRect*)&itemArea, &dst);
+    this->area.w = dst.w;
+    this->area.h = dst.h;
 }
 
 
