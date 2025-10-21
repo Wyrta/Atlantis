@@ -1,4 +1,4 @@
-#include "GameItems.hpp"
+#include "GameItem.hpp"
 
 uint32_t GameItem::nbId = 0;
 

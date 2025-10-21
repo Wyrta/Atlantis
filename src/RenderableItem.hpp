@@ -10,7 +10,7 @@
 #include <string>
 #include <iterator>
 #include <vector>
-#include "GameItems.hpp"
+#include "GameItem.hpp"
 
 SDL_Texture *createTexture(SDL_Renderer* render, SDL_FRect* rectangle, const char* path);
 

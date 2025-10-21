@@ -37,7 +37,7 @@ PRIVATE
     src/main.cpp
     src/RenderableItem.cpp
     src/Engine.cpp
-    src/GameItems.cpp
+    src/GameItem.cpp
 )
 
 # Set C++ version
