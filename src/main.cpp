@@ -101,8 +101,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     RenderableGroups* group = new RenderableGroups({100, 100});
     app->renderEngine.items.push_back(group);
 
-    group->addItem(new TextSprite("Hello world !", fontInter, (SDL_Color){255,0,255,255}, (SDL_FPoint){10, 10}));
-    group->addItem(new TextSprite("Hello world 2", fontInter, (SDL_Color){255,0,255,255}, (SDL_FPoint){10, 50}));
+    group->addItem(new TextSprite("Hello world !", fontInter, (SDL_Color){255,0,255,255}, (SDL_FPoint){0, 0}));
+    group->addItem(new TextSprite("Hello world 2", fontInter, (SDL_Color){255,0,255,255}, (SDL_FPoint){0, 50}));
     
     SDL_StartTextInput(app->window);
 

@@ -142,10 +142,12 @@ void RenderableItems::setEventHandler(GameItem* eventHandler) {
 
 void RenderableGroups::render(SDL_Renderer *renderer) {
     ASSERT_RENDERER
-    SDL_FRect test = this->area;
+
+    this->area = this->updateArea();
+
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    SDL_RenderFillRect(renderer, &test);   // clear render
-    
+    SDL_RenderFillRect(renderer, &this->area);
+
     for (int i = 0; i < this->items.size(); i++) {
         SDL_FPoint position;
         position.x = this->offset[i].x + this->area.x;
@@ -156,10 +158,31 @@ void RenderableGroups::render(SDL_Renderer *renderer) {
     }
 }
 
+SDL_FRect RenderableGroups::updateArea(void) {
+    SDL_FRect src = this->area;
+    SDL_FRect dst;
+    src.w = 0;
+    src.h = 0;
+
+    for (int i = 0; i < this->items.size(); i++) {
+        SDL_FRect itemArea = this->items[i]->getArea();
+        itemArea.x = this->offset[i].x + this->area.x;
+        itemArea.y = this->offset[i].y + this->area.y;
+
+        SDL_GetRectUnionFloat((const SDL_FRect*)&src, (const SDL_FRect*)&itemArea, &dst);
+        src = dst;
+    }
+
+    return src;
+}
+
+
 void RenderableGroups::addItem(RenderableItems *item) {
     SDL_FPoint position;
     SDL_FRect itemArea;
     itemArea = item->getArea();
+
+    SDL_Log("RenderableGroups::addItem(): x%f y%f w%f h%f", itemArea.x, itemArea.y, itemArea.w, itemArea.h);
 
     position.x = itemArea.x;
     position.y = itemArea.y;
@@ -174,7 +197,11 @@ void RenderableGroups::addItem(RenderableItems *item) {
 
     // update area
     SDL_FRect src, dst;
-    src = this->area;
+    src = item->getArea();
+    src.x = 0;
+    src.y = 0;
+    itemArea.x = 0;
+    itemArea.y = 0;
     dst = {0.0, 0.0, 0.0, 0.0};
     SDL_GetRectUnionFloat((const SDL_FRect*)&src, (const SDL_FRect*)&itemArea, &dst);
     this->area.w = dst.w;

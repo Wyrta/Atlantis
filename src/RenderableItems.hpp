@@ -61,6 +61,8 @@ public:
     void render(SDL_Renderer *renderer);
     void addItem(RenderableItems *item);
 
+    SDL_FRect updateArea(void);
+
     RenderableGroups(SDL_FPoint pos = {0,0});
 };
 
