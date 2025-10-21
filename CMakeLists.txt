@@ -35,7 +35,7 @@ add_executable(${EXECUTABLE_NAME})
 target_sources(${EXECUTABLE_NAME} 
 PRIVATE 
     src/main.cpp
-    src/RenderableItems.cpp
+    src/RenderableItem.cpp
     src/Engine.cpp
     src/GameItems.cpp
 )

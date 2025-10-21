@@ -23,7 +23,7 @@ struct Texture {
 };
 
 
-class RenderableItems {
+class RenderableItem {
 private:
     GameItem* eventHandler;
 protected:
@@ -43,7 +43,7 @@ public:
     void setPosition(SDL_FPoint newPos);
     SDL_FRect getArea(void) {return this->area;};
 
-    RenderableItems(SDL_FPoint pos = {0,0}, GameItem* eventHandler = NULL);
+    RenderableItem(SDL_FPoint pos = {0,0}, GameItem* eventHandler = NULL);
 
     void onHover(SDL_FPoint position);
     void onClick(SDL_FPoint position);
@@ -52,21 +52,21 @@ public:
 
 };
 
-class RenderableGroups : public RenderableItems {
+class RenderableGroups : public RenderableItem {
 private:
-    std::vector<RenderableItems*> items;
+    std::vector<RenderableItem*> items;
     std::vector<SDL_FPoint> offset;
     
 public:
     void render(SDL_Renderer *renderer);
-    void addItem(RenderableItems *item);
+    void addItem(RenderableItem *item);
 
     SDL_FRect updateArea(void);
 
     RenderableGroups(SDL_FPoint pos = {0,0});
 };
 
-class Sprite : public RenderableItems {
+class Sprite : public RenderableItem {
 private:
     std::string name;
     SDL_Texture* texture;
@@ -77,9 +77,9 @@ public:
     Sprite(std::string name, SDL_FPoint pos = {0,0});
 };
 
-class AnimatedSprite : public RenderableItems {
+class AnimatedSprite : public RenderableItem {
 private:
-    std::vector<RenderableItems*> frames;
+    std::vector<RenderableItem*> frames;
     int currentFrameID;
     
     int frameDuration;      // ms
@@ -92,7 +92,7 @@ public:
     void changeFramerate(int frameDuration);
 };
 
-class TextSprite : public RenderableItems {
+class TextSprite : public RenderableItem {
 public:
     std::string content;
     bool update;

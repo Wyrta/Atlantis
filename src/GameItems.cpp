@@ -12,7 +12,7 @@ void GameItem::setPosition(SDL_FPoint position) {
     this->position = position;
 }
 
-void GameItem::setRenderableItem(RenderableItems* renderableItem) {
+void GameItem::setRenderableItem(RenderableItem* renderableItem) {
     this->renderableItem = renderableItem;
 }
 

@@ -1,4 +1,4 @@
-#include "RenderableItems.hpp"
+#include "RenderableItem.hpp"
 #include <unistd.h>
 
 #define ASSERT_RENDERER     \
@@ -8,8 +8,8 @@
     }
 
 
-uint32_t RenderableItems::nbId = 0;
-std::vector<Texture> RenderableItems::textures;
+uint32_t RenderableItem::nbId = 0;
+std::vector<Texture> RenderableItem::textures;
 
 SDL_Texture *createTexture(SDL_Renderer* render, SDL_FRect* rectangle, const char* path) {
 	SDL_Surface *surface = NULL;
@@ -69,8 +69,8 @@ SDL_Texture *write(SDL_Renderer* render, SDL_FRect *rect, TTF_Font *font, const 
 
 /**********************************************************************************************************************/
 
-RenderableItems::RenderableItems(SDL_FPoint pos, GameItem* eventHandler): id(RenderableItems::nbId++) {
-    SDL_Log("New RenderableItems with id %d", this->id);
+RenderableItem::RenderableItem(SDL_FPoint pos, GameItem* eventHandler): id(RenderableItem::nbId++) {
+    SDL_Log("New RenderableItem with id %d", this->id);
     this->area.x = pos.x;
     this->area.y = pos.y;
     
@@ -78,8 +78,8 @@ RenderableItems::RenderableItems(SDL_FPoint pos, GameItem* eventHandler): id(Ren
 }
 
 
-SDL_Texture* RenderableItems::getTexture(std::string name, SDL_FRect* size) {
-    for(std::vector<Texture>::iterator it = RenderableItems::textures.begin(); it != RenderableItems::textures.end(); ++it)
+SDL_Texture* RenderableItem::getTexture(std::string name, SDL_FRect* size) {
+    for(std::vector<Texture>::iterator it = RenderableItem::textures.begin(); it != RenderableItem::textures.end(); ++it)
     {
         if ((*it).name != name)
             continue;
@@ -94,16 +94,16 @@ SDL_Texture* RenderableItems::getTexture(std::string name, SDL_FRect* size) {
     return NULL;
 }
 
-void RenderableItems::move(SDL_FPoint newPos, int duration) {
-    SDL_Log("Error RenderableItems::move not implemented");
+void RenderableItem::move(SDL_FPoint newPos, int duration) {
+    SDL_Log("Error RenderableItem::move not implemented");
 }
 
-void RenderableItems::setPosition(SDL_FPoint newPos) {
+void RenderableItem::setPosition(SDL_FPoint newPos) {
     this->area.x = newPos.x;
     this->area.y = newPos.y;
 }
 
-SDL_FPoint RenderableItems::calculateReelPosition(SDL_FPoint position) {
+SDL_FPoint RenderableItem::calculateReelPosition(SDL_FPoint position) {
     SDL_FPoint reelPosition;
     reelPosition.x = this->area.x - position.x;
     reelPosition.y = this->area.y - position.y;
@@ -111,7 +111,7 @@ SDL_FPoint RenderableItems::calculateReelPosition(SDL_FPoint position) {
     return reelPosition;
 }
 
-void RenderableItems::onHover(SDL_FPoint position) {
+void RenderableItem::onHover(SDL_FPoint position) {
     position = this->calculateReelPosition(position);
 
     if (eventHandler == NULL)
@@ -119,21 +119,21 @@ void RenderableItems::onHover(SDL_FPoint position) {
     eventHandler->onHover(position);
 }
 
-void RenderableItems::onClick(SDL_FPoint position) {
+void RenderableItem::onClick(SDL_FPoint position) {
     position = this->calculateReelPosition(position);
     if (eventHandler == NULL)
         return;
     eventHandler->onClick(position);
 }
 
-void RenderableItems::onHold(SDL_FPoint position) {
+void RenderableItem::onHold(SDL_FPoint position) {
     position = this->calculateReelPosition(position);
     if (eventHandler == NULL)
         return;
     eventHandler->onHold(position);
 }
 
-void RenderableItems::setEventHandler(GameItem* eventHandler) {
+void RenderableItem::setEventHandler(GameItem* eventHandler) {
     this->eventHandler = eventHandler;
 }
 
@@ -177,7 +177,7 @@ SDL_FRect RenderableGroups::updateArea(void) {
 }
 
 
-void RenderableGroups::addItem(RenderableItems *item) {
+void RenderableGroups::addItem(RenderableItem *item) {
     SDL_FPoint position;
     SDL_FRect itemArea;
     itemArea = item->getArea();
@@ -209,7 +209,7 @@ void RenderableGroups::addItem(RenderableItems *item) {
 }
 
 
-RenderableGroups::RenderableGroups(SDL_FPoint pos) : RenderableItems(pos) {
+RenderableGroups::RenderableGroups(SDL_FPoint pos) : RenderableItem(pos) {
 
 }
 
@@ -217,10 +217,10 @@ RenderableGroups::RenderableGroups(SDL_FPoint pos) : RenderableItems(pos) {
 /**********************************************************************************************************************/
 
 
-Sprite::Sprite(std::string path, SDL_FPoint pos) : RenderableItems(pos) {
+Sprite::Sprite(std::string path, SDL_FPoint pos) : RenderableItem(pos) {
     this->name = path;
     SDL_FRect tmpArea;
-    this->texture = RenderableItems::getTexture(this->name, &tmpArea);
+    this->texture = RenderableItem::getTexture(this->name, &tmpArea);
     this->area.x = pos.x;
     this->area.y = pos.y;
     this->area.w = tmpArea.w;
@@ -241,7 +241,7 @@ void Sprite::render(SDL_Renderer* renderer) {
 
 /**********************************************************************************************************************/
 
-AnimatedSprite::AnimatedSprite(std::vector<std::string> names, int frameDuration, SDL_FPoint pos) : RenderableItems(pos) {
+AnimatedSprite::AnimatedSprite(std::vector<std::string> names, int frameDuration, SDL_FPoint pos) : RenderableItem(pos) {
     for (int i = 0;i<names.size();i++) {
         Sprite* item = new Sprite(names[i], (SDL_FPoint){this->area.x, this->area.y});
         frames.push_back(item);
@@ -279,7 +279,7 @@ void AnimatedSprite::changeFramerate(int frameDuration) {
 
 /**********************************************************************************************************************/
 
-TextSprite::TextSprite(std::string newContent, TTF_Font* font, SDL_Color color, SDL_FPoint pos) : RenderableItems(pos) {
+TextSprite::TextSprite(std::string newContent, TTF_Font* font, SDL_Color color, SDL_FPoint pos) : RenderableItem(pos) {
     if (font == NULL)
         SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "font == NULL");
 

@@ -10,16 +10,16 @@
 #include <string>
 #include <vector>
 
-#include "RenderableItems.hpp"
+#include "RenderableItem.hpp"
 
 
 class RenderEngine {
 private:
     SDL_Renderer* renderer;
 public:
-    std::vector<RenderableItems*> items;
+    std::vector<RenderableItem*> items;
 
-    RenderableItems* getItem(int id);
+    RenderableItem* getItem(int id);
     void render(void);
     int loadTextures(void);
     void clearScreen(void);

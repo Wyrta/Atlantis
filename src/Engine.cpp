@@ -8,9 +8,9 @@ RenderEngine::RenderEngine(SDL_Renderer* renderer) {
 }
 
 
-RenderableItems* RenderEngine::getItem(int id)
+RenderableItem* RenderEngine::getItem(int id)
 {
-    for(std::vector<RenderableItems*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
+    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
         if ((*it)->id == id)
             return *it;
@@ -24,7 +24,7 @@ void RenderEngine::setRenderer(SDL_Renderer* renderer) {
 }
 
 void RenderEngine::render(void) {
-    for(std::vector<RenderableItems*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
+    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
         (*it)->render(this->renderer);
     }
@@ -46,7 +46,7 @@ int RenderEngine::loadTextures(void) {
             std::string name = filename.substr(filename.find("/")+1);
             SDL_Log("Texture name: %s", name.c_str());
 
-            RenderableItems::textures.push_back((Texture){texture, name, size});
+            RenderableItem::textures.push_back((Texture){texture, name, size});
             
             nbTexture++;
         }
@@ -66,7 +66,7 @@ void RenderEngine::mouseMotion(void) {
     SDL_FPoint mouse;
     SDL_FRect itemArea;
 
-    for(std::vector<RenderableItems*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
+    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
         itemArea = (*it)->getArea();
 
@@ -87,7 +87,7 @@ void RenderEngine::mouseClick(void) {
     // bool x1 = (mask & SDL_BUTTON_X1MASK);
     // bool x2 = (mask & SDL_BUTTON_X2MASK);
 
-    for(std::vector<RenderableItems*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
+    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
         itemArea = (*it)->getArea();
 

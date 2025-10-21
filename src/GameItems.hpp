@@ -10,14 +10,14 @@
 #include <string>
 #include <iterator>
 #include <vector>
-#include "RenderableItems.hpp"
+#include "RenderableItem.hpp"
 
-class RenderableItems;
+class RenderableItem;
 
 class GameItem {
 private:
     SDL_FPoint position;
-    RenderableItems* renderableItem;
+    RenderableItem* renderableItem;
 
 public:
     const uint32_t id;
@@ -27,7 +27,7 @@ public:
 
     virtual void process(int tick) = 0;
     void setPosition(SDL_FPoint position);
-    void setRenderableItem(RenderableItems* renderableItem);
+    void setRenderableItem(RenderableItem* renderableItem);
 
     void onHover(SDL_FPoint position);
     void onClick(SDL_FPoint position);
