@@ -114,6 +114,8 @@ SDL_FPoint RenderableItem::calculateReelPosition(SDL_FPoint position) {
 void RenderableItem::onHover(SDL_FPoint position) {
     position = this->calculateReelPosition(position);
 
+    SDL_Log("Hover on %d", this->id);
+
     if (eventHandler == NULL)
         return;
     eventHandler->onHover(position);
@@ -181,8 +183,6 @@ void RenderableGroups::addItem(RenderableItem *item) {
     SDL_FPoint position;
     SDL_FRect itemArea;
     itemArea = item->getArea();
-
-    SDL_Log("RenderableGroups::addItem(): x%f y%f w%f h%f", itemArea.x, itemArea.y, itemArea.w, itemArea.h);
 
     position.x = itemArea.x;
     position.y = itemArea.y;

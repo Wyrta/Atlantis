@@ -66,6 +66,8 @@ void RenderEngine::mouseMotion(void) {
     SDL_FPoint mouse;
     SDL_FRect itemArea;
 
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+
     for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
         itemArea = (*it)->getArea();
