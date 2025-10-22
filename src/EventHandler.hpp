@@ -48,8 +48,8 @@ public:
     void onDblClick(void) {return;};
     void onContextMenu(void) {return;};
     void onMouseMenu(void) {return;};
-    void onMouseDown(int btnId) {return;};   // input
-    void onMouseUp(int btnId) {return;};     // input
+    void onMouseDown(SDL_MouseButtonEvent event);   // input
+    void onMouseUp(SDL_MouseButtonEvent event);     // input
     void onMouseIn(void) {return;};
     void onMouseOut(void) {return;};
 };

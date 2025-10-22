@@ -79,7 +79,7 @@ void RenderEngine::mouseMotion(void) {
     }
 }
 
-void RenderEngine::mouseDown(int button) {
+void RenderEngine::mouseDown(SDL_MouseButtonEvent event) {
     SDL_FPoint mouse;
     SDL_FRect itemArea;
     SDL_GetMouseState(&mouse.x, &mouse.y);
@@ -91,11 +91,11 @@ void RenderEngine::mouseDown(int button) {
         if (SDL_PointInRectFloat((const SDL_FPoint*)&mouse, (const SDL_FRect*)&itemArea) == false) 
             continue;
 
-        (*it)->onMouseDown(button);
+        (*it)->onMouseDown(event);
     }
 }
 
-void RenderEngine::mouseUp(int button) {
+void RenderEngine::mouseUp(SDL_MouseButtonEvent event) {
     SDL_FPoint mouse;
     SDL_FRect itemArea;
     SDL_GetMouseState(&mouse.x, &mouse.y);
@@ -107,6 +107,6 @@ void RenderEngine::mouseUp(int button) {
         if (SDL_PointInRectFloat((const SDL_FPoint*)&mouse, (const SDL_FRect*)&itemArea) == false) 
             continue;
 
-        (*it)->onMouseUp(button);
+        (*it)->onMouseUp(event);
     }
 }

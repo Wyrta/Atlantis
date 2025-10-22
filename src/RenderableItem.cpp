@@ -110,8 +110,6 @@ SDL_FPoint RenderableItem::calculateReelPosition(SDL_FPoint position) {
 void RenderableItem::onHover(SDL_FPoint position) {
     position = this->calculateReelPosition(position);
 
-    SDL_Log("Hover on %d", this->id);
-
     this->sendEvent("onHover");
 }
 

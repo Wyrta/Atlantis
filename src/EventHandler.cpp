@@ -20,6 +20,7 @@ void EventEmitter::setEventHandler(EventHandler* eventHandler) {
 }
 
 void EventEmitter::sendEvent(std::string eventType) {
+    SDL_Log("Event: %s", eventType.c_str());
     if (this->eventHandler == NULL)
         return;
 
@@ -28,4 +29,17 @@ void EventEmitter::sendEvent(std::string eventType) {
     event.emitter = this;
     event.tick = SDL_GetTicks();
     this->eventHandler->receiveEvent(event);
+}
+
+void MouseTarget::onMouseDown(SDL_MouseButtonEvent event) {
+    this->sendEvent("onMouseDown");
+}
+
+void MouseTarget::onMouseUp(SDL_MouseButtonEvent event) {
+    if (event.clicks == 1)
+        this->sendEvent("onClick");
+    else if (event.clicks > 1)
+        this->sendEvent("onDlbClick");
+    else
+        this->sendEvent("onMouseDown");
 }

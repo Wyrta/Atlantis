@@ -130,14 +130,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
             app->renderEngine.mouseMotion();
             break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
-            app->renderEngine.mouseDown(event->button.button);
+            app->renderEngine.mouseDown(event->button);
             break;
         case SDL_EVENT_MOUSE_BUTTON_UP: 
-            app->renderEngine.mouseUp(event->button.button);
+            app->renderEngine.mouseUp(event->button);
             break;
-        case SDL_EVENT_MOUSE_WHEEL: {
-
-        } break;
+        case SDL_EVENT_MOUSE_WHEEL:
+            break;
         case SDL_EVENT_KEY_DOWN: {
             // SDL_Log("Key pressed: %d", event->key.scancode);
 

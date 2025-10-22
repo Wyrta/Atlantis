@@ -27,8 +27,8 @@ public:
     RenderEngine(SDL_Renderer* renderer);
 
     void mouseMotion(void);
-    void mouseDown(int button);
-    void mouseUp(int button);
+    void mouseDown(SDL_MouseButtonEvent event);
+    void mouseUp(SDL_MouseButtonEvent event);
 };
 
 class GameEngine {
