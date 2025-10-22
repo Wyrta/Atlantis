@@ -79,15 +79,10 @@ void RenderEngine::mouseMotion(void) {
     }
 }
 
-void RenderEngine::mouseClick(void) {
+void RenderEngine::mouseDown(int button) {
     SDL_FPoint mouse;
     SDL_FRect itemArea;
-    Uint32 mask = SDL_GetMouseState(&mouse.x, &mouse.y);
-    bool left  = (mask & SDL_BUTTON_LMASK);
-    // bool right = (mask & SDL_BUTTON_RMASK);
-    // bool middle = (mask & SDL_BUTTON_MMASK);
-    // bool x1 = (mask & SDL_BUTTON_X1MASK);
-    // bool x2 = (mask & SDL_BUTTON_X2MASK);
+    SDL_GetMouseState(&mouse.x, &mouse.y);
 
     for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
@@ -96,9 +91,22 @@ void RenderEngine::mouseClick(void) {
         if (SDL_PointInRectFloat((const SDL_FPoint*)&mouse, (const SDL_FRect*)&itemArea) == false) 
             continue;
 
-        if (left == true) {
-            SDL_Log("Click on %d", (*it)->id);
-            (*it)->onClick();
-        }
+        (*it)->onMouseDown(button);
+    }
+}
+
+void RenderEngine::mouseUp(int button) {
+    SDL_FPoint mouse;
+    SDL_FRect itemArea;
+    SDL_GetMouseState(&mouse.x, &mouse.y);
+
+    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
+    {
+        itemArea = (*it)->getArea();
+
+        if (SDL_PointInRectFloat((const SDL_FPoint*)&mouse, (const SDL_FRect*)&itemArea) == false) 
+            continue;
+
+        (*it)->onMouseUp(button);
     }
 }
