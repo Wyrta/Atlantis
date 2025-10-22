@@ -38,6 +38,7 @@ PRIVATE
     src/RenderableItem.cpp
     src/Engine.cpp
     src/GameItem.cpp
+    src/EventHandler.cpp
 )
 
 # Set C++ version

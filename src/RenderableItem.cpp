@@ -74,7 +74,7 @@ RenderableItem::RenderableItem(SDL_FPoint pos, GameItem* eventHandler): id(Rende
     this->area.x = pos.x;
     this->area.y = pos.y;
     
-    this->eventHandler = eventHandler;
+    this->setEventHandler(eventHandler);
 }
 
 
@@ -92,10 +92,6 @@ SDL_Texture* RenderableItem::getTexture(std::string name, SDL_FRect* size) {
         return (*it).texture; 
     }
     return NULL;
-}
-
-void RenderableItem::move(SDL_FPoint newPos, int duration) {
-    SDL_Log("Error RenderableItem::move not implemented");
 }
 
 void RenderableItem::setPosition(SDL_FPoint newPos) {
@@ -116,29 +112,8 @@ void RenderableItem::onHover(SDL_FPoint position) {
 
     SDL_Log("Hover on %d", this->id);
 
-    if (eventHandler == NULL)
-        return;
-    eventHandler->onHover(position);
+    this->sendEvent("onHover");
 }
-
-void RenderableItem::onClick(SDL_FPoint position) {
-    position = this->calculateReelPosition(position);
-    if (eventHandler == NULL)
-        return;
-    eventHandler->onClick(position);
-}
-
-void RenderableItem::onHold(SDL_FPoint position) {
-    position = this->calculateReelPosition(position);
-    if (eventHandler == NULL)
-        return;
-    eventHandler->onHold(position);
-}
-
-void RenderableItem::setEventHandler(GameItem* eventHandler) {
-    this->eventHandler = eventHandler;
-}
-
 
 /**********************************************************************************************************************/
 

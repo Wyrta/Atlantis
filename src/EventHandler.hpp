@@ -8,13 +8,43 @@
 #include <SDL3_mixer/SDL_mixer.h>
 #include <SDL3_image/SDL_image.h>
 
-class MouseTarget {
+#include <string>
+#include <iterator>
+#include <vector>
+
+class EventEmitter;
+
+
+typedef struct Event {
+    std::string type;
+    Uint64 tick;
+    EventEmitter* emitter;
+} Event;
+
+class EventHandler {
+private:
+    std::vector<Event> event;
+public:
+    void receiveEvent(Event event);
+    virtual void handleEvent(void);
+};
+
+class EventEmitter {
+private:
+    EventHandler* eventHandler;
+
+public:
+    void setEventHandler(EventHandler* eventHandler);
+    void sendEvent(std::string eventType);
+};
+
+class MouseTarget : public EventEmitter {
 private:
     Uint64 lastClick[5];
     Uint64 mouseDown[5];
 public:
-    void onHover(SDL_FPoint position) {return;};       // input
-    void onClick(void) {return;};
+    virtual void onHover(SDL_FPoint position) {return;};       // input
+    virtual void onClick(void) {return;};
     void onDblClick(void) {return;};
     void onContextMenu(void) {return;};
     void onMouseMenu(void) {return;};

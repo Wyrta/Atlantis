@@ -98,7 +98,7 @@ void RenderEngine::mouseClick(void) {
 
         if (left == true) {
             SDL_Log("Click on %d", (*it)->id);
-            (*it)->onClick(mouse);
+            (*it)->onClick();
         }
     }
 }

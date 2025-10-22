@@ -11,10 +11,11 @@
 #include <iterator>
 #include <vector>
 #include "RenderableItem.hpp"
+#include "EventHandler.hpp"
 
 class RenderableItem;
 
-class GameItem {
+class GameItem : public EventHandler {
 private:
     SDL_FPoint position;
     RenderableItem* renderableItem;

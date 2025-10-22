@@ -11,6 +11,7 @@
 #include <iterator>
 #include <vector>
 #include "GameItem.hpp"
+#include "EventHandler.hpp"
 
 SDL_Texture *createTexture(SDL_Renderer* render, SDL_FRect* rectangle, const char* path);
 
@@ -23,9 +24,9 @@ struct Texture {
 };
 
 
-class RenderableItem {
+class RenderableItem : public MouseTarget {
 private:
-    GameItem* eventHandler;
+
 protected:
     SDL_FRect area = {0, 0, 10, 10};
 
@@ -39,17 +40,12 @@ public:
     
     virtual void render(SDL_Renderer *renderer) = 0;
 
-    void move(SDL_FPoint newPos, int duration);
     void setPosition(SDL_FPoint newPos);
     SDL_FRect getArea(void) {return this->area;};
 
     RenderableItem(SDL_FPoint pos = {0,0}, GameItem* eventHandler = NULL);
 
     void onHover(SDL_FPoint position);
-    void onClick(SDL_FPoint position);
-    void onHold(SDL_FPoint position);
-    void setEventHandler(GameItem* eventHandler);
-
 };
 
 class RenderableGroups : public RenderableItem {
