@@ -33,9 +33,9 @@ SDL_AppResult SDL_Fail(){
 Uint32 SDL_AppWorker(void *userdata, SDL_TimerID timerID, Uint32 interval) {
     auto* app = (AppContext*)userdata;
 
-    // SDL_Log("SDL_AppWorker ! %d", interval);
+    app->gameEngine.process();
 
-    return 0;
+    return interval;
 }
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
@@ -84,6 +84,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
        .window = window,
        .renderer = renderer,
        .renderEngine = RenderEngine(renderer),
+       .gameEngine = GameEngine(),
     };
     
     SDL_SetRenderVSync(renderer, SDL_RENDERER_VSYNC_ADAPTIVE);
@@ -91,21 +92,27 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 
     SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "60"); // set fps
 
-    SDL_AddTimer(10, (SDL_TimerCallback)SDL_AppWorker, appstate);
-
     auto* app = (AppContext*)*appstate;
     app->renderEngine.loadTextures();
     TTF_Font* fontInter = TTF_OpenFont("assets/Inter-VariableFont.ttf", 24);
     app->renderEngine.items.push_back(new TextSprite("Hello world !", fontInter, (SDL_Color){255,0,255,255}));
     
     RenderableGroups* group = new RenderableGroups({100, 100});
+    group->disable();
     app->renderEngine.items.push_back(group);
 
     group->addItem(new TextSprite("Hello world !", fontInter, (SDL_Color){255,0,255,255}, (SDL_FPoint){0, 0}));
     group->addItem(new TextSprite("Hello world 2", fontInter, (SDL_Color){255,0,255,255}, (SDL_FPoint){0, 50}));
+
+    Popup* popup = new Popup("title", "content");
+    popup->setDuration(3000);
+    popup->setRenderableItem(group);
+
+    app->gameEngine.items.push_back(popup);
     
     SDL_StartTextInput(app->window);
 
+    SDL_AddTimer(10, (SDL_TimerCallback)SDL_AppWorker, app);
     SDL_Log("Application started successfully!");
 
     return SDL_APP_CONTINUE;
@@ -139,16 +146,18 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
             break;
         case SDL_EVENT_KEY_DOWN: {
             // SDL_Log("Key pressed: %d", event->key.scancode);
+            SDL_Log("keycode=%s\nscancode=%s\n\n",SDL_GetKeyName(event->key.key),SDL_GetScancodeName(event->key.scancode));
 
             int key = event->key.scancode;
-
             switch (key) {
                 case 41: 
                     app->app_quit = SDL_APP_SUCCESS;
                     break;
-                default: {
-                    
-                } break;
+                case SDL_SCANCODE_F: {
+                        ((Popup*)app->gameEngine.items[0])->show();
+                    } break;
+                default: 
+                    break;
             }
             } break;
         case SDL_EVENT_KEY_UP: break;

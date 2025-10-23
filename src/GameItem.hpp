@@ -17,6 +17,7 @@ class RenderableItem;
 
 class GameItem : public EventHandler {
 private:
+protected:
     SDL_FPoint position;
     RenderableItem* renderableItem;
 
@@ -26,14 +27,40 @@ public:
 
     GameItem(SDL_FPoint position = {0,0});
 
-    virtual void process(int tick) = 0;
+    virtual void process(Uint64 ticks) {};
     void setPosition(SDL_FPoint position);
     void setRenderableItem(RenderableItem* renderableItem);
 
     void onHover(SDL_FPoint position);
     void onClick(SDL_FPoint position);
     void onHold(SDL_FPoint position);
+
+    bool canDelete;
 };
 
+class Popup : public GameItem {
+private:
+    std::string title;
+    std::string content;
+    int duration;   // == 0 : infini duration
+    int currentDuration;
+    Uint64 startTicks;
+    bool doRender;
+
+    std::vector<std::string> choice;
+    GameItem* callback;
+
+public:
+    Popup(std::string title, std::string content);
+
+    void addChoice(std::string newChoice);
+
+    void show(void);
+    void process(Uint64 ticks);
+
+    void setcallback(GameItem* callback);
+    void setDuration(int duration);
+    int getDuration(void);
+};
 
 #endif // GAME_ITEMS

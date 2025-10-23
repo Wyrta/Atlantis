@@ -6,6 +6,7 @@ GameItem::GameItem(SDL_FPoint position) : id(nbId++) {
     this->position = position;
     this->renderableItem = NULL;
 
+    bool canDelete = false;
 }
 
 void GameItem::setPosition(SDL_FPoint position) {
@@ -28,3 +29,52 @@ void GameItem::onHold(SDL_FPoint position) {
 
 }
 
+
+Popup::Popup(std::string title, std::string content) : GameItem() {
+    this->currentDuration = 0;
+    this->duration = 0;
+
+    this->doRender = false;
+
+    this->title = content;
+    this->content = content;
+
+    this->startTicks = 0;
+}
+
+void Popup::process(Uint64 ticks) {
+    if (this->doRender == false)
+        return;
+
+    if (this->startTicks == 0)
+        this->startTicks = ticks;
+
+    this->currentDuration = ticks - this->startTicks;
+
+    if ((this->currentDuration > this->duration) && (this->duration != 0)) {
+        this->canDelete = true;
+        this->renderableItem->disable();
+    }
+}
+
+
+void Popup::show(void) {
+    this->doRender = true;
+    this->renderableItem->enable();
+
+    // reset
+    this->currentDuration = 0;
+    this->startTicks = 0;
+}
+
+void Popup::setcallback(GameItem* callback) {
+    this->callback = callback;
+}
+
+void Popup::setDuration(int duration) {
+    this->duration = duration;
+}
+
+int Popup::getDuration(void) {
+    return this->duration;
+}
