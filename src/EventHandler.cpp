@@ -27,7 +27,7 @@ void EventEmitter::sendEvent(std::string eventType) {
     Event event;
     event.type = eventType;
     event.emitter = this;
-    event.tick = SDL_GetTicks();
+    event.ticks = SDL_GetTicks();
     this->eventHandler->receiveEvent(event);
 }
 

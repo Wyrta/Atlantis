@@ -69,7 +69,7 @@ SDL_Texture *write(SDL_Renderer* render, SDL_FRect *rect, TTF_Font *font, const 
 
 /**********************************************************************************************************************/
 
-RenderableItem::RenderableItem(SDL_FPoint pos, GameItem* eventHandler): id(RenderableItem::nbId++) {
+RenderableItem::RenderableItem(SDL_FPoint pos, EventHandler* eventHandler): id(RenderableItem::nbId++) {
     SDL_Log("New RenderableItem with id %d", this->id);
     this->area.x = pos.x;
     this->area.y = pos.y;

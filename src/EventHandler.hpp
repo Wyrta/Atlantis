@@ -17,7 +17,7 @@ class EventEmitter;
 
 typedef struct Event {
     std::string type;
-    Uint64 tick;
+    Uint64 ticks;
     EventEmitter* emitter;
 } Event;
 

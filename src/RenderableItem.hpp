@@ -10,12 +10,9 @@
 #include <string>
 #include <iterator>
 #include <vector>
-#include "GameItem.hpp"
 #include "EventHandler.hpp"
 
 SDL_Texture *createTexture(SDL_Renderer* render, SDL_FRect* rectangle, const char* path);
-
-class GameItem;
 
 struct Texture {
     SDL_Texture* texture;
@@ -29,6 +26,7 @@ private:
 
 protected:
     SDL_FRect area = {0, 0, 10, 10};
+    bool disabled;
 
 public:
     const uint32_t id;
@@ -43,9 +41,13 @@ public:
     void setPosition(SDL_FPoint newPos);
     SDL_FRect getArea(void) {return this->area;};
 
-    RenderableItem(SDL_FPoint pos = {0,0}, GameItem* eventHandler = NULL);
+    RenderableItem(SDL_FPoint pos = {0,0}, EventHandler* eventHandler = NULL);
 
     void onHover(SDL_FPoint position);
+
+    bool isDisabled() {return this->disabled;};
+    void disable(void) {this->disabled = true;};
+    void enable(void) {this->disabled = false;};
 };
 
 class RenderableGroups : public RenderableItem {
