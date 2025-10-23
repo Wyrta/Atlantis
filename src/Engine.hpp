@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "RenderableItem.hpp"
+#include "GameItem.hpp"
 
 
 class RenderEngine {
@@ -35,7 +36,9 @@ class GameEngine {
 private:
 
 public:
-
+    std::vector<GameItem*> items;
+    void process(void);
+    GameEngine();
 };
 
 #endif // ENGINE

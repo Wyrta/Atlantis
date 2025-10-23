@@ -26,7 +26,8 @@ void RenderEngine::setRenderer(SDL_Renderer* renderer) {
 void RenderEngine::render(void) {
     for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
-        (*it)->render(this->renderer);
+        if ((*it)->isDisabled() == false)
+            (*it)->render(this->renderer);
     }
 }
 
@@ -108,5 +109,18 @@ void RenderEngine::mouseUp(SDL_MouseButtonEvent event) {
             continue;
 
         (*it)->onMouseUp(event);
+    }
+}
+
+GameEngine::GameEngine() {
+    SDL_Log("test");
+}
+
+
+void GameEngine::process(void) {
+    Uint64 ticks = SDL_GetTicks();
+    for(int i = 0; i < this->items.size();i += 1)
+    {
+        this->items[i]->process(ticks);
     }
 }
