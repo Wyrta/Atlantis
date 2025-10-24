@@ -139,9 +139,12 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
         case SDL_EVENT_MOUSE_MOTION:
             app->renderEngine.mouseMotion();
             break;
-        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+            RenderableItem* item = new Sprite("mobTest.png", {(float)((int)SDL_GetTicks() % 100), 100.0});
+            newItem(item);
+
             app->renderEngine.mouseDown(event->button);
-            break;
+            } break;
         case SDL_EVENT_MOUSE_BUTTON_UP: 
             app->renderEngine.mouseUp(event->button);
             break;
@@ -165,7 +168,21 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
             } break;
         case SDL_EVENT_KEY_UP: break;
         case SDL_EVENT_TEXT_INPUT: break;
-
+        case SDL_EVENT_USER:
+            switch (event->user.code)
+            {
+                case EVENT_NEW_ITEM_REQUEST:
+                    SDL_Log("New item request ! %ld", app->renderEngine.items.size());
+                    app->renderEngine.items.push_back((RenderableItem*)event->user.data1);
+                    SDL_Log("%ld", app->renderEngine.items.size());
+                    app->renderEngine.items[app->renderEngine.items.size()-1]->enable();
+                    break;
+                
+                default:
+                    SDL_Log("Unkown event");
+                    break;
+            }
+            break;
         default:
             // SDL_Log("Event: %d", event->type);
             break;

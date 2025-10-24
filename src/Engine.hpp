@@ -41,4 +41,11 @@ public:
     GameEngine();
 };
 
+#define EVENT_NEW_ITEM_REQUEST    1
+
+/**
+ * Send event to add an item to the RenderEngine
+ */
+bool newItem(RenderableItem* item);
+
 #endif // ENGINE
