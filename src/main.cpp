@@ -140,7 +140,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
             app->renderEngine.mouseMotion();
             break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-            RenderableItem* item = new Sprite("mobTest.png", {(float)((int)SDL_GetTicks() % 100), 100.0});
+            SDL_FPoint mouse;
+            SDL_GetMouseState(&mouse.x, &mouse.y);
+            RenderableItem* item = new Sprite("mobTest.png");
+            mouse.x -= item->getArea().w / 2;
+            mouse.y -= item->getArea().h / 2;
+            item->setPosition(mouse);
+            item->enable();
             newItem(item);
 
             app->renderEngine.mouseDown(event->button);
@@ -169,13 +175,12 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
         case SDL_EVENT_KEY_UP: break;
         case SDL_EVENT_TEXT_INPUT: break;
         case SDL_EVENT_USER:
+            SDL_Log("new user event");
+
             switch (event->user.code)
             {
                 case EVENT_NEW_ITEM_REQUEST:
-                    SDL_Log("New item request ! %ld", app->renderEngine.items.size());
                     app->renderEngine.items.push_back((RenderableItem*)event->user.data1);
-                    SDL_Log("%ld", app->renderEngine.items.size());
-                    app->renderEngine.items[app->renderEngine.items.size()-1]->enable();
                     break;
                 
                 default:

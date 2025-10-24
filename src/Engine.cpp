@@ -130,21 +130,22 @@ void GameEngine::process(void) {
 }
 
 bool newItem(RenderableItem* item) {
-    const Uint32 eventType = SDL_RegisterEvents(1);
+    static Uint32 eventType = SDL_RegisterEvents(1);
 
     if (eventType != 0) {
-        SDL_Log("event OK");
         SDL_Event event;
         SDL_zero(event);
         event.type = eventType;
         event.user.code = EVENT_NEW_ITEM_REQUEST;
         event.user.data1 = (void *)item;
         event.user.data2 = NULL;
-        SDL_PushEvent(&event);
+        bool res = SDL_PushEvent(&event);
+
+        if (res == false)
+            SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
 
         return true;
     }
-    SDL_Log("event fail");
     return false;
 
 }
