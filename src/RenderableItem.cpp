@@ -10,6 +10,7 @@
 
 uint32_t RenderableItem::nbId = 0;
 std::vector<Texture> RenderableItem::textures;
+std::vector<Font> TextSprite::fonts;
 
 SDL_Texture *createTexture(SDL_Renderer* render, SDL_FRect* rectangle, const char* path) {
 	SDL_Surface *surface = NULL;
@@ -252,7 +253,9 @@ void AnimatedSprite::changeFramerate(int frameDuration) {
 
 /**********************************************************************************************************************/
 
-TextSprite::TextSprite(std::string newContent, TTF_Font* font, SDL_Color color, SDL_FPoint pos) : RenderableItem(pos) {
+TextSprite::TextSprite(std::string newContent, std::string fontName, int fontSize, SDL_Color color, SDL_FPoint pos) : RenderableItem(pos) {
+    TTF_Font* font = this->getFont(fontName, fontSize);
+
     if (font == NULL)
         SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "font == NULL");
 
@@ -269,6 +272,32 @@ void TextSprite::updateText(std::string newContent) {
 std::string TextSprite::getText(void) {
     return content;
 }
+
+TTF_Font* TextSprite::getFont(std::string name, int size) {
+    for (int i = 0;i < TextSprite::fonts.size(); i += 1) {
+        if ((TextSprite::fonts[i].name == name) && (TextSprite::fonts[i].size == size))
+            return TextSprite::fonts[i].font;
+    }
+    
+    std::string path = "assets/";
+    path += name;
+    TTF_Font* font = TTF_OpenFont(path.c_str(), size);
+    if (font == NULL) {
+        SDL_Log("TextSprite::getFont(): failed to load font : %s", SDL_GetError());
+        return NULL;
+    }
+
+    Font newFont;
+    newFont.font = font;
+    newFont.name = name;
+    newFont.size = size;
+
+    TextSprite::fonts.push_back(newFont);
+    SDL_Log("New font loaded : %s %dpx", name.c_str(), size);
+
+    return newFont.font;
+}
+
 
 
 void TextSprite::render(SDL_Renderer* renderer) {

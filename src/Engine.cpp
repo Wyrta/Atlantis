@@ -63,6 +63,18 @@ void RenderEngine::clearScreen(void) {
     SDL_RenderFillRect(this->renderer, NULL);   // clear render
 }
 
+bool doSendEvent(RenderableItem* item, SDL_FPoint mouse) {
+    if (item->isDisabled() == true)
+        return false;
+
+    SDL_FRect itemArea = item->getArea();
+
+    if (SDL_PointInRectFloat((const SDL_FPoint*)&mouse, (const SDL_FRect*)&itemArea) == false) 
+        return false;
+
+    return true;
+}
+
 void RenderEngine::mouseMotion(void) {
     SDL_FPoint mouse;
     SDL_FRect itemArea;
@@ -71,9 +83,7 @@ void RenderEngine::mouseMotion(void) {
 
     for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
-        itemArea = (*it)->getArea();
-
-        if (SDL_PointInRectFloat((const SDL_FPoint*)&mouse, (const SDL_FRect*)&itemArea) == false) 
+        if (doSendEvent(*it, mouse) == false)
             continue;
 
         (*it)->onHover(mouse);
@@ -82,14 +92,11 @@ void RenderEngine::mouseMotion(void) {
 
 void RenderEngine::mouseDown(SDL_MouseButtonEvent event) {
     SDL_FPoint mouse;
-    SDL_FRect itemArea;
     SDL_GetMouseState(&mouse.x, &mouse.y);
 
     for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
-        itemArea = (*it)->getArea();
-
-        if (SDL_PointInRectFloat((const SDL_FPoint*)&mouse, (const SDL_FRect*)&itemArea) == false) 
+        if (doSendEvent(*it, mouse) == false)
             continue;
 
         (*it)->onMouseDown(event);
@@ -98,14 +105,11 @@ void RenderEngine::mouseDown(SDL_MouseButtonEvent event) {
 
 void RenderEngine::mouseUp(SDL_MouseButtonEvent event) {
     SDL_FPoint mouse;
-    SDL_FRect itemArea;
     SDL_GetMouseState(&mouse.x, &mouse.y);
 
     for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
-        itemArea = (*it)->getArea();
-
-        if (SDL_PointInRectFloat((const SDL_FPoint*)&mouse, (const SDL_FRect*)&itemArea) == false) 
+        if (doSendEvent(*it, mouse) == false)
             continue;
 
         (*it)->onMouseUp(event);

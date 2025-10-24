@@ -20,6 +20,11 @@ struct Texture {
     SDL_FRect size;
 };
 
+struct Font {
+    TTF_Font* font;
+    std::string name;
+    int size;
+};
 
 class RenderableItem : public MouseTarget {
 private:
@@ -100,7 +105,10 @@ public:
     SDL_Color color;
 
 public:
-    TextSprite(std::string newContent, TTF_Font* font, SDL_Color color, SDL_FPoint pos = {0,0});
+    static std::vector<Font> fonts;
+    static TTF_Font* getFont(std::string fontName, int fontSize);
+
+    TextSprite(std::string newContent, std::string fontName, int fontSize, SDL_Color color = {255, 255, 255, SDL_ALPHA_OPAQUE}, SDL_FPoint pos = {0,0});
     void updateText(std::string newContent);
     std::string getText(void);
 

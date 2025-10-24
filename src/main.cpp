@@ -12,15 +12,24 @@
 #include "Engine.hpp"
 
 
-struct AppContext {
+class AppContext {
+public:
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_AudioDeviceID audioDevice;
-    SDL_AppResult app_quit = SDL_APP_CONTINUE;
+    SDL_AppResult app_quit;
 
     RenderEngine renderEngine;
     GameEngine gameEngine;
+
+    AppContext(SDL_Window* window, SDL_Renderer* renderer);
 };
+
+AppContext::AppContext(SDL_Window* window, SDL_Renderer* renderer) : renderEngine(renderer), gameEngine() {
+    this->window = window;
+    this->renderer = renderer;
+    this->app_quit = SDL_APP_CONTINUE;
+}
 
 uint32_t windowStartWidth = 400;
 uint32_t windowStartHeight = 400;
@@ -80,32 +89,26 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     }
 
     // set up the application data
-    *appstate = new AppContext{
-       .window = window,
-       .renderer = renderer,
-       .renderEngine = RenderEngine(renderer),
-       .gameEngine = GameEngine(),
-    };
+    *appstate = new AppContext(window, renderer);
+    auto* app = (AppContext*)*appstate;
     
     SDL_SetRenderVSync(renderer, SDL_RENDERER_VSYNC_ADAPTIVE);
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "60"); // set fps
 
-    auto* app = (AppContext*)*appstate;
     app->renderEngine.loadTextures();
-    TTF_Font* fontInter = TTF_OpenFont("assets/Inter-VariableFont.ttf", 24);
-    app->renderEngine.items.push_back(new TextSprite("Hello world !", fontInter, (SDL_Color){255,0,255,255}));
+    app->renderEngine.items.push_back(new TextSprite("Hello world !", "Inter-VariableFont.ttf", 24, (SDL_Color){255,0,255,255}));
     
-    RenderableGroups* group = new RenderableGroups({100, 100});
+    RenderableGroups* group = new RenderableGroups({0, 30});
     group->disable();
     app->renderEngine.items.push_back(group);
 
-    group->addItem(new TextSprite("Hello world !", fontInter, (SDL_Color){255,0,255,255}, (SDL_FPoint){0, 0}));
-    group->addItem(new TextSprite("Hello world 2", fontInter, (SDL_Color){255,0,255,255}, (SDL_FPoint){0, 50}));
+    group->addItem(new TextSprite("Title", "Inter-VariableFont.ttf", 24, (SDL_Color){255,0,255,255}, (SDL_FPoint){0, 0}));
+    group->addItem(new TextSprite("Content", "Inter-VariableFont.ttf", 16, (SDL_Color){255,0,255,255}, (SDL_FPoint){0, 50}));
 
     Popup* popup = new Popup("title", "content");
-    popup->setDuration(3000);
+    popup->setDuration(1000);
     popup->setRenderableItem(group);
 
     app->gameEngine.items.push_back(popup);
