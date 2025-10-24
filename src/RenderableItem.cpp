@@ -76,8 +76,9 @@ RenderableItem::RenderableItem(SDL_FPoint pos, EventHandler* eventHandler): id(R
     this->area.y = pos.y;
     
     this->setEventHandler(eventHandler);
-}
 
+    this->canDelete = false;
+}
 
 SDL_Texture* RenderableItem::getTexture(std::string name, SDL_FRect* size) {
     for(std::vector<Texture>::iterator it = RenderableItem::textures.begin(); it != RenderableItem::textures.end(); ++it)
@@ -184,9 +185,14 @@ void RenderableGroups::addItem(RenderableItem *item) {
 
 
 RenderableGroups::RenderableGroups(SDL_FPoint pos) : RenderableItem(pos) {
-
+    for (int i = 0; i < this->items.size(); i++) {
+        delete this->items[i];
+    }
 }
 
+RenderableGroups::~RenderableGroups() {
+
+}
 
 /**********************************************************************************************************************/
 
@@ -228,6 +234,12 @@ AnimatedSprite::AnimatedSprite(std::vector<std::string> names, int frameDuration
     this->frameDuration = frameDuration;
 }
 
+AnimatedSprite::~AnimatedSprite() {
+    for (int i = 0; i < this->frames.size(); i++) {
+        delete this->frames[i];
+    }
+}
+
 void AnimatedSprite::render(SDL_Renderer* renderer) {
     ASSERT_RENDERER
 
@@ -262,6 +274,10 @@ TextSprite::TextSprite(std::string newContent, std::string fontName, int fontSiz
     this->updateText(newContent);
     this->font = font;
     this->color = color;
+}
+
+TextSprite::~TextSprite() {
+    SDL_DestroyTexture(this->texture);
 }
 
 void TextSprite::updateText(std::string newContent) {

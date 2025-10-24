@@ -100,19 +100,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     app->renderEngine.loadTextures();
     app->renderEngine.items.push_back(new TextSprite("Hello world !", "Inter-VariableFont.ttf", 24, (SDL_Color){255,0,255,255}));
     
-    RenderableGroups* group = new RenderableGroups({0, 30});
-    group->disable();
-    app->renderEngine.items.push_back(group);
-
-    group->addItem(new TextSprite("Title", "Inter-VariableFont.ttf", 24, (SDL_Color){255,0,255,255}, (SDL_FPoint){0, 0}));
-    group->addItem(new TextSprite("Content", "Inter-VariableFont.ttf", 16, (SDL_Color){255,0,255,255}, (SDL_FPoint){0, 50}));
-
-    Popup* popup = new Popup("title", "content");
-    popup->setDuration(1000);
-    popup->setRenderableItem(group);
-
-    app->gameEngine.items.push_back(popup);
-    
     SDL_StartTextInput(app->window);
 
     SDL_AddTimer(10, (SDL_TimerCallback)SDL_AppWorker, app);
@@ -166,7 +153,10 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                     app->app_quit = SDL_APP_SUCCESS;
                     break;
                 case SDL_SCANCODE_F: {
-                        ((Popup*)app->gameEngine.items[0])->show();
+                        Popup* popup = new Popup("title", "content", {0.0, 100.0});
+                        popup->setDuration(1000);
+                        popup->show();
+                        app->gameEngine.items.push_back(popup);
                     } break;
                 default: 
                     break;

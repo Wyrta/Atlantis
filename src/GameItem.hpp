@@ -26,6 +26,7 @@ public:
     static uint32_t nbId;
 
     GameItem(SDL_FPoint position = {0,0});
+    ~GameItem();
 
     virtual void process(Uint64 ticks) {};
     void setPosition(SDL_FPoint position);
@@ -51,7 +52,7 @@ private:
     GameItem* callback;
 
 public:
-    Popup(std::string title, std::string content);
+    Popup(std::string title, std::string content, SDL_FPoint pos = {0.0, 0.0});
 
     void addChoice(std::string newChoice);
 

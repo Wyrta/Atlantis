@@ -123,9 +123,19 @@ GameEngine::GameEngine() {
 
 void GameEngine::process(void) {
     Uint64 ticks = SDL_GetTicks();
-    for(int i = 0; i < this->items.size();i += 1)
+    GameItem* item = NULL;
+    for(std::vector<GameItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
-        this->items[i]->process(ticks);
+        item = *it;
+
+        item->process(ticks);
+
+        if (item->canDelete == true) {
+            it = this->items.erase(it);
+            it--;   // get previous iterator
+
+            delete item;
+        }
     }
 }
 

@@ -53,6 +53,8 @@ public:
     bool isDisabled() {return this->disabled;};
     void disable(void) {this->disabled = true;};
     void enable(void) {this->disabled = false;};
+
+    bool canDelete;
 };
 
 class RenderableGroups : public RenderableItem {
@@ -67,6 +69,7 @@ public:
     SDL_FRect updateArea(void);
 
     RenderableGroups(SDL_FPoint pos = {0,0});
+    ~RenderableGroups();
 };
 
 class Sprite : public RenderableItem {
@@ -91,6 +94,8 @@ private:
     
 public:
     AnimatedSprite(std::vector<std::string> names, int frameDuration, SDL_FPoint pos = {0,0});
+    ~AnimatedSprite();
+    
     void render(SDL_Renderer *renderer);
     void changeFramerate(int frameDuration);
 };
@@ -108,7 +113,8 @@ public:
     static std::vector<Font> fonts;
     static TTF_Font* getFont(std::string fontName, int fontSize);
 
-    TextSprite(std::string newContent, std::string fontName, int fontSize, SDL_Color color = {255, 255, 255, SDL_ALPHA_OPAQUE}, SDL_FPoint pos = {0,0});
+    TextSprite(std::string newContent, std::string fontName, int fontSize, SDL_Color color = {0, 0, 0, SDL_ALPHA_OPAQUE}, SDL_FPoint pos = {0,0});
+    ~TextSprite();
     void updateText(std::string newContent);
     std::string getText(void);
 
