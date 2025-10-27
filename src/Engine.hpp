@@ -47,6 +47,7 @@ public:
     GameEngine();
 
     int addItem(GameItem* item);
+    GameItem* getItem(int id);
     void process(void);
 };
 

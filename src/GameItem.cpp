@@ -20,21 +20,19 @@ void GameItem::setPosition(SDL_FPoint position) {
 }
 
 void GameItem::setRenderableItem(RenderableItem* renderableItem) {
+    if (this->renderableItem != NULL)
+        this->renderableItem->canDelete = true;    
+
     this->renderableItem = renderableItem;
+    newItem(this->renderableItem);
 }
 
-void GameItem::onHover(SDL_FPoint position) {
-
+RenderableItem* GameItem::getRenderableItem(void) {
+    return this->renderableItem;
 }
 
-void GameItem::onClick(SDL_FPoint position) {
 
-}
-
-void GameItem::onHold(SDL_FPoint position) {
-
-}
-
+/**********************************************************************************************************************/
 
 Popup::Popup(std::string title, std::string content, SDL_FPoint pos) : GameItem(pos) {
     this->currentDuration = 0;
@@ -54,7 +52,6 @@ Popup::Popup(std::string title, std::string content, SDL_FPoint pos) : GameItem(
     item->disable();
 
     this->setRenderableItem(item);
-    newItem((RenderableItem*)item);
 }
 
 void Popup::process(Uint64 ticks) {
@@ -92,4 +89,48 @@ void Popup::setDuration(int duration) {
 
 int Popup::getDuration(void) {
     return this->duration;
+}
+
+/**********************************************************************************************************************/
+
+Text::Text(std::string content, SDL_FPoint pos) : GameItem(pos) {
+    this->content = content;
+    TextSprite* item = new TextSprite(this->content, "Inter-VariableFont.ttf", 16, {255, 255, 255, SDL_ALPHA_OPAQUE}, this->position);
+    this->setRenderableItem((RenderableItem*)item);
+}
+
+std::string Text::getText(void) {
+    TextSprite* item = (TextSprite*)this->renderableItem;
+    return item->getText();
+}
+
+void Text::setText(std::string content) {
+    TextSprite* item = (TextSprite*)this->renderableItem;
+    item->updateText(content);
+}
+
+/**********************************************************************************************************************/
+
+TextArea::TextArea(std::string content, SDL_FPoint pos, std::string cursorContent) : Text(content, pos) {
+    this->cursor = new TextSprite("_", "Inter-VariableFont.ttf", 16, {255, 255, 255, SDL_ALPHA_OPAQUE}, this->position);
+    this->cursor->disable();
+
+    newItem(this->cursor);
+
+    this->lastTicks = 0;
+    this->currentDuration = 0;
+}
+
+void TextArea::keyPressed(SDL_Scancode key) {
+    
+}
+
+void TextArea::process(Uint64 ticks) {
+    int cursorDuration = 1000;
+    this->currentDuration = ticks - this->lastTicks;
+
+    if (this->currentDuration > cursorDuration) {
+        this->cursor->toggle();
+        this->lastTicks = this->currentDuration;
+    }
 }

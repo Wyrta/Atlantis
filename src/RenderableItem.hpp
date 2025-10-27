@@ -54,6 +54,7 @@ public:
     bool isDisabled() {return this->disabled;};
     void disable(void) {this->disabled = true;};
     void enable(void) {this->disabled = false;};
+    void toggle(void) {this->disabled ^= this->disabled;};
 
     bool canDelete;
 };

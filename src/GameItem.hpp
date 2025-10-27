@@ -31,10 +31,7 @@ public:
     virtual void process(Uint64 ticks) {};
     void setPosition(SDL_FPoint position);
     void setRenderableItem(RenderableItem* renderableItem);
-
-    void onHover(SDL_FPoint position);
-    void onClick(SDL_FPoint position);
-    void onHold(SDL_FPoint position);
+    RenderableItem* getRenderableItem(void);
 
     bool canDelete;
 };
@@ -62,6 +59,30 @@ public:
     void setcallback(GameItem* callback);
     void setDuration(int duration);
     int getDuration(void);
+};
+
+class Text : public GameItem {
+private:
+    std::string content;
+
+public:
+    std::string getText(void);
+    void setText(std::string content);
+
+    Text(std::string content, SDL_FPoint pos);
+};
+
+
+class TextArea : public Text {
+private:
+    TextSprite* cursor; 
+    Uint64 lastTicks, currentDuration;
+    
+public:
+    TextArea(std::string content, SDL_FPoint pos, std::string cursorContent = "_");
+    void keyPressed(SDL_Scancode key);
+    void process(Uint64 ticks);
+
 };
 
 #endif // GAME_ITEMS

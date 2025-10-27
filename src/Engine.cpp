@@ -20,14 +20,17 @@ int RenderEngine::addItem(RenderableItem* item) {
 }
 
 
-RenderableItem* RenderEngine::getItem(int id)
-{
+RenderableItem* RenderEngine::getItem(int id) {
+    this->mutex.lock();
     for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
-        if ((*it)->id == id)
+        if ((*it)->id == id) {
+            this->mutex.unlock();
             return *it;
+        }
     }
 
+    this->mutex.unlock();
     return NULL;
 }
 
@@ -197,6 +200,20 @@ int GameEngine::addItem(GameItem* item) {
     this->mutex.unlock();
 
     return size;
+}
+
+GameItem* GameEngine::getItem(int id) {
+    this->mutex.lock();
+    for(std::vector<GameItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
+    {
+        if ((*it)->id == id) {
+            this->mutex.unlock();
+            return *it;
+        }
+    }
+
+    this->mutex.unlock();
+    return NULL;
 }
 
 static Uint32 eventType = SDL_RegisterEvents(1);

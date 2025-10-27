@@ -98,8 +98,9 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "60"); // set fps
 
     app->renderEngine.loadTextures();
-    app->renderEngine.addItem(new TextSprite("Hello world !", "Inter-VariableFont.ttf", 24, (SDL_Color){255,0,255,255}));
-    
+    app->gameEngine.addItem(new Text("Test", {0.0, 0.0}));
+    app->gameEngine.addItem(new TextArea("Test", {0.0, 50.0}));
+
     SDL_StartTextInput(app->window);
 
     SDL_AddTimer(10, (SDL_TimerCallback)SDL_AppWorker, app);
@@ -184,8 +185,11 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     
     app->renderEngine.clearScreen();
 
-    TextSprite* text = (TextSprite*)app->renderEngine.getItem(0);
-    text->updateText(std::to_string(SDL_GetTicks()) + " ms");
+    Text* text = (Text*)app->gameEngine.getItem(0);
+    auto str = std::to_string(SDL_GetTicks());
+    if (str.length() < 6)
+        str.insert(0, 6 - str.length(), '0');
+    text->setText(str + " ms");
 
     app->renderEngine.render();
 
