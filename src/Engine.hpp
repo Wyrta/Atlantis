@@ -9,6 +9,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include "RenderableItem.hpp"
 #include "GameItem.hpp"
@@ -17,9 +18,10 @@
 class RenderEngine {
 private:
     SDL_Renderer* renderer;
-public:
     std::vector<RenderableItem*> items;
-
+    std::mutex mutex;
+public:
+    int addItem(RenderableItem* item);
     RenderableItem* getItem(int id);
     void render(void);
     int loadTextures(void);
@@ -34,11 +36,14 @@ public:
 
 class GameEngine {
 private:
+    std::vector<GameItem*> items;
+    std::mutex mutex;
 
 public:
-    std::vector<GameItem*> items;
-    void process(void);
     GameEngine();
+
+    int addItem(GameItem* item);
+    void process(void);
 };
 
 #define EVENT_NEW_ITEM_REQUEST    1

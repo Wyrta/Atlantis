@@ -98,7 +98,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "60"); // set fps
 
     app->renderEngine.loadTextures();
-    app->renderEngine.items.push_back(new TextSprite("Hello world !", "Inter-VariableFont.ttf", 24, (SDL_Color){255,0,255,255}));
+    app->renderEngine.addItem(new TextSprite("Hello world !", "Inter-VariableFont.ttf", 24, (SDL_Color){255,0,255,255}));
     
     SDL_StartTextInput(app->window);
 
@@ -145,7 +145,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
             break;
         case SDL_EVENT_KEY_DOWN: {
             // SDL_Log("Key pressed: %d", event->key.scancode);
-            SDL_Log("keycode=%s\nscancode=%s\n\n",SDL_GetKeyName(event->key.key),SDL_GetScancodeName(event->key.scancode));
+            // SDL_Log("keycode=%s\nscancode=%s\n\n",SDL_GetKeyName(event->key.key),SDL_GetScancodeName(event->key.scancode));
 
             int key = event->key.scancode;
             switch (key) {
@@ -153,10 +153,10 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                     app->app_quit = SDL_APP_SUCCESS;
                     break;
                 case SDL_SCANCODE_F: {
-                        Popup* popup = new Popup("title", "content", {0.0, 100.0});
+                        Popup* popup = new Popup("Ticks", std::to_string(SDL_GetTicks()), {0.0, 100.0});
                         popup->setDuration(1000);
                         popup->show();
-                        app->gameEngine.items.push_back(popup);
+                        app->gameEngine.addItem(popup);
                     } break;
                 default: 
                     break;
@@ -165,12 +165,12 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
         case SDL_EVENT_KEY_UP: break;
         case SDL_EVENT_TEXT_INPUT: break;
         case SDL_EVENT_USER:
-            SDL_Log("new user event");
+            // SDL_Log("new user event");
 
             switch (event->user.code)
             {
                 case EVENT_NEW_ITEM_REQUEST:
-                    app->renderEngine.items.push_back((RenderableItem*)event->user.data1);
+                    app->renderEngine.addItem((RenderableItem*)event->user.data1);
                     break;
                 
                 default:

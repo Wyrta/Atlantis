@@ -20,7 +20,7 @@ void EventEmitter::setEventHandler(EventHandler* eventHandler) {
 }
 
 void EventEmitter::sendEvent(std::string eventType) {
-    SDL_Log("Event: %s", eventType.c_str());
+    // SDL_Log("Event: %s", eventType.c_str());
     if (this->eventHandler == NULL)
         return;
 

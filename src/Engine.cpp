@@ -7,6 +7,17 @@ RenderEngine::RenderEngine(SDL_Renderer* renderer) {
     this->setRenderer(renderer);
 }
 
+int RenderEngine::addItem(RenderableItem* item) {
+    this->mutex.lock();
+
+    this->items.push_back(item);
+    int size = this->items.size();
+    
+    this->mutex.unlock();
+
+    return size;
+}
+
 
 RenderableItem* RenderEngine::getItem(int id)
 {
@@ -24,11 +35,22 @@ void RenderEngine::setRenderer(SDL_Renderer* renderer) {
 }
 
 void RenderEngine::render(void) {
+    RenderableItem* item = NULL;
+    this->mutex.lock();
     for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
-        if ((*it)->isDisabled() == false)
-            (*it)->render(this->renderer);
+        item = *it;
+        if (item->isDisabled() == false)
+            item->render(this->renderer);
+
+        if (item->canDelete == true) {
+            it = this->items.erase(it);
+            it--;   // get previous iterator
+
+            delete item;
+        }
     }
+    this->mutex.unlock();
 }
 
 int RenderEngine::loadTextures(void) {
@@ -124,6 +146,7 @@ GameEngine::GameEngine() {
 void GameEngine::process(void) {
     Uint64 ticks = SDL_GetTicks();
     GameItem* item = NULL;
+    this->mutex.lock();
     for(std::vector<GameItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
         item = *it;
@@ -137,7 +160,20 @@ void GameEngine::process(void) {
             delete item;
         }
     }
+    this->mutex.unlock();
 }
+
+int GameEngine::addItem(GameItem* item) {
+    this->mutex.lock();
+
+    this->items.push_back(item);
+    int size = this->items.size();
+    
+    this->mutex.unlock();
+
+    return size;
+}
+
 
 bool newItem(RenderableItem* item) {
     static Uint32 eventType = SDL_RegisterEvents(1);
