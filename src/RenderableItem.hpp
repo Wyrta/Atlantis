@@ -10,6 +10,7 @@
 #include <string>
 #include <iterator>
 #include <vector>
+#include <mutex>
 #include "EventHandler.hpp"
 
 SDL_Texture *createTexture(SDL_Renderer* render, SDL_FRect* rectangle, const char* path);
@@ -61,10 +62,11 @@ class RenderableGroups : public RenderableItem {
 private:
     std::vector<RenderableItem*> items;
     std::vector<SDL_FPoint> offset;
-    
+    std::mutex mutex;
 public:
     void render(SDL_Renderer *renderer);
     void addItem(RenderableItem *item);
+    void updateItemsPosition(void);
 
     SDL_FRect updateArea(void);
 

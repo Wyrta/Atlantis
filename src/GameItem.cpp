@@ -49,8 +49,8 @@ Popup::Popup(std::string title, std::string content, SDL_FPoint pos) : GameItem(
 
     RenderableGroups* item = new RenderableGroups(this->position);
 
-    item->addItem(new TextSprite(title, "Inter-VariableFont.ttf", 24));
-    item->addItem(new TextSprite(content, "Inter-VariableFont.ttf", 16, {0,0,0,SDL_ALPHA_OPAQUE}, {0.0, 26.0}));
+    item->addItem(new TextSprite(title, "Inter-VariableFont.ttf", 24, {255,255,255,SDL_ALPHA_OPAQUE}));
+    item->addItem(new TextSprite(content, "Inter-VariableFont.ttf", 16, {255,255,255,SDL_ALPHA_OPAQUE}, {0.0, 26.0}));
     item->disable();
 
     this->setRenderableItem(item);

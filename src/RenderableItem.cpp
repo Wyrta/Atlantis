@@ -120,10 +120,9 @@ void RenderableItem::onHover(SDL_FPoint position) {
 void RenderableGroups::render(SDL_Renderer *renderer) {
     ASSERT_RENDERER
 
-    this->area = this->updateArea();
+    this->mutex.lock();
 
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    SDL_RenderFillRect(renderer, &this->area);
+    this->area = this->updateArea();
 
     for (int i = 0; i < this->items.size(); i++) {
         SDL_FPoint position;
@@ -133,6 +132,7 @@ void RenderableGroups::render(SDL_Renderer *renderer) {
         this->items[i]->setPosition(position);
         this->items[i]->render(renderer);
     }
+    this->mutex.unlock();
 }
 
 SDL_FRect RenderableGroups::updateArea(void) {
@@ -155,6 +155,7 @@ SDL_FRect RenderableGroups::updateArea(void) {
 
 
 void RenderableGroups::addItem(RenderableItem *item) {
+    this->mutex.lock();
     SDL_FPoint position;
     SDL_FRect itemArea;
     itemArea = item->getArea();
@@ -181,17 +182,19 @@ void RenderableGroups::addItem(RenderableItem *item) {
     SDL_GetRectUnionFloat((const SDL_FRect*)&src, (const SDL_FRect*)&itemArea, &dst);
     this->area.w = dst.w;
     this->area.h = dst.h;
+
+    this->mutex.unlock();
 }
 
 
 RenderableGroups::RenderableGroups(SDL_FPoint pos) : RenderableItem(pos) {
-    for (int i = 0; i < this->items.size(); i++) {
-        delete this->items[i];
-    }
+
 }
 
 RenderableGroups::~RenderableGroups() {
-
+    for (int i = 0; i < this->items.size(); i++) {
+        delete this->items[i];
+    }
 }
 
 /**********************************************************************************************************************/
@@ -314,8 +317,6 @@ TTF_Font* TextSprite::getFont(std::string name, int size) {
     return newFont.font;
 }
 
-
-
 void TextSprite::render(SDL_Renderer* renderer) {
     ASSERT_RENDERER
     
@@ -323,12 +324,10 @@ void TextSprite::render(SDL_Renderer* renderer) {
 	    SDL_DestroyTexture(this->texture);
         SDL_FRect area = {0,0,0,0};
         this->texture = write(renderer, &area, this->font, this->content.c_str(), this->color);
-        this->area = area;
+        this->area.h = area.h;
+        this->area.w = area.w;
         this->update = false;
     }
-
-    ASSERT_RENDERER
-
     
     SDL_FRect area = this->area;
 	SDL_RenderTexture(renderer, this->texture, NULL, &area);

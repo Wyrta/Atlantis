@@ -95,7 +95,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     SDL_SetRenderVSync(renderer, SDL_RENDERER_VSYNC_ADAPTIVE);
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "60"); // set fps
+    SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "3"); // set fps
 
     app->renderEngine.loadTextures();
     app->renderEngine.addItem(new TextSprite("Hello world !", "Inter-VariableFont.ttf", 24, (SDL_Color){255,0,255,255}));
