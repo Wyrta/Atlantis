@@ -20,6 +20,7 @@ private:
     SDL_Renderer* renderer;
     std::vector<RenderableItem*> items;
     std::mutex mutex;
+    int keyboardTarget;
 public:
     int addItem(RenderableItem* item);
     RenderableItem* getItem(int id);
@@ -32,6 +33,9 @@ public:
     void mouseMotion(void);
     void mouseDown(SDL_MouseButtonEvent event);
     void mouseUp(SDL_MouseButtonEvent event);
+
+    void requestKeybordTarget(int id);
+    void key(SDL_KeyboardEvent event);
 };
 
 class GameEngine {
@@ -47,10 +51,13 @@ public:
 };
 
 #define EVENT_NEW_ITEM_REQUEST    1
+#define EVENT_KEYBOARD_REQUEST    2
 
 /**
  * Send event to add an item to the RenderEngine
  */
 bool newItem(RenderableItem* item);
+
+bool requestKeybordTarget(Uint64 id);
 
 #endif // ENGINE

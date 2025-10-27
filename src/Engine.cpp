@@ -5,6 +5,7 @@ namespace fs = std::filesystem;
 
 RenderEngine::RenderEngine(SDL_Renderer* renderer) {
     this->setRenderer(renderer);
+    this->keyboardTarget = -1;
 }
 
 int RenderEngine::addItem(RenderableItem* item) {
@@ -138,6 +139,30 @@ void RenderEngine::mouseUp(SDL_MouseButtonEvent event) {
     }
 }
 
+void RenderEngine::requestKeybordTarget(int id) {
+    this->keyboardTarget = id;
+}
+
+void RenderEngine::key(SDL_KeyboardEvent event) {
+    if (this->keyboardTarget < 0)
+        return;
+
+    KeyboardTarget* item = (KeyboardTarget*)this->getItem(this->keyboardTarget);
+
+    if (item == NULL)
+        return;
+
+    if (event.down) {
+        if (event.repeat) 
+            item->onKeyHold(event.scancode);
+        else
+            item->onKeyDown(event.scancode);
+    }
+    else
+        item->onKeyUp(event.scancode);
+}
+
+
 GameEngine::GameEngine() {
     SDL_Log("test");
 }
@@ -174,10 +199,9 @@ int GameEngine::addItem(GameItem* item) {
     return size;
 }
 
+static Uint32 eventType = SDL_RegisterEvents(1);
 
 bool newItem(RenderableItem* item) {
-    static Uint32 eventType = SDL_RegisterEvents(1);
-
     if (eventType != 0) {
         SDL_Event event;
         SDL_zero(event);
@@ -194,4 +218,22 @@ bool newItem(RenderableItem* item) {
     }
     return false;
 
+}
+
+bool requestKeybordTarget(Uint64 id) {
+    if (eventType != 0) {
+        SDL_Event event;
+        SDL_zero(event);
+        event.type = eventType;
+        event.user.code = EVENT_KEYBOARD_REQUEST;
+        event.user.data1 = (void *)id;
+        event.user.data2 = NULL;
+        bool res = SDL_PushEvent(&event);
+
+        if (res == false)
+            SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
+
+        return true;
+    }
+    return false;
 }

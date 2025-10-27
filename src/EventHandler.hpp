@@ -54,5 +54,13 @@ public:
     void onMouseOut(void) {return;};
 };
 
+class KeyboardTarget : public EventEmitter {
+private:
+
+public:
+    void onKeyUp(SDL_Scancode key);
+    void onKeyDown(SDL_Scancode key);
+    void onKeyHold(SDL_Scancode key);
+};
 
 #endif //EVENT_HANDLER

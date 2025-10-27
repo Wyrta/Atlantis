@@ -43,3 +43,13 @@ void MouseTarget::onMouseUp(SDL_MouseButtonEvent event) {
     else
         this->sendEvent("onMouseDown");
 }
+
+void KeyboardTarget::onKeyUp(SDL_Scancode key) {
+    SDL_Log("KeyboardTarget::onKeyUp %s", SDL_GetScancodeName(key));
+}
+void KeyboardTarget::onKeyDown(SDL_Scancode key) {
+    SDL_Log("KeyboardTarget::onKeyDown %s", SDL_GetScancodeName(key));
+}
+void KeyboardTarget::onKeyHold(SDL_Scancode key) {
+    SDL_Log("KeyboardTarget::onKeyHold %s", SDL_GetScancodeName(key));
+}

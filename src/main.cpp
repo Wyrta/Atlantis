@@ -95,7 +95,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     SDL_SetRenderVSync(renderer, SDL_RENDERER_VSYNC_ADAPTIVE);
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "3"); // set fps
+    SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "60"); // set fps
 
     app->renderEngine.loadTextures();
     app->renderEngine.addItem(new TextSprite("Hello world !", "Inter-VariableFont.ttf", 24, (SDL_Color){255,0,255,255}));
@@ -127,16 +127,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
             app->renderEngine.mouseMotion();
             break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-            SDL_FPoint mouse;
-            SDL_GetMouseState(&mouse.x, &mouse.y);
-            RenderableItem* item = new Sprite("mobTest.png");
-            mouse.x -= item->getArea().w / 2;
-            mouse.y -= item->getArea().h / 2;
-            item->setPosition(mouse);
-            item->enable();
-            newItem(item);
-
             app->renderEngine.mouseDown(event->button);
+            requestKeybordTarget(1);
             } break;
         case SDL_EVENT_MOUSE_BUTTON_UP: 
             app->renderEngine.mouseUp(event->button);
@@ -144,11 +136,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
         case SDL_EVENT_MOUSE_WHEEL:
             break;
         case SDL_EVENT_KEY_DOWN: {
-            // SDL_Log("Key pressed: %d", event->key.scancode);
-            // SDL_Log("keycode=%s\nscancode=%s\n\n",SDL_GetKeyName(event->key.key),SDL_GetScancodeName(event->key.scancode));
-
-            int key = event->key.scancode;
-            switch (key) {
+            app->renderEngine.key(event->key);
+            switch (event->key.scancode) {
                 case 41: 
                     app->app_quit = SDL_APP_SUCCESS;
                     break;
@@ -162,7 +151,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                     break;
             }
             } break;
-        case SDL_EVENT_KEY_UP: break;
+        case SDL_EVENT_KEY_UP: 
+            app->renderEngine.key(event->key);
+            break;
         case SDL_EVENT_TEXT_INPUT: break;
         case SDL_EVENT_USER:
             // SDL_Log("new user event");
@@ -172,7 +163,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                 case EVENT_NEW_ITEM_REQUEST:
                     app->renderEngine.addItem((RenderableItem*)event->user.data1);
                     break;
-                
+                case EVENT_KEYBOARD_REQUEST:
+                    app->renderEngine.requestKeybordTarget((Uint64 )event->user.data1);
+                    break;
                 default:
                     SDL_Log("Unkown event");
                     break;
