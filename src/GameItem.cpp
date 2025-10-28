@@ -119,6 +119,8 @@ TextArea::TextArea(std::string content, SDL_FPoint pos, std::string cursorConten
 
     this->lastTicks = 0;
     this->currentDuration = 0;
+
+    this->renderableItem->setEventHandler(this);
 }
 
 void TextArea::keyPressed(SDL_Scancode key) {
@@ -126,6 +128,10 @@ void TextArea::keyPressed(SDL_Scancode key) {
 }
 
 void TextArea::process(Uint64 ticks) {
+    this->handleEvent();
+
+    // TODO update cursor pos
+    
     int cursorDuration = 1000;
     this->currentDuration = ticks - this->lastTicks;
 
@@ -133,4 +139,15 @@ void TextArea::process(Uint64 ticks) {
         this->cursor->toggle();
         this->lastTicks = this->currentDuration;
     }
+}
+
+void TextArea::handleEvent(void) {
+    this->mutex.lock();
+    for(std::vector<Event>::iterator it = this->event.begin(); it != this->event.end(); ++it)
+    {
+        SDL_Log("TextArea::handleEvent(): Event handled: '%s'", (*it).type.c_str());
+        it = this->event.erase(it);
+        it--;   // get previous iterator
+    }
+    this->mutex.unlock();
 }

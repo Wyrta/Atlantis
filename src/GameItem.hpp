@@ -83,6 +83,8 @@ public:
     void keyPressed(SDL_Scancode key);
     void process(Uint64 ticks);
 
+    void handleEvent(void);
+
 };
 
 #endif // GAME_ITEMS

@@ -27,7 +27,7 @@ struct Font {
     int size;
 };
 
-class RenderableItem : public MouseTarget {
+class RenderableItem : public EventEmitter {
 private:
 
 protected:

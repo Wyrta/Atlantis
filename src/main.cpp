@@ -98,10 +98,13 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "60"); // set fps
 
     app->renderEngine.loadTextures();
-    app->gameEngine.addItem(new Text("Test", {0.0, 0.0}));
-    app->gameEngine.addItem(new TextArea("Test", {0.0, 50.0}));
+    app->gameEngine.addItem(new Text("FPS", {0.0, 0.0}));
 
-    SDL_StartTextInput(app->window);
+    int textID = app->gameEngine.addItem(new TextArea("Test TextArea", {0.0, 50.0}));
+    GameItem* gameItem = app->gameEngine.getItem(textID);
+    requestKeybordTarget(gameItem->getRenderableItem()->id);
+
+    // SDL_StartTextInput(app->window);
 
     SDL_AddTimer(10, (SDL_TimerCallback)SDL_AppWorker, app);
     SDL_Log("Application started successfully!");
@@ -129,7 +132,6 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
             break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
             app->renderEngine.mouseDown(event->button);
-            requestKeybordTarget(1);
             } break;
         case SDL_EVENT_MOUSE_BUTTON_UP: 
             app->renderEngine.mouseUp(event->button);
@@ -137,7 +139,6 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
         case SDL_EVENT_MOUSE_WHEEL:
             break;
         case SDL_EVENT_KEY_DOWN: {
-            app->renderEngine.key(event->key);
             switch (event->key.scancode) {
                 case 41: 
                     app->app_quit = SDL_APP_SUCCESS;
@@ -152,6 +153,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                     break;
             }
             } break;
+            app->renderEngine.key(event->key);
+
         case SDL_EVENT_KEY_UP: 
             app->renderEngine.key(event->key);
             break;

@@ -150,7 +150,7 @@ void RenderEngine::key(SDL_KeyboardEvent event) {
     if (this->keyboardTarget < 0)
         return;
 
-    KeyboardTarget* item = (KeyboardTarget*)this->getItem(this->keyboardTarget);
+    EventEmitter* item = (EventEmitter*)this->getItem(this->keyboardTarget);
 
     if (item == NULL)
         return;
@@ -195,11 +195,10 @@ int GameEngine::addItem(GameItem* item) {
     this->mutex.lock();
 
     this->items.push_back(item);
-    int size = this->items.size();
-    
-    this->mutex.unlock();
+    int itemID = item->id;
 
-    return size;
+    this->mutex.unlock();
+    return itemID;
 }
 
 GameItem* GameEngine::getItem(int id) {

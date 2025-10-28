@@ -11,6 +11,7 @@
 #include <string>
 #include <iterator>
 #include <vector>
+#include <mutex>
 
 class EventEmitter;
 
@@ -23,26 +24,28 @@ typedef struct Event {
 
 class EventHandler {
 private:
+protected:
+    std::mutex mutex;
     std::vector<Event> event;
 public:
     void receiveEvent(Event event);
     virtual void handleEvent(void);
+    int test = 42;
 };
 
 class EventEmitter {
 private:
     EventHandler* eventHandler;
 
+    // mouse target
+    Uint64 lastClick[5];
+    Uint64 mouseDown[5];
+
 public:
     void setEventHandler(EventHandler* eventHandler);
     void sendEvent(std::string eventType);
-};
 
-class MouseTarget : public EventEmitter {
-private:
-    Uint64 lastClick[5];
-    Uint64 mouseDown[5];
-public:
+    // mouse target 
     virtual void onHover(SDL_FPoint position) {return;};       // input
     virtual void onClick(void) {return;};
     void onDblClick(void) {return;};
@@ -52,15 +55,13 @@ public:
     void onMouseUp(SDL_MouseButtonEvent event);     // input
     void onMouseIn(void) {return;};
     void onMouseOut(void) {return;};
-};
 
-class KeyboardTarget : public EventEmitter {
-private:
-
-public:
-    void onKeyUp(SDL_Scancode key);
+    // keyboard target
+    void onKeyUp(SDL_Scancode key); 
     void onKeyDown(SDL_Scancode key);
     void onKeyHold(SDL_Scancode key);
+
+    int keyboard = 42;
 };
 
 #endif //EVENT_HANDLER
