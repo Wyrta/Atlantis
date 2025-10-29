@@ -151,10 +151,16 @@ void TextArea::handleEvent(void) {
     for(std::vector<Event>::iterator it = this->event.begin(); it != this->event.end(); ++it)
     {
         Event item = *it;
-        SDL_Log("TextArea::handleEvent(): Event handled: '%s' '%s'", getEventTypeName(item.type), SDL_GetScancodeName(item.key));
+        // SDL_Log("TextArea::handleEvent(): Event handled: '%s' '%s'", getEventTypeName(item.type), SDL_GetScancodeName(item.key));
 
         switch (item.type)
         {
+        case EventType::onTextInput: {
+            TextSprite* textSprite = (TextSprite*)this->renderableItem;
+            std::string content = textSprite->getText();
+            content += item.text;
+            textSprite->updateText(content);
+        }
         case EventType::onKeyUp:
         case EventType::onKeyHold: {
             TextSprite* textSprite = (TextSprite*)this->renderableItem;
@@ -162,25 +168,28 @@ void TextArea::handleEvent(void) {
 
             switch (item.key)
             {
-            case SDL_SCANCODE_BACKSPACE:
+            case '\b':
+            case 127:
                 if (content.empty() == false) 
                     content.pop_back();
                 break;
-            case SDL_SCANCODE_SPACE:
-                content += " ";
+            case '\t':
+                content += "    ";
+                break;
+            case '\r':
+                content += "\r";
                 break;
             default:
-                content += SDL_GetScancodeName(item.key);
-                SDL_GetKeyFromScancode(item.key);
-                break;
+                break; 
             }
             textSprite->updateText(content);
             break;
         }
         default:
-            SDL_Log("Unhandled: '%s'", getEventTypeName(item.type));
+            // SDL_Log("Unhandled: '%s'", getEventTypeName(item.type));
             break;
         }
+
 
         // remove event
         it = this->event.erase(it);

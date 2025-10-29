@@ -1,6 +1,5 @@
 #include "EventHandler.hpp"
 
-
 const char *eventTypeName[] = {
     "onHover",
     "onMouseDown",
@@ -10,9 +9,11 @@ const char *eventTypeName[] = {
     "onKeyDown",
     "onKeyUp",
     "onKeyHold",
+    "onTextInput",
 
     "onNothing"   // last item
 };
+
 const char *getEventTypeName(EventType eventType) {
     if (eventType < 0)
         return eventTypeName[EventType::onNothing];
@@ -22,8 +23,6 @@ const char *getEventTypeName(EventType eventType) {
 
     return eventTypeName[eventType];
 }
-
-
 
 void EventHandler::handleEvent(void) {
     this->mutex.lock();
@@ -38,7 +37,7 @@ void EventHandler::handleEvent(void) {
 
 void EventHandler::receiveEvent(Event newEvent) {
     this->mutex.lock();
-    SDL_Log("New event received: %s 0x%p at %ldms", getEventTypeName(newEvent.type), newEvent.emitter, newEvent.ticks);
+    // SDL_Log("New event received: %s 0x%p at %ldms", getEventTypeName(newEvent.type), newEvent.emitter, newEvent.ticks);
     this->event.push_back(newEvent);
     this->mutex.unlock();
 }
@@ -48,56 +47,61 @@ void EventEmitter::setEventHandler(EventHandler* eventHandler) {
     this->eventHandler = eventHandler;
 }
 
-void EventEmitter::sendEvent(EventType eventType, auto data) {
-    // SDL_Log("Event: %s", eventType.c_str());
+void EventEmitter::sendEvent(Event event) {
+    // SDL_Log("Event: %s", eventTypeName(event.type));
     if (this->eventHandler == NULL)
         return;
 
-    Event event;
-    event.type = eventType;
     event.emitter = this;
     event.ticks = SDL_GetTicks();
-
-    switch (eventType)
-    {
-    case EventType::onKeyUp:
-    case EventType::onKeyDown:
-    case EventType::onKeyHold:
-        // TODO send SDL_Scancode and SDL_Keymod
-        event.key = (SDL_Scancode)data;
-        break;
-    
-    default:
-        break;
-    }
 
     this->eventHandler->receiveEvent(event);
 }
 
-void EventEmitter::onMouseDown(SDL_MouseButtonEvent event) {
-    this->sendEvent(EventType::onMouseDown, NULL);
+void EventEmitter::onMouseDown(SDL_MouseButtonEvent mouseEvent) {
+    Event event;
+    this->sendEvent(event);
 }
 
-void EventEmitter::onMouseUp(SDL_MouseButtonEvent event) {
-    if (event.clicks == 1)
-        this->sendEvent(EventType::onClick, NULL);
-    else if (event.clicks > 1)
-        this->sendEvent(EventType::onDlbClick, NULL);
-    else
-        this->sendEvent(EventType::onMouseDown, NULL);
+void EventEmitter::onMouseUp(SDL_MouseButtonEvent mouseEvent) {
+    EventType type;
+    Event event;
+
+    if (mouseEvent.clicks == 1)
+        type = EventType::onClick;
+    else if (mouseEvent.clicks > 1)
+        type = EventType::onDlbClick;
+    else 
+        type = EventType::onMouseDown;
+
+    this->sendEvent(event);
+
 }
 
-void EventEmitter::onKeyUp(SDL_Scancode key) {
-    SDL_Log("EventEmitter::onKeyUp %s", SDL_GetScancodeName(key));
-    this->sendEvent(EventType::onKeyUp, key);
+void EventEmitter::onKeyUp(SDL_Keycode key) {
+    Event event;
+    event.type = EventType::onKeyUp;
+    event.key = key;
+    this->sendEvent(event);
 }
 
-void EventEmitter::onKeyDown(SDL_Scancode key) {
-    SDL_Log("EventEmitter::onKeyDown %s", SDL_GetScancodeName(key));
-    this->sendEvent(EventType::onKeyDown, key);
+void EventEmitter::onKeyDown(SDL_Keycode key) {
+    Event event;
+    event.type = EventType::onKeyDown;
+    event.key = key;
+    this->sendEvent(event);
 }
 
-void EventEmitter::onKeyHold(SDL_Scancode key) {
-    SDL_Log("EventEmitter::onKeyHold %s", SDL_GetScancodeName(key));
-    this->sendEvent(EventType::onKeyHold, key);
+void EventEmitter::onKeyHold(SDL_Keycode key) {
+    Event event;
+    event.type = EventType::onKeyHold;
+    event.key = key;
+    this->sendEvent(event);
+}
+
+void EventEmitter::onTextInput(std::string text) {
+    Event event;
+    event.type = EventType::onTextInput;
+    event.text = text;
+    this->sendEvent(event);
 }

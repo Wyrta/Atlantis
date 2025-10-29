@@ -146,7 +146,7 @@ void RenderEngine::requestKeybordTarget(int id) {
     this->keyboardTarget = id;
 }
 
-void RenderEngine::key(SDL_KeyboardEvent event) {
+void RenderEngine::onText(SDL_TextInputEvent event) {
     if (this->keyboardTarget < 0)
         return;
 
@@ -155,19 +155,34 @@ void RenderEngine::key(SDL_KeyboardEvent event) {
     if (item == NULL)
         return;
 
+    item->onTextInput(event.text);
+    
+}
+
+void RenderEngine::onKey(SDL_KeyboardEvent event) {
+    if (this->keyboardTarget < 0)
+        return;
+
+    EventEmitter* item = (EventEmitter*)this->getItem(this->keyboardTarget);
+
+    if (item == NULL)
+        return;
+
+    SDL_Keycode key = SDL_GetKeyFromScancode(event.scancode, event.mod, false);
+
     if (event.down) {
         if (event.repeat) 
-            item->onKeyHold(event.scancode);
+            item->onKeyHold(key);
         else
-            item->onKeyDown(event.scancode);
+            item->onKeyDown(key);
     }
     else
-        item->onKeyUp(event.scancode);
+        item->onKeyUp(key);
 }
 
 
 GameEngine::GameEngine() {
-    SDL_Log("test");
+
 }
 
 

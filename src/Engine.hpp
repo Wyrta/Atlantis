@@ -35,7 +35,8 @@ public:
     void mouseUp(SDL_MouseButtonEvent event);
 
     void requestKeybordTarget(int id);
-    void key(SDL_KeyboardEvent event);
+    void onKey(SDL_KeyboardEvent event);
+    void onText(SDL_TextInputEvent event);
 };
 
 class GameEngine {

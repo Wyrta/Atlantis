@@ -24,6 +24,7 @@ typedef enum EventType {
     onKeyDown,
     onKeyUp,
     onKeyHold,
+    onTextInput,
 
     onNothing   // last item
 } EventType;
@@ -35,7 +36,8 @@ typedef struct Event {
     Uint64 ticks;
     EventEmitter* emitter;
 
-    SDL_Scancode key;
+    SDL_Keycode key;
+    std::string text;
 } Event;
 
 class EventHandler {
@@ -46,7 +48,6 @@ protected:
 public:
     void receiveEvent(Event event);
     virtual void handleEvent(void);
-    int test = 42;
 };
 
 class EventEmitter {
@@ -59,7 +60,7 @@ private:
 
 public:
     void setEventHandler(EventHandler* eventHandler);
-    void sendEvent(EventType eventType, auto data);
+    void sendEvent(Event event);
 
     // mouse target 
     virtual void onHover(SDL_FPoint position) {return;};       // input
@@ -73,9 +74,12 @@ public:
     void onMouseOut(void) {return;};
 
     // keyboard target
-    void onKeyUp(SDL_Scancode key); 
-    void onKeyDown(SDL_Scancode key);
-    void onKeyHold(SDL_Scancode key);
+    void onKeyUp(SDL_Keycode key);
+    void onKeyDown(SDL_Keycode key);
+    void onKeyHold(SDL_Keycode key);
+
+    void onTextInput(std::string text);
+
 
     int keyboard = 42;
 };

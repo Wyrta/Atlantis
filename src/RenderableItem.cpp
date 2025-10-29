@@ -111,8 +111,9 @@ SDL_FPoint RenderableItem::calculateReelPosition(SDL_FPoint position) {
 
 void RenderableItem::onHover(SDL_FPoint position) {
     position = this->calculateReelPosition(position);
-
-    this->sendEvent(EventType::onHover, NULL);
+    Event event;
+    event.type = EventType::onHover;
+    this->sendEvent(event);
 }
 
 /**********************************************************************************************************************/
@@ -132,7 +133,6 @@ void RenderableGroups::render(SDL_Renderer *renderer) {
         this->items[i]->setPosition(position);
 
         if (this->items[i]->isDisabled() == true) {
-            SDL_Log("Element disabled");
             continue;
         }
         this->items[i]->render(renderer);
@@ -289,6 +289,10 @@ TextSprite::~TextSprite() {
 }
 
 void TextSprite::updateText(std::string newContent) {
+    if (newContent.find('\r') != -1)
+        SDL_Log("TODO: Add carriage return to textsprite");
+
+
     this->content = newContent;
     this->update = true;
 }

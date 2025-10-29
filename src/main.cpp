@@ -104,7 +104,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     GameItem* gameItem = app->gameEngine.getItem(textID);
     requestKeybordTarget(gameItem->getRenderableItem()->id);
 
-    // SDL_StartTextInput(app->window);
+    SDL_StartTextInput(app->window);
 
     SDL_AddTimer(10, (SDL_TimerCallback)SDL_AppWorker, app);
     SDL_Log("Application started successfully!");
@@ -119,7 +119,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
         case SDL_EVENT_QUIT:
             app->app_quit = SDL_APP_SUCCESS;
             break;
-
+        case SDL_EVENT_TEXT_INPUT:
+            app->renderEngine.onText(event->text);
+            break;
         case SDL_EVENT_WINDOW_RESIZED: {
             int width, height;
             SDL_GetCurrentRenderOutputSize(app->renderer, &width, &height);
@@ -152,13 +154,12 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                 default: 
                     break;
                 }
-            app->renderEngine.key(event->key);
+            app->renderEngine.onKey(event->key);
             } break;
 
         case SDL_EVENT_KEY_UP: 
-            app->renderEngine.key(event->key);
+            app->renderEngine.onKey(event->key);
             break;
-        case SDL_EVENT_TEXT_INPUT: break;
         case SDL_EVENT_USER:
             // SDL_Log("new user event");
 
@@ -175,6 +176,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                     break;
             }
             break;
+
         default:
             // SDL_Log("Event: %d", event->type);
             break;
@@ -186,16 +188,17 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
 SDL_AppResult SDL_AppIterate(void *appstate) {
     auto* app = (AppContext*)appstate;
     
-    app->renderEngine.clearScreen();
+    SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
+    SDL_RenderClear(app->renderer);
 
     Text* text = (Text*)app->gameEngine.getItem(0);
     auto str = std::to_string(SDL_GetTicks());
     if (str.length() < 6)
         str.insert(0, 6 - str.length(), '0');
     text->setText(str + " ms");
-
+    
     app->renderEngine.render();
-
+    
     SDL_RenderPresent(app->renderer);
 
     return SDL_APP_CONTINUE;
