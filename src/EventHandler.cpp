@@ -63,6 +63,7 @@ void EventEmitter::sendEvent(EventType eventType, auto data) {
     case EventType::onKeyUp:
     case EventType::onKeyDown:
     case EventType::onKeyHold:
+        // TODO send SDL_Scancode and SDL_Keymod
         event.key = (SDL_Scancode)data;
         break;
     
