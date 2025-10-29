@@ -131,13 +131,18 @@ void TextArea::process(Uint64 ticks) {
     this->handleEvent();
 
     // TODO update cursor pos
-    
-    int cursorDuration = 1000;
+    SDL_FRect textArea = this->renderableItem->getArea();
+    SDL_FPoint cursorPos;
+    cursorPos.x = textArea.x + textArea.w;
+    cursorPos.y = textArea.y;
+    this->cursor->setPosition(cursorPos);
+
+    int cursorDuration = 500;
     this->currentDuration = ticks - this->lastTicks;
 
     if (this->currentDuration > cursorDuration) {
         this->cursor->toggle();
-        this->lastTicks = this->currentDuration;
+        this->lastTicks = ticks;
     }
 }
 
@@ -145,7 +150,39 @@ void TextArea::handleEvent(void) {
     this->mutex.lock();
     for(std::vector<Event>::iterator it = this->event.begin(); it != this->event.end(); ++it)
     {
-        SDL_Log("TextArea::handleEvent(): Event handled: '%s'", (*it).type.c_str());
+        Event item = *it;
+        SDL_Log("TextArea::handleEvent(): Event handled: '%s' '%s'", getEventTypeName(item.type), SDL_GetScancodeName(item.key));
+
+        switch (item.type)
+        {
+        case EventType::onKeyUp:
+        case EventType::onKeyHold: {
+            TextSprite* textSprite = (TextSprite*)this->renderableItem;
+            std::string content = textSprite->getText();
+
+            switch (item.key)
+            {
+            case SDL_SCANCODE_BACKSPACE:
+                if (content.empty() == false) 
+                    content.pop_back();
+                break;
+            case SDL_SCANCODE_SPACE:
+                content += " ";
+                break;
+            default:
+                content += SDL_GetScancodeName(item.key);
+                SDL_GetKeyFromScancode(item.key);
+                break;
+            }
+            textSprite->updateText(content);
+            break;
+        }
+        default:
+            SDL_Log("Unhandled: '%s'", getEventTypeName(item.type));
+            break;
+        }
+
+        // remove event
         it = this->event.erase(it);
         it--;   // get previous iterator
     }

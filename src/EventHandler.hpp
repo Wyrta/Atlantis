@@ -15,11 +15,27 @@
 
 class EventEmitter;
 
+typedef enum EventType {
+    onHover = 0,
+    onMouseDown,
+    onMouseUp,
+    onClick,
+    onDlbClick,
+    onKeyDown,
+    onKeyUp,
+    onKeyHold,
+
+    onNothing   // last item
+} EventType;
+
+const char *getEventTypeName(EventType eventType);
 
 typedef struct Event {
-    std::string type;
+    EventType type;
     Uint64 ticks;
     EventEmitter* emitter;
+
+    SDL_Scancode key;
 } Event;
 
 class EventHandler {
@@ -43,7 +59,7 @@ private:
 
 public:
     void setEventHandler(EventHandler* eventHandler);
-    void sendEvent(std::string eventType);
+    void sendEvent(EventType eventType, auto data);
 
     // mouse target 
     virtual void onHover(SDL_FPoint position) {return;};       // input

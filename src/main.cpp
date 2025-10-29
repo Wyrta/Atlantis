@@ -151,9 +151,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                     } break;
                 default: 
                     break;
-            }
-            } break;
+                }
             app->renderEngine.key(event->key);
+            } break;
 
         case SDL_EVENT_KEY_UP: 
             app->renderEngine.key(event->key);

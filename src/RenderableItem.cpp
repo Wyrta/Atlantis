@@ -112,7 +112,7 @@ SDL_FPoint RenderableItem::calculateReelPosition(SDL_FPoint position) {
 void RenderableItem::onHover(SDL_FPoint position) {
     position = this->calculateReelPosition(position);
 
-    this->sendEvent("onHover");
+    this->sendEvent(EventType::onHover, NULL);
 }
 
 /**********************************************************************************************************************/
@@ -130,6 +130,11 @@ void RenderableGroups::render(SDL_Renderer *renderer) {
         position.y = this->offset[i].y + this->area.y;
 
         this->items[i]->setPosition(position);
+
+        if (this->items[i]->isDisabled() == true) {
+            SDL_Log("Element disabled");
+            continue;
+        }
         this->items[i]->render(renderer);
     }
     this->mutex.unlock();
