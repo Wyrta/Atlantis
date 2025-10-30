@@ -39,6 +39,7 @@ PRIVATE
     src/Engine.cpp
     src/GameItem.cpp
     src/EventHandler.cpp
+    src/MapItem.cpp
 )
 
 # Set C++ version

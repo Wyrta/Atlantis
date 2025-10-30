@@ -273,7 +273,7 @@ void AnimatedSprite::changeFramerate(int frameDuration) {
 
 /**********************************************************************************************************************/
 
-TextSprite::TextSprite(std::string newContent, std::string fontName, int fontSize, SDL_Color color, SDL_FPoint pos) : RenderableItem(pos) {
+TextSprite::TextSprite(std::string newContent, std::string fontName, int fontSize, SDL_Color color, SDL_FPoint pos) : RenderableItem(pos), fontSize(fontSize) {
     TTF_Font* font = this->getFont(fontName, fontSize);
 
     if (font == NULL)

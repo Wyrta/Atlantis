@@ -122,6 +122,8 @@ public:
     std::string getText(void);
 
     void render(SDL_Renderer *renderer);
+
+    const int fontSize;
 };
 
 #endif // RENDERABLE_ITEMS

@@ -76,6 +76,7 @@ public:
 class TextArea : public Text {
 private:
     TextSprite* cursor; 
+    int cursorPosition;
     Uint64 lastTicks, currentDuration;
     
 public:

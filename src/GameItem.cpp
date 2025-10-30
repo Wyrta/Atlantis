@@ -121,6 +121,8 @@ TextArea::TextArea(std::string content, SDL_FPoint pos, std::string cursorConten
     this->currentDuration = 0;
 
     this->renderableItem->setEventHandler(this);
+
+    this->cursorPosition = 0;
 }
 
 void TextArea::keyPressed(SDL_Scancode key) {
@@ -129,8 +131,9 @@ void TextArea::keyPressed(SDL_Scancode key) {
 
 void TextArea::process(Uint64 ticks) {
     this->handleEvent();
-    int cursorPosition = 3;
+    
     // TODO update cursor pos
+
     SDL_FRect textArea = this->renderableItem->getArea();
     SDL_FPoint cursorPos;
     cursorPos.x = textArea.x + textArea.w;
