@@ -112,7 +112,7 @@ void Text::setText(std::string content) {
 /**********************************************************************************************************************/
 
 TextArea::TextArea(std::string content, SDL_FPoint pos, std::string cursorContent) : Text(content, pos) {
-    this->cursor = new TextSprite("_", "Inter-VariableFont.ttf", 16, {255, 255, 255, SDL_ALPHA_OPAQUE}, this->position);
+    this->cursor = new TextSprite(cursorContent, "Inter-VariableFont.ttf", 16, {255, 255, 255, SDL_ALPHA_OPAQUE}, this->position);
     this->cursor->disable();
 
     newItem(this->cursor);
@@ -129,7 +129,7 @@ void TextArea::keyPressed(SDL_Scancode key) {
 
 void TextArea::process(Uint64 ticks) {
     this->handleEvent();
-
+    int cursorPosition = 3;
     // TODO update cursor pos
     SDL_FRect textArea = this->renderableItem->getArea();
     SDL_FPoint cursorPos;
@@ -144,6 +144,40 @@ void TextArea::process(Uint64 ticks) {
         this->cursor->toggle();
         this->lastTicks = ticks;
     }
+}
+
+int check_utf8_char(std::string &utf, long i) {
+    unsigned char check = utf[i] & 0xF0;
+
+    switch (check)
+    {
+    case 0xC0:
+        return bool((utf[i + 1] & 0x80) == 0x80) * 1;
+    case 0xE0:
+        return bool(((utf[i + 1] & 0x80) == 0x80 && 
+                     (utf[i + 2] & 0x80) == 0x80)) * 2;
+    case 0xF0:
+        return bool(((utf[i + 1] & 0x80) == 0x80 && 
+                     (utf[i + 2] & 0x80) == 0x80 && 
+                     (utf[i + 3] & 0x80) == 0x80)) * 3;
+    }
+    return 0;
+}
+
+int getLastCharLenght(std::string string) {
+    long size;
+    std::string chr;
+
+    for (long i = 0; i < string.size(); i++)
+    {
+    size = check_utf8_char(string, i);
+    //size >= 0 && size <= 3, we need to add 1 for the full size
+    chr = string.substr(i, size + 1);
+    //we add this value to skip the whole character at once
+    //hence the reason why we return full size - 1
+    i += size;   
+    }
+    return size;
 }
 
 void TextArea::handleEvent(void) {
@@ -168,10 +202,13 @@ void TextArea::handleEvent(void) {
 
             switch (item.key)
             {
-            case '\b':
-            case 127:
-                if (content.empty() == false) 
-                    content.pop_back();
+            case '\b':{
+                if (content.size() > 0) {
+                    int lenght = getLastCharLenght(content) + 1;
+                    content.erase(content.size()-lenght, lenght);
+                }
+                }break;
+            case 127: 
                 break;
             case '\t':
                 content += "    ";

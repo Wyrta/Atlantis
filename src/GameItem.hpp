@@ -79,7 +79,7 @@ private:
     Uint64 lastTicks, currentDuration;
     
 public:
-    TextArea(std::string content, SDL_FPoint pos, std::string cursorContent = "_");
+    TextArea(std::string content, SDL_FPoint pos, std::string cursorContent = "|");
     void keyPressed(SDL_Scancode key);
     void process(Uint64 ticks);
 
