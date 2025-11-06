@@ -156,7 +156,7 @@ void RenderEngine::onText(SDL_TextInputEvent event) {
     if (item == NULL)
         return;
 
-    item->onTextInput(event.text);
+    item->onTextInput(event);
     
 }
 
@@ -169,16 +169,17 @@ void RenderEngine::onKey(SDL_KeyboardEvent event) {
     if (item == NULL)
         return;
 
-    SDL_Keycode key = SDL_GetKeyFromScancode(event.scancode, event.mod, false);
+    // SDL_Keycode key = SDL_GetKeyFromScancode(event.scancode, event.mod, false);
+    SDL_Log("scancode: %d", event.scancode, event.scancode);
 
     if (event.down) {
         if (event.repeat) 
-            item->onKeyHold(key);
+            item->onKeyHold(event);
         else
-            item->onKeyDown(key);
+            item->onKeyDown(event);
     }
     else
-        item->onKeyUp(key);
+        item->onKeyUp(event);
 }
 
 

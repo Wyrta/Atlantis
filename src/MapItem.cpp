@@ -7,22 +7,6 @@ SDL_FRect Tile::tileSize = {0.0, 0.0, 64.0, 64.0};
 
 /**********************************************************************************************************************/
 
-const char *tileTypeName[] = {
-    "test",
-
-    "empty"   // last item
-};
-
-std::string getTileTypeName(TileType type) {
-    if ((type < 0) || (type > TileType::empty))
-        return eventTypeName[TileType::empty];
-
-    return eventTypeName[type];
-}
-
-
-/**********************************************************************************************************************/
-
 Map::Map() : GameItem() {
     Tile::tileSize = {0.0, 0.0, 100.0, 100.0};
     this->setRenderableItem(new RenderableGroups(this->getPosition()));
@@ -58,15 +42,15 @@ void Map::handleEvent(void) {
         case EventType::onKeyHold: {
             SDL_FPoint newPos = this->getPosition();
 
-            switch (item.key)
+            switch (item.scancode)
             {
-            case 'z': newPos.y -= 5; this->setPosition(newPos); break;
-            case 's': newPos.y += 5; this->setPosition(newPos); break;
-            case 'q': newPos.x -= 5; this->setPosition(newPos); break;
-            case 'd': newPos.x += 5; this->setPosition(newPos); break;
+            case SDL_Scancode::SDL_SCANCODE_UP: newPos.y -= 5; this->setPosition(newPos); break;  
+            case SDL_Scancode::SDL_SCANCODE_DOWN: newPos.y += 5; this->setPosition(newPos); break;  
+            case SDL_Scancode::SDL_SCANCODE_LEFT: newPos.x -= 5; this->setPosition(newPos); break;  
+            case SDL_Scancode::SDL_SCANCODE_RIGHT: newPos.x += 5; this->setPosition(newPos); break;  
             
             default:
-                // SDL_Log("unknow: '%c' '%d'", item.key, item.key);
+                SDL_Log("unknow: '%d' '%c'", item.key, item.key);
                 break;
             }
         }
@@ -131,12 +115,12 @@ SDL_FPoint computeMapPosition(SDL_FPoint mapOffset, SDL_FRect tileSize, SDL_Poin
     return finalPosition;
 }
 
-Tile::Tile(TileType type, Map* map, SDL_Point coords, SDL_Rect size, int layer) : GameItem(computeMapPosition(map->getPosition(), Tile::tileSize, coords)) {
+Tile::Tile(std::string type, Map* map, SDL_Point coords, SDL_Rect size, int layer) : GameItem(computeMapPosition(map->getPosition(), Tile::tileSize, coords)) {
     this->coords = coords;
     this->size = size;
     this->layer = layer;
 
-    this->setRenderableItem(new Sprite("mobTest.png", this->getPosition()));
+    this->setRenderableItem(new Sprite(type, this->getPosition()));
 }
 
 Tile::~Tile() {
@@ -188,13 +172,4 @@ void Tile::addEvent(MapEvent event) {
     Tile::mutex.lock();
     Tile::messages.push_back(event);
     Tile::mutex.unlock();
-}
-
-std::string Tile::getTileType(std::string type) {
-    SDL_Log("not implemented");
-    return "";
-}
-void Tile::loadTileType(void) {
-    SDL_Log("not implemented");
-
 }

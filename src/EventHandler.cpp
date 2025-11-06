@@ -78,30 +78,33 @@ void EventEmitter::onMouseUp(SDL_MouseButtonEvent mouseEvent) {
 
 }
 
-void EventEmitter::onKeyUp(SDL_Keycode key) {
+void EventEmitter::onKeyUp(SDL_KeyboardEvent keyEvent) {
     Event event;
     event.type = EventType::onKeyUp;
-    event.key = key;
+    event.key = keyEvent.key;
+    event.scancode = keyEvent.scancode;
     this->sendEvent(event);
 }
 
-void EventEmitter::onKeyDown(SDL_Keycode key) {
+void EventEmitter::onKeyDown(SDL_KeyboardEvent keyEvent) {
     Event event;
     event.type = EventType::onKeyDown;
-    event.key = key;
+    event.key = keyEvent.key;
+    event.scancode = keyEvent.scancode;
     this->sendEvent(event);
 }
 
-void EventEmitter::onKeyHold(SDL_Keycode key) {
+void EventEmitter::onKeyHold(SDL_KeyboardEvent keyEvent) {
     Event event;
     event.type = EventType::onKeyHold;
-    event.key = key;
+    event.key = keyEvent.key;
+    event.scancode = keyEvent.scancode;
     this->sendEvent(event);
 }
 
-void EventEmitter::onTextInput(std::string text) {
+void EventEmitter::onTextInput(SDL_TextInputEvent textEvent) {
     Event event;
     event.type = EventType::onTextInput;
-    event.text = text;
+    event.text = std::string(textEvent.text);
     this->sendEvent(event);
 }

@@ -37,6 +37,7 @@ typedef struct Event {
     EventEmitter* emitter;
 
     SDL_Keycode key;
+    SDL_Scancode scancode;
     std::string text;
 } Event;
 
@@ -69,11 +70,11 @@ public:
     void onMouseOut(void) {return;};
 
     // keyboard target
-    void onKeyUp(SDL_Keycode key);
-    void onKeyDown(SDL_Keycode key);
-    void onKeyHold(SDL_Keycode key);
+    void onKeyUp(SDL_KeyboardEvent event);
+    void onKeyDown(SDL_KeyboardEvent event);
+    void onKeyHold(SDL_KeyboardEvent event);
 
-    void onTextInput(std::string text);
+    void onTextInput(SDL_TextInputEvent event);
 
 
     int keyboard = 42;

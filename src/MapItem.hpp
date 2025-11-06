@@ -15,15 +15,6 @@
 #include "GameItem.hpp"
 #include "EventHandler.hpp"
 
-typedef enum TileType {
-    test = 0,
-
-    empty   // last item
-} TileType;
-
-TileType getTiletypeFromStr(std::string type);
-std::string getTileTypeName(TileType type);
-
 typedef enum MapEventType {
 
 } MapEventType;
@@ -44,13 +35,12 @@ private:
 protected:
     SDL_Point coords;
     SDL_Rect size;   
-    TileType type;
     int layer;
     
     static std::vector<MapEvent> messages;
     static std::mutex mutex;
 public:
-    Tile(TileType type, Map* map, SDL_Point position = {0,0}, SDL_Rect size = {1,1}, int layer = 0);
+    Tile(std::string type, Map* map, SDL_Point position = {0,0}, SDL_Rect size = {1,1}, int layer = 0);
     ~Tile();
 
     void setCoords(SDL_Point coords);
@@ -61,9 +51,6 @@ public:
     void addEvent(MapEvent event);
     void refreshPosition(SDL_FPoint mapPosition);
     
-    static std::vector<std::string> tileType;
-    static std::string getTileType(std::string type);
-    static void loadTileType(void);
     static SDL_FRect tileSize;
 };
 

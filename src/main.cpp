@@ -115,10 +115,10 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     app->mapID = map->id;
     app->gameEngine.addItem(map);
     
-    map->addItem(new Tile(TileType::test, map, {0,0}, {1,1}));
-    map->addItem(new Tile(TileType::test, map, {0,1}, {1,1}));
-    map->addItem(new Tile(TileType::test, map, {1,1}, {1,1}));
-    map->addItem(new Tile(TileType::test, map, {2,2}, {1,1}));
+    map->addItem(new Tile("mobTest.png", map, {0,0}, {1,1}));
+    map->addItem(new Tile("mobTest.png", map, {0,1}, {1,1}));
+    map->addItem(new Tile("mobTest.png", map, {1,1}, {1,1}));
+    map->addItem(new Tile("mobTest.png", map, {2,2}, {1,1}));
 
     requestKeybordTarget(map->getRenderableItem()->id);
 
