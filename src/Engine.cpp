@@ -233,39 +233,40 @@ GameItem* GameEngine::getItem(int id) {
 
 static Uint32 eventType = SDL_RegisterEvents(1);
 
+SDL_Event createEvent(int code) {
+    if (eventType == 0)
+        SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "createEvent() %s", SDL_GetError());
+
+    SDL_Event event;
+    SDL_zero(event);
+    event.type = eventType;
+    event.user.code = code;
+    event.user.data1 = NULL;
+    event.user.data2 = NULL;
+
+    return event;
+}
+
 bool newItem(RenderableItem* item) {
-    if (eventType != 0) {
-        SDL_Event event;
-        SDL_zero(event);
-        event.type = eventType;
-        event.user.code = EVENT_NEW_ITEM_REQUEST;
-        event.user.data1 = (void *)item;
-        event.user.data2 = NULL;
-        bool res = SDL_PushEvent(&event);
+    SDL_Event event = createEvent(EVENT_NEW_ITEM_REQUEST);
 
-        if (res == false)
-            SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
+    event.user.data1 = (void *)item;
+    bool res = SDL_PushEvent(&event);
 
-        return true;
-    }
-    return false;
-
+    return (event.type != EVENT_BLANK) && res;
 }
 
 bool requestKeybordTarget(Uint64 id) {
-    if (eventType != 0) {
-        SDL_Event event;
-        SDL_zero(event);
-        event.type = eventType;
-        event.user.code = EVENT_KEYBOARD_REQUEST;
-        event.user.data1 = (void *)id;
-        event.user.data2 = NULL;
-        bool res = SDL_PushEvent(&event);
+    SDL_Event event = createEvent(EVENT_KEYBOARD_REQUEST);
+    event.user.data1 = (void *)id;
+    bool res = SDL_PushEvent(&event);
 
-        if (res == false)
-            SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
+    return (event.type != EVENT_BLANK) && res;
+}
 
-        return true;
-    }
-    return false;
+bool requestQuit(void) {
+    SDL_Event event = createEvent(EVENT_QUIT);
+    bool res = SDL_PushEvent(&event);
+
+    return (event.type != EVENT_BLANK) && res;
 }

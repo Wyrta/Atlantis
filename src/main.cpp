@@ -156,7 +156,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
         case SDL_EVENT_KEY_DOWN: {
             switch (event->key.scancode) {
                 case 41: 
-                    app->app_quit = SDL_APP_SUCCESS;
+                    // app->app_quit = SDL_APP_SUCCESS;
+                    requestQuit();
                     break;
                 case SDL_SCANCODE_F: {
                         Popup* popup = new Popup("Ticks", std::to_string(SDL_GetTicks()), {0.0, 100.0});
@@ -184,8 +185,11 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
                 case EVENT_KEYBOARD_REQUEST:
                     app->renderEngine.requestKeybordTarget((Uint64 )event->user.data1);
                     break;
+                case EVENT_QUIT:
+                    app->app_quit = SDL_APP_SUCCESS;
+                    break;
                 default:
-                    SDL_Log("Unkown event");
+                    SDL_Log("Unkown event %d", event->user.code);
                     break;
             }
             break;

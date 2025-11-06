@@ -52,8 +52,10 @@ public:
     void process(void);
 };
 
+#define EVENT_BLANK    -1
 #define EVENT_NEW_ITEM_REQUEST    1
 #define EVENT_KEYBOARD_REQUEST    2
+#define EVENT_QUIT    3
 
 /**
  * Send event to add an item to the RenderEngine
@@ -61,5 +63,7 @@ public:
 bool newItem(RenderableItem* item);
 
 bool requestKeybordTarget(Uint64 id);
+
+bool requestQuit(void);
 
 #endif // ENGINE
