@@ -5,10 +5,55 @@ std::vector<MapEvent> Tile::messages;
 std::mutex Tile::mutex;
 SDL_FRect Tile::tileSize = {0.0, 0.0, 64.0, 64.0};
 
+SDL_FPoint computeVector(bool left, bool right, bool up, bool down) {
+    float hypo = 3.0;
+    SDL_Point direction = {0, 0};
+    float angle = 0;
+    
+    if (down) { // DOWN
+        direction.y -= 1;
+    }
+    if (up) { // UP
+        direction.y += 1;
+    }
+    if (right) { // RIGHT
+        direction.x -= 1;
+    }
+    if (left) { // LEFT
+        direction.x += 1;
+    }
+
+    if (direction.x == 0 && direction.y == 0)
+        return {0.0, 0.0};
+    if (direction.x == 1 && direction.y == 0)
+        angle = 0;
+    if (direction.x == 1 && direction.y == 1)
+        angle = SDL_PI_F/4;
+    if (direction.x == 0 && direction.y == 1)
+        angle = SDL_PI_F/2;
+    if (direction.x == -1 && direction.y == 1)
+        angle = 3*SDL_PI_F/4;
+    if (direction.x == -1 && direction.y == 0)
+        angle = SDL_PI_F;
+    if (direction.x == -1 && direction.y == -1)
+        angle = 5*SDL_PI_F/4;
+    if (direction.x == 0 && direction.y == -1)
+        angle = 3*SDL_PI_F/2;
+    if (direction.x == 1 && direction.y == -1)
+        angle = 7*SDL_PI_F/4;
+    
+    SDL_FPoint coords;
+
+    coords.x = SDL_cos(angle)*hypo;
+    coords.y = SDL_sin(angle)*hypo;
+
+    return coords;
+}
+
 /**********************************************************************************************************************/
 
 Map::Map() : GameItem() {
-    Tile::tileSize = {0.0, 0.0, 100.0, 100.0};
+    Tile::tileSize = {0.0, 0.0, 32.0, 32.0};
     this->setRenderableItem(new RenderableGroups(this->getPosition()));
     this->getRenderableItem()->setEventHandler(this);
 }
@@ -19,6 +64,15 @@ Map::~Map() {
 
 void Map::process(Uint64 ticks) {
     this->handleEvent();
+
+    const bool* keyboard = SDL_GetKeyboardState(NULL);
+    
+    SDL_FPoint newPos = computeVector(keyboard[SDL_SCANCODE_LEFT], keyboard[SDL_SCANCODE_RIGHT], keyboard[SDL_SCANCODE_UP], keyboard[SDL_SCANCODE_DOWN]);
+    newPos.x += this->getPosition().x;
+    newPos.y += this->getPosition().y;
+
+    this->setPosition(newPos);
+
 
     this->mutex.lock();
     Tile* item = NULL;
@@ -51,20 +105,7 @@ void Map::handleEvent(void) {
         {
         case EventType::onKeyDown:
         case EventType::onKeyHold: {
-            SDL_FPoint newPos = this->getPosition();
-
-            switch (item.scancode)
-            {
-            case SDL_Scancode::SDL_SCANCODE_UP: newPos.y -= 5; this->setPosition(newPos); break;  
-            case SDL_Scancode::SDL_SCANCODE_DOWN: newPos.y += 5; this->setPosition(newPos); break;  
-            case SDL_Scancode::SDL_SCANCODE_LEFT: newPos.x -= 5; this->setPosition(newPos); break;  
-            case SDL_Scancode::SDL_SCANCODE_RIGHT: newPos.x += 5; this->setPosition(newPos); break;  
-            
-            default:
-                // SDL_Log("unknow: '%d' '%c'", item.key, item.key);
-                break;
-            }
-        }
+        } break;
         default:
             // SDL_Log("Unhandled: '%s'", getEventTypeName(item.type));
             break;
@@ -132,6 +173,11 @@ Tile::Tile(std::string type, Map* map, SDL_Point coords, SDL_Rect size, int laye
     this->layer = layer;
 
     this->setRenderableItem(new Sprite(type, this->getPosition()));
+    Sprite* sprite = (Sprite*)this->getRenderableItem();
+    SDL_FRect area = sprite->getArea();
+    area.w = Tile::tileSize.w;
+    area.h = Tile::tileSize.h;
+    sprite->setArea(area);
 }
 
 Tile::~Tile() {

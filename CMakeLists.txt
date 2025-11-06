@@ -95,10 +95,25 @@ macro(copy_helper filename)
         DEPENDS "${filename}"
     )
 endmacro()
-copy_helper("assets/mobTest.png")
-copy_helper("assets/npcTest.png")
-copy_helper("assets/Inter-VariableFont.ttf")
-copy_helper("assets/JackOfGears-YzD1v.ttf")
+# copy_helper("assets/mobTest.png")
+# copy_helper("assets/npcTest.png")
+# copy_helper("assets/Inter-VariableFont.ttf")
+# copy_helper("assets/JackOfGears-YzD1v.ttf")
+
+macro(copy_dir_helper filename)
+    
+    # for platforms that do not have a good packaging format, all we can do is copy the assets to the process working directory.
+    set(outname "${CMAKE_BINARY_DIR}/$<CONFIGURATION>/${filename}")
+    
+    add_custom_command(POST_BUILD
+        TARGET "${EXECUTABLE_NAME}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different "${CMAKE_CURRENT_LIST_DIR}/src/${filename}" "${outname}"
+        DEPENDS "${filename}"
+    )
+endmacro()
+
+copy_dir_helper("assets")
+
 
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES 
     # On macOS, make a proper .app bundle instead of a bare executable
