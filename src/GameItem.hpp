@@ -17,9 +17,9 @@ class RenderableItem;
 
 class GameItem : public EventHandler {
 private:
+    RenderableItem* renderableItem;
 protected:
     SDL_FPoint position;
-    RenderableItem* renderableItem;
 
 public:
     const uint32_t id;
@@ -30,6 +30,7 @@ public:
 
     virtual void process(Uint64 ticks) {};
     void setPosition(SDL_FPoint position);
+    SDL_FPoint getPosition(void) {return this->position; };
     void setRenderableItem(RenderableItem* renderableItem);
     RenderableItem* getRenderableItem(void);
 
@@ -80,12 +81,10 @@ private:
     Uint64 lastTicks, currentDuration;
     
 public:
-    TextArea(std::string content, SDL_FPoint pos, std::string cursorContent = "|");
-    void keyPressed(SDL_Scancode key);
     void process(Uint64 ticks);
-
     void handleEvent(void);
 
+    TextArea(std::string content, SDL_FPoint pos, std::string cursorContent = "|");
 };
 
 #endif // GAME_ITEMS

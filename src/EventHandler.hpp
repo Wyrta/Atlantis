@@ -54,10 +54,6 @@ class EventEmitter {
 private:
     EventHandler* eventHandler;
 
-    // mouse target
-    Uint64 lastClick[5];
-    Uint64 mouseDown[5];
-
 public:
     void setEventHandler(EventHandler* eventHandler);
     void sendEvent(Event event);
@@ -67,7 +63,6 @@ public:
     virtual void onClick(void) {return;};
     void onDblClick(void) {return;};
     void onContextMenu(void) {return;};
-    void onMouseMenu(void) {return;};
     void onMouseDown(SDL_MouseButtonEvent event);   // input
     void onMouseUp(SDL_MouseButtonEvent event);     // input
     void onMouseIn(void) {return;};

@@ -48,7 +48,7 @@ void EventEmitter::setEventHandler(EventHandler* eventHandler) {
 }
 
 void EventEmitter::sendEvent(Event event) {
-    // SDL_Log("Event: %s", eventTypeName(event.type));
+    // SDL_Log("Event: %s", getEventTypeName(event.type));
     if (this->eventHandler == NULL)
         return;
 

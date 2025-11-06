@@ -65,14 +65,14 @@ void Popup::process(Uint64 ticks) {
 
     if ((this->currentDuration > this->duration) && (this->duration != 0)) {
         this->canDelete = true;
-        this->renderableItem->disable();
+        this->getRenderableItem()->disable();
     }
 }
 
 
 void Popup::show(void) {
     this->doRender = true;
-    this->renderableItem->enable();
+    this->getRenderableItem()->enable();
 
     // reset
     this->currentDuration = 0;
@@ -100,12 +100,12 @@ Text::Text(std::string content, SDL_FPoint pos) : GameItem(pos) {
 }
 
 std::string Text::getText(void) {
-    TextSprite* item = (TextSprite*)this->renderableItem;
+    TextSprite* item = (TextSprite*)this->getRenderableItem();
     return item->getText();
 }
 
 void Text::setText(std::string content) {
-    TextSprite* item = (TextSprite*)this->renderableItem;
+    TextSprite* item = (TextSprite*)this->getRenderableItem();
     item->updateText(content);
 }
 
@@ -120,13 +120,9 @@ TextArea::TextArea(std::string content, SDL_FPoint pos, std::string cursorConten
     this->lastTicks = 0;
     this->currentDuration = 0;
 
-    this->renderableItem->setEventHandler(this);
+    this->getRenderableItem()->setEventHandler(this);
 
     this->cursorPosition = 0;
-}
-
-void TextArea::keyPressed(SDL_Scancode key) {
-    
 }
 
 void TextArea::process(Uint64 ticks) {
@@ -134,7 +130,7 @@ void TextArea::process(Uint64 ticks) {
     
     // TODO update cursor pos
 
-    SDL_FRect textArea = this->renderableItem->getArea();
+    SDL_FRect textArea = this->getRenderableItem()->getArea();
     SDL_FPoint cursorPos;
     cursorPos.x = textArea.x + textArea.w;
     cursorPos.y = textArea.y;
@@ -193,14 +189,14 @@ void TextArea::handleEvent(void) {
         switch (item.type)
         {
         case EventType::onTextInput: {
-            TextSprite* textSprite = (TextSprite*)this->renderableItem;
+            TextSprite* textSprite = (TextSprite*)this->getRenderableItem();
             std::string content = textSprite->getText();
             content += item.text;
             textSprite->updateText(content);
         }
         case EventType::onKeyUp:
         case EventType::onKeyHold: {
-            TextSprite* textSprite = (TextSprite*)this->renderableItem;
+            TextSprite* textSprite = (TextSprite*)this->getRenderableItem();
             std::string content = textSprite->getText();
 
             switch (item.key)

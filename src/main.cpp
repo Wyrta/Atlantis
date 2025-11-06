@@ -10,6 +10,7 @@
 
 #include "RenderableItem.hpp"
 #include "Engine.hpp"
+#include "MapItem.hpp"
 
 
 class AppContext {
@@ -21,6 +22,8 @@ public:
 
     RenderEngine renderEngine;
     GameEngine gameEngine;
+
+    int mapID;
 
     AppContext(SDL_Window* window, SDL_Renderer* renderer);
 };
@@ -102,12 +105,22 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 
     int textID = app->gameEngine.addItem(new TextArea("Test TextArea", {0.0, 50.0}));
     GameItem* gameItem = app->gameEngine.getItem(textID);
-    requestKeybordTarget(gameItem->getRenderableItem()->id);
 
     SDL_StartTextInput(app->window);
 
     SDL_AddTimer(10, (SDL_TimerCallback)SDL_AppWorker, app);
     SDL_Log("Application started successfully!");
+
+    Map* map = new Map();
+    app->mapID = map->id;
+    app->gameEngine.addItem(map);
+    
+    map->addItem(new Tile(TileType::test, map, {0,0}, {1,1}));
+    map->addItem(new Tile(TileType::test, map, {0,1}, {1,1}));
+    map->addItem(new Tile(TileType::test, map, {1,1}, {1,1}));
+    map->addItem(new Tile(TileType::test, map, {2,2}, {1,1}));
+
+    requestKeybordTarget(map->getRenderableItem()->id);
 
     return SDL_APP_CONTINUE;
 }

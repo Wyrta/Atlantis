@@ -143,6 +143,7 @@ void RenderEngine::mouseUp(SDL_MouseButtonEvent event) {
 }
 
 void RenderEngine::requestKeybordTarget(int id) {
+    SDL_Log("requestKeybordTarget %d", id);
     this->keyboardTarget = id;
 }
 
