@@ -22,11 +22,22 @@ void Map::process(Uint64 ticks) {
 
     this->mutex.lock();
     Tile* item = NULL;
+    RenderableGroups* group = (RenderableGroups*)this->getRenderableItem();
+    SDL_FRect newArea = group->getArea();
+    newArea.w = newArea.h = 0.0;
     for(std::vector<Tile*>::iterator it = this->tilemap.begin(); it != this->tilemap.end(); ++it)
     {
         item = *it;
         item->refreshPosition(this->getPosition());
+        
+        Sprite* rItem = (Sprite*)item->getRenderableItem();
+        SDL_FRect itemArea = rItem->getArea();
+        SDL_FRect tmp = newArea;
+        SDL_GetRectUnionFloat((const SDL_FRect*)&tmp, (const SDL_FRect*)&itemArea, &newArea);
+        newArea = tmp;
     }
+    group->setArea(newArea);
+
     this->mutex.unlock();
 }
 

@@ -46,6 +46,7 @@ public:
 
     void setPosition(SDL_FPoint newPos);
     SDL_FRect getArea(void) {return this->area;};
+    void setArea(SDL_FRect area) {this->area = area;};
 
     RenderableItem(SDL_FPoint pos = {0,0}, EventHandler* eventHandler = NULL);
 

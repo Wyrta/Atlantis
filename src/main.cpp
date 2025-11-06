@@ -175,8 +175,6 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event* event) {
             app->renderEngine.onKey(event->key);
             break;
         case SDL_EVENT_USER:
-            // SDL_Log("new user event");
-
             switch (event->user.code)
             {
                 case EVENT_NEW_ITEM_REQUEST:
