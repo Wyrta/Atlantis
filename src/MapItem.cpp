@@ -50,7 +50,7 @@ void Map::handleEvent(void) {
             case SDL_Scancode::SDL_SCANCODE_RIGHT: newPos.x += 5; this->setPosition(newPos); break;  
             
             default:
-                SDL_Log("unknow: '%d' '%c'", item.key, item.key);
+                // SDL_Log("unknow: '%d' '%c'", item.key, item.key);
                 break;
             }
         }

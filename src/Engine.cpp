@@ -143,7 +143,7 @@ void RenderEngine::mouseUp(SDL_MouseButtonEvent event) {
 }
 
 void RenderEngine::requestKeybordTarget(int id) {
-    SDL_Log("requestKeybordTarget %d", id);
+    // SDL_Log("requestKeybordTarget %d", id);
     this->keyboardTarget = id;
 }
 
@@ -169,8 +169,7 @@ void RenderEngine::onKey(SDL_KeyboardEvent event) {
     if (item == NULL)
         return;
 
-    // SDL_Keycode key = SDL_GetKeyFromScancode(event.scancode, event.mod, false);
-    SDL_Log("scancode: %d", event.scancode, event.scancode);
+    // SDL_Log("scancode: %d", event.scancode, event.scancode);
 
     if (event.down) {
         if (event.repeat) 
