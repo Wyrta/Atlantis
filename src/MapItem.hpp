@@ -58,15 +58,19 @@ class Map : public GameItem {
 private:
     std::mutex mutex;
     std::vector<Tile*> tilemap;
+
+    int hoverElement;
 protected:
 public:
     Map();
     ~Map();
 
+    void load(std::string file);
+
     void process(Uint64 ticks);
     void handleEvent(void);
 
-    void addItem(Tile* tile);
+    uint32_t addItem(Tile* tile);
     Tile* getItem(int id);
     Tile* getItem(SDL_FPoint position);
     void removeTile(SDL_Point tilePos);

@@ -114,19 +114,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     Map* map = new Map();
     app->mapID = map->id;
     app->gameEngine.addItem(map);
-    
-    map->addItem(new Tile("tiles/dirt-NW-grass.png",  map, {0,0}, {1,1}));
-    map->addItem(new Tile("tiles/grass-S-N-dirt.png", map, {1,0}, {1,1}));
-    map->addItem(new Tile("tiles/dirt-NE-grass.png",  map, {2,0}, {1,1}));
 
-    map->addItem(new Tile("tiles/grass-E-W-dirt.png", map, {0,1}, {1,1}));
-    map->addItem(new Tile("tiles/grass_3.png",        map, {1,1}, {1,1}));
-    map->addItem(new Tile("tiles/grass-W-E-dirt.png", map, {2,1}, {1,1}));
-
-    map->addItem(new Tile("tiles/dirt-SW-grass.png",  map, {0,2}, {1,1}));
-    map->addItem(new Tile("tiles/grass-N-S-dirt.png", map, {1,2}, {1,1}));
-    map->addItem(new Tile("tiles/dirt-SE-grass.png",  map, {2,2}, {1,1}));
-
+    map->load("assets/map1.json");
     map->setPosition({0.0, 200.0});
 
     requestKeybordTarget(map->getRenderableItem()->id);

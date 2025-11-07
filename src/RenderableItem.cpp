@@ -109,10 +109,12 @@ SDL_FPoint RenderableItem::calculateReelPosition(SDL_FPoint position) {
     return reelPosition;
 }
 
-void RenderableItem::onHover(SDL_FPoint position) {
+void RenderableItem::onHover(SDL_FPoint position, SDL_MouseButtonFlags flags) {
     position = this->calculateReelPosition(position);
     Event event;
     event.type = EventType::onHover;
+    event.mousePos = position;
+    event.mouseFlags = flags;
     this->sendEvent(event);
 }
 
@@ -160,7 +162,7 @@ SDL_FRect RenderableGroups::updateArea(void) {
 }
 
 
-void RenderableGroups::addItem(RenderableItem *item) {
+uint32_t RenderableGroups::addItem(RenderableItem *item) {
     this->mutex.lock();
     SDL_FPoint position;
     SDL_FRect itemArea;
@@ -190,6 +192,21 @@ void RenderableGroups::addItem(RenderableItem *item) {
     this->area.h = dst.h;
 
     this->mutex.unlock();
+
+    return item->id;
+}
+
+RenderableItem *RenderableGroups::getItem(uint32_t id) {
+    this->mutex.lock();
+    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != items.end(); ++it) {
+        if ((*it)->id == id) {
+            this->mutex.unlock();
+            return *it;
+        }
+    }
+    this->mutex.unlock();
+
+    return NULL;
 }
 
 
@@ -220,7 +237,7 @@ void Sprite::render(SDL_Renderer* renderer) {
     ASSERT_RENDERER
 
     if (this->texture == NULL) {
-        SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error Sprite::render texture == NULL");
+        // SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Sprite::render texture == NULL");
         return;
     }
 

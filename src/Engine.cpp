@@ -14,9 +14,9 @@ std::string AppOptions::getOption(std::string key) {
     this->mutex.lock();
     for(std::vector<Option>::iterator it = this->options.begin(); it != this->options.end(); ++it)
     {
-        if ((*it)->key == key) {
+        if ((*it).key == key) {
             this->mutex.unlock();
-            return *it;
+            return (*it).value;
         }
     }
     this->mutex.unlock();
@@ -28,7 +28,7 @@ bool AppOptions::setOption(Option option) {
     this->mutex.lock();
     for(std::vector<Option>::iterator it = this->options.begin(); it != this->options.end(); ++it)
     {
-        if ((*it)->key == option.key) {
+        if ((*it).key == option.key) {
             (*it).value = option.value;
             this->mutex.unlock();
             return true;
@@ -158,14 +158,14 @@ void RenderEngine::mouseMotion(void) {
     SDL_FPoint mouse;
     SDL_FRect itemArea;
 
-    SDL_GetMouseState(&mouse.x, &mouse.y);
+    SDL_MouseButtonFlags flags = SDL_GetMouseState(&mouse.x, &mouse.y);
 
     for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
         if (doSendEvent(*it, mouse) == false)
             continue;
 
-        (*it)->onHover(mouse);
+        (*it)->onHover(mouse, flags);
     }
 }
 

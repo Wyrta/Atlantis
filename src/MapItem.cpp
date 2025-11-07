@@ -1,6 +1,10 @@
 #include "MapItem.hpp"
 #include "Engine.hpp"
 
+#include <fstream>
+#include <nlohmann/json.hpp>    // nlohmann-json3-dev
+using json = nlohmann::json;
+
 std::vector<MapEvent> Tile::messages;
 std::mutex Tile::mutex;
 SDL_FRect Tile::tileSize = {0.0, 0.0, 64.0, 64.0};
@@ -59,11 +63,35 @@ Map::Map() : GameItem() {
     item->enable();
     item->autoUpdate = false;
     this->setRenderableItem(item);
+
+    this->hoverElement = item->addItem(new TextSprite("---", "Inter-VariableFont.ttf", 16, {255, 0, 0, 255}, this->position));
 }
 
 Map::~Map() {
     // delete tile
 }
+
+void Map::load(std::string filename) {
+    std::ifstream file(filename);
+    json data = json::parse(file);
+
+    auto tiles = data["tiles"];
+    for(auto it = tiles.begin(); it != tiles.end(); ++it) {
+        auto tile = *it;
+        std::string name = (std::string)"tiles/" + (std::string)tile["tile"] + (std::string)".png";
+        SDL_Rect area;
+            area.x = (int)tile["coords"][0];
+            area.y = (int)tile["coords"][1];
+            area.w = (int)tile["size"][0];
+            area.h = (int)tile["size"][1];
+        int layer = (int)tile["layer"];
+
+        SDL_Log("add tile: %s, coords: %d %d, size: %d %d", name.c_str(), area.x, area.y, area.w, area.h);
+        uint32_t tileId = this->addItem(new Tile(name, this, {area.x, area.y}, area, layer));
+        // this->getItem(tileId)->getRenderableItem()->disable();
+    }
+}
+
 
 void Map::process(Uint64 ticks) {
     this->handleEvent();
@@ -75,7 +103,6 @@ void Map::process(Uint64 ticks) {
     newPos.y += this->getPosition().y;
 
     this->setPosition(newPos);
-
 
     this->mutex.lock();
     Tile* item = NULL;
@@ -91,15 +118,10 @@ void Map::process(Uint64 ticks) {
         SDL_FRect itemArea = rItem->getArea();
         SDL_FRect tmp = newArea;
         SDL_GetRectUnionFloat((const SDL_FRect*)&tmp, (const SDL_FRect*)&itemArea, &newArea);
-        // newArea.w = tmp.w;
-        // newArea.h = tmp.h;
-        // SDL_Log("x%f y%f w%f h%f    ->    x%f y%f w%f h%f", itemArea.x, itemArea.y, itemArea.w, itemArea.h, newArea.x, newArea.y, newArea.w, newArea.h);
     }
     newArea.x = this->getPosition().x;
     newArea.y = this->getPosition().y;
     group->setArea(newArea);
-    // SDL_Log("x%f y%f w%f h%f", newArea.x, newArea.y, newArea.w, newArea.h);
-
 
     this->mutex.unlock();
 }
@@ -112,6 +134,19 @@ void Map::handleEvent(void) {
 
         switch (item.type)
         {
+        case EventType::onHover: {
+            SDL_Point mouseTile;
+            mouseTile.x = SDL_abs((int)(item.mousePos.x / this->getTileSize().w));
+            mouseTile.y = SDL_abs((int)(item.mousePos.y / this->getTileSize().h));
+            
+            RenderableGroups* renderableGroup = (RenderableGroups*)this->getRenderableItem();
+            TextSprite* text = (TextSprite*)renderableGroup->getItem(this->hoverElement);
+            
+            std::string content = std::string("Tile x") + std::to_string(mouseTile.x) + std::string(" y") + std::to_string(mouseTile.y);
+            text->enable();
+            text->updateText(content);
+            text->setPosition(item.mousePos);
+        } break;
         case EventType::onKeyDown:
         case EventType::onKeyHold: {
         } break;
@@ -127,11 +162,13 @@ void Map::handleEvent(void) {
     this->mutex.unlock();
 }
 
-void Map::addItem(Tile* tile) {
+uint32_t Map::addItem(Tile* tile) {
     this->mutex.lock();
     this->tilemap.push_back(tile);
-    tile->getRenderableItem()->disable();
+    // tile->getRenderableItem()->disable();
     this->mutex.unlock();
+
+    return tile->id;
 }
 
 Tile* Map::getItem(int id) {

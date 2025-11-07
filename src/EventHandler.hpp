@@ -39,6 +39,9 @@ typedef struct Event {
     SDL_Keycode key;
     SDL_Scancode scancode;
     std::string text;
+
+    SDL_FPoint mousePos;
+    SDL_MouseButtonFlags mouseFlags;
 } Event;
 
 class EventHandler {

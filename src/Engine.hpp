@@ -28,7 +28,7 @@ public:
     AppOptions();
     void factoryReset(void);
     std::string getOption(std::string key);
-    void setOption(Option option);
+    bool setOption(Option option);
     void addOption(Option option);
 };
 

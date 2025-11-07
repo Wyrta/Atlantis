@@ -50,7 +50,7 @@ public:
 
     RenderableItem(SDL_FPoint pos = {0,0}, EventHandler* eventHandler = NULL);
 
-    void onHover(SDL_FPoint position);
+    void onHover(SDL_FPoint position, SDL_MouseButtonFlags flags);
 
     bool isDisabled() {return this->disabled;};
     void disable(void) {this->disabled = true;};
@@ -67,7 +67,8 @@ private:
     std::mutex mutex;
 public:
     void render(SDL_Renderer *renderer);
-    void addItem(RenderableItem *item);
+    uint32_t addItem(RenderableItem *item);
+    RenderableItem *getItem(uint32_t item);
     void updateItemsPosition(void);
 
     bool autoUpdate = true;
