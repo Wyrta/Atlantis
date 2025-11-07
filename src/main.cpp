@@ -12,6 +12,7 @@
 #include "Engine.hpp"
 #include "MapItem.hpp"
 
+AppOptions options;
 
 class AppContext {
 public:

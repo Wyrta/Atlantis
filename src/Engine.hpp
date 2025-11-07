@@ -14,6 +14,23 @@
 #include "RenderableItem.hpp"
 #include "GameItem.hpp"
 
+class AppOptions {
+private: 
+    typedef struct Option
+    {
+        std::string key;
+        std::string value;
+    } Option;
+    
+    std::vector<Option> options;
+    std::mutex mutex;
+public:
+    AppOptions();
+    void factoryReset(void);
+    std::string getOption(std::string key);
+    void setOption(Option option);
+    void addOption(Option option);
+};
 
 class RenderEngine {
 private:

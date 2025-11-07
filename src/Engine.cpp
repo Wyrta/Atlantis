@@ -2,6 +2,51 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
+AppOptions::AppOptions() {
+
+}
+
+void AppOptions::factoryReset(void) {
+
+}
+
+std::string AppOptions::getOption(std::string key) {
+    this->mutex.lock();
+    for(std::vector<Option>::iterator it = this->options.begin(); it != this->options.end(); ++it)
+    {
+        if ((*it)->key == key) {
+            this->mutex.unlock();
+            return *it;
+        }
+    }
+    this->mutex.unlock();
+    return "";
+}
+
+bool AppOptions::setOption(Option option) {
+    Option opt;
+    this->mutex.lock();
+    for(std::vector<Option>::iterator it = this->options.begin(); it != this->options.end(); ++it)
+    {
+        if ((*it)->key == option.key) {
+            (*it).value = option.value;
+            this->mutex.unlock();
+            return true;
+        }
+    }
+    this->mutex.unlock();
+    return false;
+}
+
+void AppOptions::addOption(Option option) {
+    if (this->setOption(option))
+        return
+    
+    this->mutex.lock();
+    this->options.push_back(option);
+    this->mutex.unlock();
+}
+
 
 RenderEngine::RenderEngine(SDL_Renderer* renderer) {
     this->setRenderer(renderer);
