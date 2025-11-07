@@ -37,6 +37,8 @@ public:
     void requestKeybordTarget(int id);
     void onKey(SDL_KeyboardEvent event);
     void onText(SDL_TextInputEvent event);
+
+    bool debug = false;
 };
 
 class GameEngine {

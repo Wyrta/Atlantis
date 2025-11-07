@@ -54,8 +54,11 @@ SDL_FPoint computeVector(bool left, bool right, bool up, bool down) {
 
 Map::Map() : GameItem() {
     Tile::tileSize = {0.0, 0.0, 32.0, 32.0};
-    this->setRenderableItem(new RenderableGroups(this->getPosition()));
-    this->getRenderableItem()->setEventHandler(this);
+    RenderableGroups* item = new RenderableGroups(this->getPosition());
+    item->setEventHandler(this);
+    item->enable();
+    item->autoUpdate = false;
+    this->setRenderableItem(item);
 }
 
 Map::~Map() {
@@ -88,9 +91,15 @@ void Map::process(Uint64 ticks) {
         SDL_FRect itemArea = rItem->getArea();
         SDL_FRect tmp = newArea;
         SDL_GetRectUnionFloat((const SDL_FRect*)&tmp, (const SDL_FRect*)&itemArea, &newArea);
-        newArea = tmp;
+        // newArea.w = tmp.w;
+        // newArea.h = tmp.h;
+        // SDL_Log("x%f y%f w%f h%f    ->    x%f y%f w%f h%f", itemArea.x, itemArea.y, itemArea.w, itemArea.h, newArea.x, newArea.y, newArea.w, newArea.h);
     }
+    newArea.x = this->getPosition().x;
+    newArea.y = this->getPosition().y;
     group->setArea(newArea);
+    // SDL_Log("x%f y%f w%f h%f", newArea.x, newArea.y, newArea.w, newArea.h);
+
 
     this->mutex.unlock();
 }
@@ -121,6 +130,7 @@ void Map::handleEvent(void) {
 void Map::addItem(Tile* tile) {
     this->mutex.lock();
     this->tilemap.push_back(tile);
+    tile->getRenderableItem()->disable();
     this->mutex.unlock();
 }
 

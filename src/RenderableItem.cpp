@@ -123,7 +123,8 @@ void RenderableGroups::render(SDL_Renderer *renderer) {
 
     this->mutex.lock();
 
-    this->area = this->updateArea();
+    if (autoUpdate)
+        this->area = this->updateArea();
 
     for (int i = 0; i < this->items.size(); i++) {
         SDL_FPoint position;

@@ -44,8 +44,16 @@ void RenderEngine::render(void) {
     for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
     {
         item = *it;
-        if (item->isDisabled() == false)
+
+        if (item->isDisabled() == false) {
             item->render(this->renderer);
+            
+            if (this->debug) {
+                SDL_FRect area = item->getArea();
+                SDL_SetRenderDrawColor(this->renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
+                SDL_RenderRect(this->renderer, (const SDL_FRect*)&area);
+            }
+        }
 
         if (item->canDelete == true) {
             it = this->items.erase(it);

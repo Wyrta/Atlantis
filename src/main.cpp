@@ -101,15 +101,14 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "60"); // set fps
 
     app->renderEngine.loadTextures();
-    app->gameEngine.addItem(new Text("FPS", {0.0, 0.0}));
-
-    int textID = app->gameEngine.addItem(new TextArea("Test TextArea", {0.0, 50.0}));
-    GameItem* gameItem = app->gameEngine.getItem(textID);
 
     SDL_StartTextInput(app->window);
 
     SDL_AddTimer(10, (SDL_TimerCallback)SDL_AppWorker, app);
     SDL_Log("Application started successfully!");
+
+    app->gameEngine.addItem(new Text("FPS", {0.0, 0.0}));
+    app->gameEngine.addItem(new TextArea("Test TextArea", {0.0, 50.0}));
 
     Map* map = new Map();
     app->mapID = map->id;
@@ -126,6 +125,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     map->addItem(new Tile("tiles/dirt-SW-grass.png",  map, {0,2}, {1,1}));
     map->addItem(new Tile("tiles/grass-N-S-dirt.png", map, {1,2}, {1,1}));
     map->addItem(new Tile("tiles/dirt-SE-grass.png",  map, {2,2}, {1,1}));
+
+    map->setPosition({0.0, 200.0});
 
     requestKeybordTarget(map->getRenderableItem()->id);
 

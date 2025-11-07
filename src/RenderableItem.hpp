@@ -32,7 +32,7 @@ private:
 
 protected:
     SDL_FRect area = {0, 0, 10, 10};
-    bool disabled;
+    bool disabled = false;
 
 public:
     const uint32_t id;
@@ -70,6 +70,7 @@ public:
     void addItem(RenderableItem *item);
     void updateItemsPosition(void);
 
+    bool autoUpdate = true;
     SDL_FRect updateArea(void);
 
     RenderableGroups(SDL_FPoint pos = {0,0});

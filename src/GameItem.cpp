@@ -93,10 +93,11 @@ int Popup::getDuration(void) {
 
 /**********************************************************************************************************************/
 
-Text::Text(std::string content, SDL_FPoint pos) : GameItem(pos) {
+Text::Text(std::string content, SDL_FPoint pos, SDL_Color color) : GameItem(pos) {
     this->content = content;
-    TextSprite* item = new TextSprite(this->content, "Inter-VariableFont.ttf", 16, {255, 255, 255, SDL_ALPHA_OPAQUE}, this->position);
+    TextSprite* item = new TextSprite(this->content, "Inter-VariableFont.ttf", 16, {color.r, color.g, color.b, color.a}, this->position);
     this->setRenderableItem((RenderableItem*)item);
+    this->getRenderableItem()->setEventHandler(this);
 }
 
 std::string Text::getText(void) {
