@@ -78,6 +78,8 @@ RenderableItem::RenderableItem(SDL_FPoint pos, EventHandler* eventHandler): id(R
     this->setEventHandler(eventHandler);
 
     this->canDelete = false;
+
+    this->level = 0;
 }
 
 SDL_Texture* RenderableItem::getTexture(std::string name, SDL_FRect* size) {
@@ -127,6 +129,8 @@ void RenderableGroups::render(SDL_Renderer *renderer) {
 
     if (autoUpdate)
         this->area = this->updateArea();
+    else
+        this->area = this->getArea();
 
     for (int i = 0; i < this->items.size(); i++) {
         SDL_FPoint position;
@@ -148,7 +152,7 @@ SDL_FRect RenderableGroups::updateArea(void) {
     SDL_FRect dst;
     src.w = 0;
     src.h = 0;
-
+    this->mutex.lock();
     for (int i = 0; i < this->items.size(); i++) {
         SDL_FRect itemArea = this->items[i]->getArea();
         itemArea.x = this->offset[i].x + this->area.x;
@@ -157,9 +161,31 @@ SDL_FRect RenderableGroups::updateArea(void) {
         SDL_GetRectUnionFloat((const SDL_FRect*)&src, (const SDL_FRect*)&itemArea, &dst);
         src = dst;
     }
+    this->mutex.unlock();
 
     return src;
 }
+
+void RenderableGroups::moveItem(RenderableItem *item, SDL_FPoint newOffset) {
+    this->mutex.lock();
+
+    for (int i = 0; i < this->items.size(); i++) {
+        if (this->items[i]->id != item->id)
+            continue;
+
+        // change offset
+        this->offset[i].x = newOffset.x;
+        this->offset[i].y = newOffset.y;
+
+        // apply offset to the item
+        newOffset.x = this->offset[i].x + this->area.x;
+        newOffset.y = this->offset[i].y + this->area.y;
+        item->setPosition(newOffset);
+    }
+    
+    this->mutex.unlock();
+}
+
 
 
 uint32_t RenderableGroups::addItem(RenderableItem *item) {

@@ -53,25 +53,23 @@ RenderEngine::RenderEngine(SDL_Renderer* renderer) {
     this->keyboardTarget = -1;
 }
 
-int RenderEngine::addItem(RenderableItem* item) {
+uint32_t RenderEngine::addItem(RenderableItem* item) {
     this->mutex.lock();
-
-    this->items.push_back(item);
-    int size = this->items.size();
-    
+    this->items[item->getLevel()].push_back(item);
     this->mutex.unlock();
 
-    return size;
+    return item->id;
 }
-
 
 RenderableItem* RenderEngine::getItem(int id) {
     this->mutex.lock();
-    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
-    {
-        if ((*it)->id == id) {
-            this->mutex.unlock();
-            return *it;
+    for (int i = 0; i < MAX_LEVEL;i +=1) {
+        for(std::vector<RenderableItem*>::iterator it = this->items[i].begin(); it != this->items[i].end(); ++it)
+        {
+            if ((*it)->id == id) {
+                this->mutex.unlock();
+                return *it;
+            }
         }
     }
 
@@ -86,25 +84,27 @@ void RenderEngine::setRenderer(SDL_Renderer* renderer) {
 void RenderEngine::render(void) {
     RenderableItem* item = NULL;
     this->mutex.lock();
-    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
-    {
-        item = *it;
+    for (int i = 0; i < MAX_LEVEL;i +=1) {
+        for(std::vector<RenderableItem*>::iterator it = this->items[i].begin(); it != this->items[i].end(); ++it)
+        {
+            item = *it;
 
-        if (item->isDisabled() == false) {
-            item->render(this->renderer);
-            
-            if (this->debug) {
-                SDL_FRect area = item->getArea();
-                SDL_SetRenderDrawColor(this->renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
-                SDL_RenderRect(this->renderer, (const SDL_FRect*)&area);
+            if (item->isDisabled() == false) {
+                item->render(this->renderer);
+                
+                if (this->debug) {
+                    SDL_FRect area = item->getArea();
+                    SDL_SetRenderDrawColor(this->renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
+                    SDL_RenderRect(this->renderer, (const SDL_FRect*)&area);
+                }
             }
-        }
 
-        if (item->canDelete == true) {
-            it = this->items.erase(it);
-            it--;   // get previous iterator
+            if (item->canDelete == true) {
+                it = this->items[i].erase(it);
+                it--;   // get previous iterator
 
-            delete item;
+                delete item;
+            }
         }
     }
     this->mutex.unlock();
@@ -160,12 +160,14 @@ void RenderEngine::mouseMotion(void) {
 
     SDL_MouseButtonFlags flags = SDL_GetMouseState(&mouse.x, &mouse.y);
 
-    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
-    {
-        if (doSendEvent(*it, mouse) == false)
-            continue;
+    for (int i = 0; i < MAX_LEVEL;i +=1) {
+        for(std::vector<RenderableItem*>::iterator it = this->items[i].begin(); it != this->items[i].end(); ++it)
+        {
+            if (doSendEvent(*it, mouse) == false)
+                continue;
 
-        (*it)->onHover(mouse, flags);
+            (*it)->onHover(mouse, flags);
+        }
     }
 }
 
@@ -173,12 +175,13 @@ void RenderEngine::mouseDown(SDL_MouseButtonEvent event) {
     SDL_FPoint mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
 
-    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
-    {
-        if (doSendEvent(*it, mouse) == false)
-            continue;
+    for (int i = 0; i < MAX_LEVEL;i +=1) {
+        for(std::vector<RenderableItem*>::iterator it = this->items[i].begin(); it != this->items[i].end(); ++it) {
+            if (doSendEvent(*it, mouse) == false)
+                continue;
 
-        (*it)->onMouseDown(event);
+            (*it)->onMouseDown(event);
+        }
     }
 }
 
@@ -186,12 +189,13 @@ void RenderEngine::mouseUp(SDL_MouseButtonEvent event) {
     SDL_FPoint mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
 
-    for(std::vector<RenderableItem*>::iterator it = this->items.begin(); it != this->items.end(); ++it)
-    {
-        if (doSendEvent(*it, mouse) == false)
-            continue;
+    for (int i = 0; i < MAX_LEVEL;i +=1) {
+        for(std::vector<RenderableItem*>::iterator it = this->items[i].begin(); it != this->items[i].end(); ++it) {
+            if (doSendEvent(*it, mouse) == false)
+                continue;
 
-        (*it)->onMouseUp(event);
+            (*it)->onMouseUp(event);
+        }
     }
 }
 

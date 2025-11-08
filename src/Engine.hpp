@@ -35,11 +35,11 @@ public:
 class RenderEngine {
 private:
     SDL_Renderer* renderer;
-    std::vector<RenderableItem*> items;
+    std::vector<RenderableItem*> items[MAX_LEVEL];
     std::mutex mutex;
     int keyboardTarget;
 public:
-    int addItem(RenderableItem* item);
+    uint32_t addItem(RenderableItem* item);
     RenderableItem* getItem(int id);
     void render(void);
     int loadTextures(void);

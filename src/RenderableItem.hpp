@@ -13,6 +13,8 @@
 #include <mutex>
 #include "EventHandler.hpp"
 
+#define MAX_LEVEL   16
+
 SDL_Texture *createTexture(SDL_Renderer* render, SDL_FRect* rectangle, const char* path);
 
 struct Texture {
@@ -33,6 +35,7 @@ private:
 protected:
     SDL_FRect area = {0, 0, 10, 10};
     bool disabled = false;
+    int level;
 
 public:
     const uint32_t id;
@@ -58,6 +61,8 @@ public:
     void toggle(void) {this->disabled = !this->disabled;};
 
     bool canDelete;
+    void setLevel(int level) {if ((level < MAX_LEVEL) && (level >= 0)) this->level = level; };
+    int getLevel(void) {return this->level;};
 };
 
 class RenderableGroups : public RenderableItem {
@@ -68,6 +73,7 @@ private:
 public:
     void render(SDL_Renderer *renderer);
     uint32_t addItem(RenderableItem *item);
+    void moveItem(RenderableItem *item, SDL_FPoint newOffset);
     RenderableItem *getItem(uint32_t item);
     void updateItemsPosition(void);
 

@@ -63,8 +63,10 @@ Map::Map() : GameItem() {
     item->enable();
     item->autoUpdate = false;
     this->setRenderableItem(item);
+    item->setLevel(10);
 
     this->hoverElement = item->addItem(new TextSprite("---", "Inter-VariableFont.ttf", 16, {255, 0, 0, 255}, this->position));
+
 }
 
 Map::~Map() {
@@ -86,8 +88,10 @@ void Map::load(std::string filename) {
             area.h = (int)tile["size"][1];
         int layer = (int)tile["layer"];
 
-        SDL_Log("add tile: %s, coords: %d %d, size: %d %d", name.c_str(), area.x, area.y, area.w, area.h);
+        // SDL_Log("add tile: %s, coords: %d %d, size: %d %d", name.c_str(), area.x, area.y, area.w, area.h);
         uint32_t tileId = this->addItem(new Tile(name, this, {area.x, area.y}, area, layer));
+        this->getItem(tileId)->getRenderableItem()->setLevel(0);
+
         // this->getItem(tileId)->getRenderableItem()->disable();
     }
 }
@@ -145,7 +149,10 @@ void Map::handleEvent(void) {
             std::string content = std::string("Tile x") + std::to_string(mouseTile.x) + std::string(" y") + std::to_string(mouseTile.y);
             text->enable();
             text->updateText(content);
-            text->setPosition(item.mousePos);
+
+            item.mousePos.x = SDL_abs(item.mousePos.x);
+            item.mousePos.y = SDL_abs(item.mousePos.y);
+            renderableGroup->moveItem(text, item.mousePos);
         } break;
         case EventType::onKeyDown:
         case EventType::onKeyHold: {
