@@ -70,7 +70,7 @@ public:
     std::string getText(void);
     void setText(std::string content);
 
-    Text(std::string content, SDL_FPoint pos, SDL_Color color = {255, 255, 255, SDL_ALPHA_OPAQUE});
+    Text(std::string content, SDL_FPoint pos, SDL_Color color = BLACK);
 };
 
 

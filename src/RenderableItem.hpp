@@ -15,6 +15,12 @@
 
 #define MAX_LEVEL   16
 
+#define RED     (SDL_Color){255,   0,   0, SDL_ALPHA_OPAQUE}
+#define GREEN   (SDL_Color){0,   255,   0, SDL_ALPHA_OPAQUE}
+#define BLUE    (SDL_Color){0,     0, 255, SDL_ALPHA_OPAQUE}
+#define WHITE   (SDL_Color){255, 255, 255, SDL_ALPHA_OPAQUE}
+#define BLACK   (SDL_Color){0,     0,   0, SDL_ALPHA_OPAQUE}
+
 SDL_Texture *createTexture(SDL_Renderer* render, SDL_FRect* rectangle, const char* path);
 
 struct Texture {
@@ -125,7 +131,7 @@ public:
     static std::vector<Font> fonts;
     static TTF_Font* getFont(std::string fontName, int fontSize);
 
-    TextSprite(std::string newContent, std::string fontName, int fontSize, SDL_Color color = {0, 0, 0, SDL_ALPHA_OPAQUE}, SDL_FPoint pos = {0,0});
+    TextSprite(std::string newContent, std::string fontName, int fontSize, SDL_Color color = BLACK, SDL_FPoint pos = {0,0});
     ~TextSprite();
     void updateText(std::string newContent);
     std::string getText(void);

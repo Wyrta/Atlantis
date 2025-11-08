@@ -65,8 +65,8 @@ Map::Map() : GameItem() {
     this->setRenderableItem(item);
     item->setLevel(10);
 
-    this->hoverElement = item->addItem(new TextSprite("---", "Inter-VariableFont.ttf", 16, {255, 0, 0, 255}, this->position));
-
+    this->hoverElement = item->addItem(new TextSprite("---", "Inter-VariableFont.ttf", 16, WHITE, this->position));
+    item->getItem(this->hoverElement)->disable();
 }
 
 Map::~Map() {
