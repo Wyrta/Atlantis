@@ -91,10 +91,11 @@ macro(copy_helper filename)
     
     add_custom_command(POST_BUILD
         TARGET "${EXECUTABLE_NAME}"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/src/${filename}" "${outname}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_LIST_DIR}/src/${filename}" "${outname}"
         DEPENDS "${filename}"
     )
 endmacro()
+copy_helper("option.json")
 # copy_helper("assets/mobTest.png")
 # copy_helper("assets/npcTest.png")
 # copy_helper("assets/Inter-VariableFont.ttf")

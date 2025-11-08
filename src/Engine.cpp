@@ -2,6 +2,10 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
+#include <fstream>
+#include <nlohmann/json.hpp>    // nlohmann-json3-dev
+using json = nlohmann::json;
+
 SDL_AppResult SDL_Fail(){
     SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
     return SDL_APP_FAILURE;
@@ -14,6 +18,24 @@ AppOptions::AppOptions() {
 void AppOptions::factoryReset(void) {
 
 }
+
+void AppOptions::loadOptions(std::string filename) {
+    std::ifstream file(filename);
+    json data = json::parse(file);
+
+    auto options = data["options"];
+    for(auto it = options.begin(); it != options.end(); ++it) {
+        auto option = *it;
+
+        std::string key = (std::string)option["key"];
+        std::string value = (std::string)option["value"];
+
+        this->options.push_back({key, value});
+        // SDL_Log("%s:%s", key.c_str(), value.c_str());
+    }
+
+}
+
 
 std::string AppOptions::getOption(std::string key) {
     this->mutex.lock();

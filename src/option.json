@@ -1,0 +1,9 @@
+{
+    "options" : [
+        {"key":"exit", "value":"false"},
+        {"key":"fps", "value":"60"},
+        {"key":"fail", "value":"false"},
+        {"key":"nothing", "value":"false"},
+        {"key":"map", "value":"false"}
+    ]
+}

@@ -28,6 +28,7 @@ private:
     std::mutex mutex;
 public:
     AppOptions();
+    void loadOptions(std::string filename);
     void factoryReset(void);
     std::string getOption(std::string key);
     bool setOption(Option option);

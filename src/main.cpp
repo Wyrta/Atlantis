@@ -30,11 +30,7 @@ Uint32 SDL_AppWorker(void *userdata, SDL_TimerID timerID, Uint32 interval) {
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     // set up option
-    options.addOption({"exit", "false"});
-    options.addOption({"fps", "60"});
-    options.addOption({"fail", "false"});
-    options.addOption({"nothing", "false"});
-    options.addOption({"map", "false"});
+    options.loadOptions("option.json");
 
     // set up the application data
     *appstate = new AppContext();
