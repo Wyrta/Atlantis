@@ -14,6 +14,8 @@
 #include "RenderableItem.hpp"
 #include "GameItem.hpp"
 
+SDL_AppResult SDL_Fail(void);
+
 class AppOptions {
 private: 
     typedef struct Option
@@ -45,7 +47,7 @@ public:
     int loadTextures(void);
     void clearScreen(void);
     void setRenderer(SDL_Renderer* renderer);
-    RenderEngine(SDL_Renderer* renderer);
+    RenderEngine();
 
     void mouseMotion(void);
     void mouseDown(SDL_MouseButtonEvent event);
@@ -84,5 +86,22 @@ bool newItem(RenderableItem* item);
 bool requestKeybordTarget(Uint64 id);
 
 bool requestQuit(void);
+
+class AppContext {
+public:
+    SDL_Window* window;
+    SDL_Renderer* renderer;
+    SDL_AudioDeviceID audioDevice;
+    SDL_AppResult app_quit;
+
+    RenderEngine renderEngine;
+    GameEngine gameEngine;
+
+    int mapID;
+
+    AppContext();
+    int initSDL();
+};
+
 
 #endif // ENGINE

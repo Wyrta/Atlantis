@@ -121,6 +121,11 @@ void Map::process(Uint64 ticks) {
         SDL_FRect itemArea = rItem->getArea();
         SDL_FRect tmp = newArea;
         SDL_GetRectUnionFloat((const SDL_FRect*)&tmp, (const SDL_FRect*)&itemArea, &newArea);
+
+        if (group->isDisabled())
+            item->disable();
+        else
+            item->enable();
     }
     newArea.x = this->getPosition().x;
     newArea.y = this->getPosition().y;

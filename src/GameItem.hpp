@@ -34,6 +34,9 @@ public:
     void setRenderableItem(RenderableItem* renderableItem);
     RenderableItem* getRenderableItem(void);
 
+    void enable(void) {this->getRenderableItem()->enable();};
+    void disable(void) {this->getRenderableItem()->disable();};
+
     bool canDelete;
 };
 
@@ -95,6 +98,7 @@ private:
 public:
     MenuItem();
 
+    void setValue(std::string value);
     void setCallback(GameItem* callback);
     void setOption(std::string option);
     void change(void);
@@ -104,7 +108,7 @@ class Button : public MenuItem {
 private:
     bool clicked;
 
-    int IDtext, IDbg, IDfg;
+    int IDtext, IDbg;
 public:
     Button(std::string content, SDL_FRect area = {0.0, 0.0, 0.0, 0.0}, std::string option = "");
 

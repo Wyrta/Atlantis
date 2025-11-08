@@ -14,37 +14,14 @@
 
 AppOptions options;
 
-class AppContext {
-public:
-    SDL_Window* window;
-    SDL_Renderer* renderer;
-    SDL_AudioDeviceID audioDevice;
-    SDL_AppResult app_quit;
-
-    RenderEngine renderEngine;
-    GameEngine gameEngine;
-
-    int mapID;
-
-    AppContext(SDL_Window* window, SDL_Renderer* renderer);
-};
-
-AppContext::AppContext(SDL_Window* window, SDL_Renderer* renderer) : renderEngine(renderer), gameEngine() {
-    this->window = window;
-    this->renderer = renderer;
-    this->app_quit = SDL_APP_CONTINUE;
-}
-
-uint32_t windowStartWidth = 400;
-uint32_t windowStartHeight = 400;
-
-SDL_AppResult SDL_Fail(){
-    SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-}
-
 Uint32 SDL_AppWorker(void *userdata, SDL_TimerID timerID, Uint32 interval) {
     auto* app = (AppContext*)userdata;
+
+    if (options.getOption("map") == "true")
+        app->gameEngine.getItem(app->mapID)->enable();
+    else
+        app->gameEngine.getItem(app->mapID)->disable();
+    
 
     app->gameEngine.process();
 
@@ -52,57 +29,22 @@ Uint32 SDL_AppWorker(void *userdata, SDL_TimerID timerID, Uint32 interval) {
 }
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
-    if (not SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
-        return SDL_Fail();
-    }
-    
-    // init TTF
-    if (not TTF_Init()) {
-        return SDL_Fail();
-    }
-    
-    // init Mixer
-    if (not MIX_Init()) {
-        return SDL_Fail();
-    }
-    
-    // create a window
-   
-    SDL_Window* window = SDL_CreateWindow("Test window", windowStartWidth, windowStartHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
-    if (not window){
-        return SDL_Fail();
-    }
-    
-    // create a renderer
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
-    if (not renderer){
-        return SDL_Fail();
-    }
-
-    // print some information about the window
-    SDL_ShowWindow(window);
-    {
-        int width, height, bbwidth, bbheight;
-        SDL_GetWindowSize(window, &width, &height);
-        SDL_GetWindowSizeInPixels(window, &bbwidth, &bbheight);
-        SDL_Log("Window size: %ix%i", width, height);
-        SDL_Log("Backbuffer size: %ix%i", bbwidth, bbheight);
-        if (width != bbwidth){
-            SDL_Log("This is a highdpi environment.");
-        }
-    }
-
     // set up option
     options.addOption({"exit", "false"});
     options.addOption({"fps", "60"});
     options.addOption({"fail", "false"});
+    options.addOption({"nothing", "false"});
+    options.addOption({"map", "false"});
 
     // set up the application data
-    *appstate = new AppContext(window, renderer);
+    *appstate = new AppContext();
     auto* app = (AppContext*)*appstate;
+
+    if (app->initSDL() == SDL_APP_FAILURE)
+        return SDL_APP_FAILURE;
     
-    SDL_SetRenderVSync(renderer, SDL_RENDERER_VSYNC_ADAPTIVE);
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderVSync(app->renderer, SDL_RENDERER_VSYNC_ADAPTIVE);
+	SDL_SetRenderDrawBlendMode(app->renderer, SDL_BLENDMODE_BLEND);
 
     SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, options.getOption("fps").c_str()); // set fps
 
@@ -116,6 +58,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     app->gameEngine.addItem(new TextArea("Test TextArea", {0.0, 50.0}, WHITE));
     app->gameEngine.addItem(new Button("Quit", {0.0, 100.0, 100.0, 32.0}, "exit"));
     app->gameEngine.addItem(new Button("Fail", {0.0, 150.0, 100.0, 32.0}, "fail"));
+    app->gameEngine.addItem(new Button("Nothing", {125.0, 100.0, 100.0, 32.0}, "nothing"));
+    app->gameEngine.addItem(new Button("Display map", {125.0, 100.0, 100.0, 32.0}, "map"));
 
     Map* map = new Map();
     app->mapID = map->id;

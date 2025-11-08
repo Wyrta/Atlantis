@@ -363,7 +363,7 @@ TTF_Font* TextSprite::getFont(std::string name, int size) {
     newFont.size = size;
 
     TextSprite::fonts.push_back(newFont);
-    SDL_Log("New font loaded : %s %dpx", name.c_str(), size);
+    // SDL_Log("New font loaded : %s %dpx", name.c_str(), size);
 
     return newFont.font;
 }

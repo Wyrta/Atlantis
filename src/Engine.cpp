@@ -2,6 +2,11 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
+SDL_AppResult SDL_Fail(){
+    SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+}
+
 AppOptions::AppOptions() {
 
 }
@@ -47,9 +52,65 @@ void AppOptions::addOption(Option option) {
     this->mutex.unlock();
 }
 
+/**********************************************************************************************************************/
 
-RenderEngine::RenderEngine(SDL_Renderer* renderer) {
-    this->setRenderer(renderer);
+uint32_t windowStartWidth = 400;
+uint32_t windowStartHeight = 400;
+
+AppContext::AppContext() {
+    this->window = window;
+    this->renderer = renderer;
+    this->app_quit = SDL_APP_CONTINUE;
+}
+
+int AppContext::initSDL(void) {
+    if (not SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
+        return SDL_Fail();
+    }
+    
+    // init TTF
+    if (not TTF_Init()) {
+        return SDL_Fail();
+    }
+    
+    // init Mixer
+    if (not MIX_Init()) {
+        return SDL_Fail();
+    }
+    
+    // create a window
+   
+    this->window = SDL_CreateWindow("Test window", windowStartWidth, windowStartHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    if (not this->window){
+        return SDL_Fail();
+    }
+    
+    // create a renderer
+    this->renderer = SDL_CreateRenderer(this->window, NULL);
+    if (not this->renderer){
+        return SDL_Fail();
+    }
+    this->renderEngine.setRenderer(this->renderer);
+
+    // print some information about the window
+    SDL_ShowWindow(this->window);
+    {
+        int width, height, bbwidth, bbheight;
+        SDL_GetWindowSize(this->window, &width, &height);
+        SDL_GetWindowSizeInPixels(this->window, &bbwidth, &bbheight);
+        SDL_Log("Window size: %ix%i", width, height);
+        SDL_Log("Backbuffer size: %ix%i", bbwidth, bbheight);
+        if (width != bbwidth){
+            SDL_Log("This is a highdpi environment.");
+        }
+    }
+
+    return SDL_APP_SUCCESS;
+}
+
+/**********************************************************************************************************************/
+
+RenderEngine::RenderEngine() {
     this->keyboardTarget = -1;
 }
 

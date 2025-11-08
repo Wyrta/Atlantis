@@ -239,6 +239,10 @@ MenuItem::MenuItem() : GameItem() {
 
 }
 
+void MenuItem::setValue(std::string value) {
+    this->value = value;
+}
+
 void MenuItem::setCallback(GameItem* callback) {
     this->callback = callback;
     this->setRenderableItem(new RenderableGroups());
@@ -266,6 +270,7 @@ void MenuItem::change(void) {
 
 Button::Button(std::string content, SDL_FRect area, std::string option) : MenuItem() {
     this->setOption(option);
+    this->clicked = false;
     
     SDL_FPoint position;
     position.x = area.x;
@@ -279,7 +284,6 @@ Button::Button(std::string content, SDL_FRect area, std::string option) : MenuIt
     
     this->IDbg = group->addItem(new Sprite("background_menu.png"));
     this->IDtext = group->addItem(new TextSprite(content, 16, BLACK));
-    this->IDfg = -1; 
 
     SDL_FRect bgArea = area;
     bgArea.x = bgArea.y = 0;
@@ -291,7 +295,13 @@ Button::Button(std::string content, SDL_FRect area, std::string option) : MenuIt
 void Button::process(Uint64 ticks) {
     this->handleEvent();
 
+    if (this->clicked) {
+        this->setValue("true");
+        this->change();
+    }
 
+    // reset click
+    this->clicked = false;  
 }
 
 void Button::handleEvent(void) {
@@ -307,7 +317,6 @@ void Button::handleEvent(void) {
         case EventType::onDlbClick:
             ((TextSprite*)((RenderableGroups*)this->getRenderableItem())->getItem(this->IDtext))->setColor(BLACK);
             this->clicked = true;
-            this->change();
             break;
         
         default:
