@@ -21,10 +21,13 @@ typedef enum EventType {
     onMouseUp,
     onClick,
     onDlbClick,
+    onContextMenu,
     onKeyDown,
     onKeyUp,
     onKeyHold,
     onTextInput,
+
+    menuItemUpdate,
 
     onNothing   // last item
 } EventType;
@@ -40,6 +43,8 @@ typedef struct Event {
     SDL_Scancode scancode;
     std::string text;
 
+    std::string value;
+
     SDL_FPoint mousePos;
     SDL_MouseButtonFlags mouseFlags;
 } Event;
@@ -48,10 +53,12 @@ class EventHandler {
 private:
 protected:
     std::mutex mutex;
-    std::vector<Event> event;
+    std::vector<Event> events;
 public:
     void receiveEvent(Event event);
     virtual void handleEvent(void);
+    void clearEvent(void) {this->events.clear();};
+
 };
 
 class EventEmitter {

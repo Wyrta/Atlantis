@@ -3,6 +3,8 @@
 
 uint32_t GameItem::nbId = 0;
 
+extern AppOptions options;
+
 GameItem::GameItem(SDL_FPoint position) : id(nbId++) {
     this->position = position;
     this->renderableItem = NULL;
@@ -47,8 +49,8 @@ Popup::Popup(std::string title, std::string content, SDL_FPoint pos) : GameItem(
 
     RenderableGroups* item = new RenderableGroups(this->position);
 
-    item->addItem(new TextSprite(title, "Inter-VariableFont.ttf", 24, {255,255,255,SDL_ALPHA_OPAQUE}));
-    item->addItem(new TextSprite(content, "Inter-VariableFont.ttf", 16, {255,255,255,SDL_ALPHA_OPAQUE}, {0.0, 26.0}));
+    item->addItem(new TextSprite(title, 24, {255,255,255,SDL_ALPHA_OPAQUE}));
+    item->addItem(new TextSprite(content, 16, {255,255,255,SDL_ALPHA_OPAQUE}, {0.0, 26.0}));
     item->disable();
 
     this->setRenderableItem(item);
@@ -95,7 +97,7 @@ int Popup::getDuration(void) {
 
 Text::Text(std::string content, SDL_FPoint pos, SDL_Color color) : GameItem(pos) {
     this->content = content;
-    TextSprite* item = new TextSprite(this->content, "Inter-VariableFont.ttf", 16, {color.r, color.g, color.b, color.a}, this->position);
+    TextSprite* item = new TextSprite(this->content, 16, {color.r, color.g, color.b, color.a}, this->position);
     this->setRenderableItem((RenderableItem*)item);
     this->getRenderableItem()->setEventHandler(this);
 }
@@ -112,8 +114,8 @@ void Text::setText(std::string content) {
 
 /**********************************************************************************************************************/
 
-TextArea::TextArea(std::string content, SDL_FPoint pos, std::string cursorContent) : Text(content, pos) {
-    this->cursor = new TextSprite(cursorContent, "Inter-VariableFont.ttf", 16, {255, 255, 255, SDL_ALPHA_OPAQUE}, this->position);
+TextArea::TextArea(std::string content, SDL_FPoint pos, SDL_Color color, std::string cursorContent) : Text(content, pos, color) {
+    this->cursor = new TextSprite(cursorContent, 16, color, this->position);
     this->cursor->disable();
 
     newItem(this->cursor);
@@ -182,7 +184,7 @@ int getLastCharLenght(std::string string) {
 
 void TextArea::handleEvent(void) {
     this->mutex.lock();
-    for(std::vector<Event>::iterator it = this->event.begin(); it != this->event.end(); ++it)
+    for(std::vector<Event>::iterator it = this->events.begin(); it != this->events.end(); ++it)
     {
         Event item = *it;
         // SDL_Log("TextArea::handleEvent(): Event handled: '%s' '%s'", getEventTypeName(item.type), SDL_GetScancodeName(item.key));
@@ -226,11 +228,92 @@ void TextArea::handleEvent(void) {
             // SDL_Log("Unhandled: '%s'", getEventTypeName(item.type));
             break;
         }
-
-
-        // remove event
-        it = this->event.erase(it);
-        it--;   // get previous iterator
     }
+    this->clearEvent();
+    this->mutex.unlock();
+}
+
+/**********************************************************************************************************************/
+
+MenuItem::MenuItem() : GameItem() {
+
+}
+
+void MenuItem::setCallback(GameItem* callback) {
+    this->callback = callback;
+    this->setRenderableItem(new RenderableGroups());
+}
+
+void MenuItem::setOption(std::string option) {
+    this->option = option;
+}
+
+void MenuItem::change(void) {
+    if (this->option != "") {
+        options.setOption({this->option, this->value});
+    }
+
+    if (this->callback != NULL) {
+        Event event;
+        event.emitter = this->getRenderableItem();
+        event.type = EventType::menuItemUpdate;
+        event.value = this->value;
+        this->callback->receiveEvent(event);
+    }
+}
+
+/**********************************************************************************************************************/
+
+Button::Button(std::string content, SDL_FRect area, std::string option) : MenuItem() {
+    this->setOption(option);
+    
+    SDL_FPoint position;
+    position.x = area.x;
+    position.y = area.y;
+
+    RenderableGroups* group = new RenderableGroups();
+    group->enable();
+    group->setPosition(position);
+    group->setLevel(10);
+    group->setEventHandler(this);
+    
+    this->IDbg = group->addItem(new Sprite("background_menu.png"));
+    this->IDtext = group->addItem(new TextSprite(content, 16, BLACK));
+    this->IDfg = -1; 
+
+    SDL_FRect bgArea = area;
+    bgArea.x = bgArea.y = 0;
+    group->getItem(this->IDbg)->setArea(bgArea);
+
+    this->setRenderableItem((RenderableItem*)group);
+}
+
+void Button::process(Uint64 ticks) {
+    this->handleEvent();
+
+
+}
+
+void Button::handleEvent(void) {
+    this->mutex.lock();
+    for(std::vector<Event>::iterator it = this->events.begin(); it != this->events.end(); ++it) {
+        Event event = (Event)*it;
+        switch (event.type)
+        {
+        case EventType::onMouseDown:
+            ((TextSprite*)((RenderableGroups*)this->getRenderableItem())->getItem(this->IDtext))->setColor(WHITE);
+            break;
+        case EventType::onClick:
+        case EventType::onDlbClick:
+            ((TextSprite*)((RenderableGroups*)this->getRenderableItem())->getItem(this->IDtext))->setColor(BLACK);
+            this->clicked = true;
+            this->change();
+            break;
+        
+        default:
+            break;
+        }
+    }
+    this->clearEvent();
     this->mutex.unlock();
 }

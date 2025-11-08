@@ -52,6 +52,11 @@ SDL_Texture *write(SDL_Renderer* render, SDL_FRect *rect, TTF_Font *font, const 
 
 	surface = TTF_RenderText_Solid(font, text, 0, color);
 
+    if (surface == NULL) {
+		SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Create texte surface : surface NULL -> %s", SDL_GetError());
+        return NULL;
+    }
+
 	texture = SDL_CreateTextureFromSurface(render, surface);
 	SDL_DestroySurface(surface);
 
@@ -125,13 +130,13 @@ void RenderableItem::onHover(SDL_FPoint position, SDL_MouseButtonFlags flags) {
 void RenderableGroups::render(SDL_Renderer *renderer) {
     ASSERT_RENDERER
 
-    this->mutex.lock();
-
-    if (autoUpdate)
+    if (autoUpdate) {
         this->area = this->updateArea();
+    }
     else
         this->area = this->getArea();
 
+    this->mutex.lock();
     for (int i = 0; i < this->items.size(); i++) {
         SDL_FPoint position;
         position.x = this->offset[i].x + this->area.x;
@@ -185,8 +190,6 @@ void RenderableGroups::moveItem(RenderableItem *item, SDL_FPoint newOffset) {
     
     this->mutex.unlock();
 }
-
-
 
 uint32_t RenderableGroups::addItem(RenderableItem *item) {
     this->mutex.lock();
@@ -317,14 +320,9 @@ void AnimatedSprite::changeFramerate(int frameDuration) {
 
 /**********************************************************************************************************************/
 
-TextSprite::TextSprite(std::string newContent, std::string fontName, int fontSize, SDL_Color color, SDL_FPoint pos) : RenderableItem(pos), fontSize(fontSize) {
-    TTF_Font* font = this->getFont(fontName, fontSize);
-
-    if (font == NULL)
-        SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "font == NULL");
-
+TextSprite::TextSprite(std::string newContent, int fontSize, SDL_Color color, SDL_FPoint pos) : RenderableItem(pos), fontSize(fontSize) {
+    this->setFont();
     this->updateText(newContent);
-    this->font = font;
     this->color = color;
 }
 
@@ -374,16 +372,25 @@ void TextSprite::render(SDL_Renderer* renderer) {
     ASSERT_RENDERER
     
     if (this->update) {
-	    SDL_DestroyTexture(this->texture);
+        if (this->texture != NULL)
+	        SDL_DestroyTexture(this->texture);
+        
         SDL_FRect area = {0,0,0,0};
         this->texture = write(renderer, &area, this->font, this->content.c_str(), this->color);
         this->area.h = area.h;
         this->area.w = area.w;
         this->update = false;
     }
-    
     SDL_FRect area = this->area;
 	SDL_RenderTexture(renderer, this->texture, NULL, &area);
 }
+
+void TextSprite::setFont(std::string fontName) {
+    this->font = this->getFont(fontName, this->fontSize);
+
+    if (this->font == NULL)
+        SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "font == NULL");
+}
+
 
 /**********************************************************************************************************************/

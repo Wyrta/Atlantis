@@ -21,6 +21,8 @@
 #define WHITE   (SDL_Color){255, 255, 255, SDL_ALPHA_OPAQUE}
 #define BLACK   (SDL_Color){0,     0,   0, SDL_ALPHA_OPAQUE}
 
+#define DEFAULT_FONT    "Inter-VariableFont.ttf"
+
 SDL_Texture *createTexture(SDL_Renderer* render, SDL_FRect* rectangle, const char* path);
 
 struct Texture {
@@ -123,18 +125,20 @@ public:
     std::string content;
     bool update;
     
-    TTF_Font* font;
-    SDL_Texture* texture;
+    TTF_Font* font = NULL;
+    SDL_Texture* texture = NULL;
     SDL_Color color;
 
 public:
     static std::vector<Font> fonts;
     static TTF_Font* getFont(std::string fontName, int fontSize);
 
-    TextSprite(std::string newContent, std::string fontName, int fontSize, SDL_Color color = BLACK, SDL_FPoint pos = {0,0});
+    TextSprite(std::string newContent, int fontSize, SDL_Color color = BLACK, SDL_FPoint pos = {0,0});
     ~TextSprite();
     void updateText(std::string newContent);
     std::string getText(void);
+    void setFont(std::string font = DEFAULT_FONT);
+    void setColor(SDL_Color color) {this->color = color; this->update = true;};
 
     void render(SDL_Renderer *renderer);
 

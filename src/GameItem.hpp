@@ -73,7 +73,6 @@ public:
     Text(std::string content, SDL_FPoint pos, SDL_Color color = BLACK);
 };
 
-
 class TextArea : public Text {
 private:
     TextSprite* cursor; 
@@ -84,7 +83,33 @@ public:
     void process(Uint64 ticks);
     void handleEvent(void);
 
-    TextArea(std::string content, SDL_FPoint pos, std::string cursorContent = "|");
+    TextArea(std::string content, SDL_FPoint pos, SDL_Color color = BLACK, std::string cursorContent = "|");
+};
+
+class MenuItem : public GameItem {
+private:
+    std::string option = "";
+    GameItem* callback = NULL;
+
+    std::string value = "true";
+public:
+    MenuItem();
+
+    void setCallback(GameItem* callback);
+    void setOption(std::string option);
+    void change(void);
+};
+
+class Button : public MenuItem {
+private:
+    bool clicked;
+
+    int IDtext, IDbg, IDfg;
+public:
+    Button(std::string content, SDL_FRect area = {0.0, 0.0, 0.0, 0.0}, std::string option = "");
+
+    void process(Uint64 ticks);
+    void handleEvent(void);
 };
 
 #endif // GAME_ITEMS

@@ -6,10 +6,13 @@ const char *eventTypeName[] = {
     "onMouseUp",
     "onClick",
     "onDlbClick",
+    "onContextMenu",
     "onKeyDown",
     "onKeyUp",
     "onKeyHold",
     "onTextInput",
+
+    "menuItemUpdate",
 
     "onNothing"   // last item
 };
@@ -26,19 +29,18 @@ const char *getEventTypeName(EventType eventType) {
 
 void EventHandler::handleEvent(void) {
     this->mutex.lock();
-    for(std::vector<Event>::iterator it = this->event.begin(); it != this->event.end(); ++it)
+    for(std::vector<Event>::iterator it = this->events.begin(); it != this->events.end(); ++it)
     {
         SDL_Log("Event handled: %s", getEventTypeName((*it).type));
-        it = this->event.erase(it);
-        it--;   // get previous iterator
     }
+    this->clearEvent();
     this->mutex.unlock();
 }
 
 void EventHandler::receiveEvent(Event newEvent) {
     this->mutex.lock();
     // SDL_Log("New event received: %s 0x%p at %ldms", getEventTypeName(newEvent.type), newEvent.emitter, newEvent.ticks);
-    this->event.push_back(newEvent);
+    this->events.push_back(newEvent);
     this->mutex.unlock();
 }
 
@@ -60,6 +62,11 @@ void EventEmitter::sendEvent(Event event) {
 
 void EventEmitter::onMouseDown(SDL_MouseButtonEvent mouseEvent) {
     Event event;
+    event.type = EventType::onMouseDown;
+    
+    if (mouseEvent.button == SDL_BUTTON_RIGHT)
+        event.type = EventType::onContextMenu;
+
     this->sendEvent(event);
 }
 
@@ -72,8 +79,12 @@ void EventEmitter::onMouseUp(SDL_MouseButtonEvent mouseEvent) {
     else if (mouseEvent.clicks > 1)
         type = EventType::onDlbClick;
     else 
-        type = EventType::onMouseDown;
+        type = EventType::onMouseUp;
 
+    if (mouseEvent.button == SDL_BUTTON_RIGHT)
+        return;
+
+    event.type = type;
     this->sendEvent(event);
 
 }

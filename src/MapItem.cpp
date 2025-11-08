@@ -7,7 +7,7 @@ using json = nlohmann::json;
 
 std::vector<MapEvent> Tile::messages;
 std::mutex Tile::mutex;
-SDL_FRect Tile::tileSize = {0.0, 0.0, 64.0, 64.0};
+SDL_FRect Tile::tileSize = {0.0, 0.0, 32.0, 32.0};
 
 SDL_FPoint computeVector(bool left, bool right, bool up, bool down) {
     float hypo = 3.0;
@@ -57,7 +57,6 @@ SDL_FPoint computeVector(bool left, bool right, bool up, bool down) {
 /**********************************************************************************************************************/
 
 Map::Map() : GameItem() {
-    Tile::tileSize = {0.0, 0.0, 32.0, 32.0};
     RenderableGroups* item = new RenderableGroups(this->getPosition());
     item->setEventHandler(this);
     item->enable();
@@ -65,7 +64,7 @@ Map::Map() : GameItem() {
     this->setRenderableItem(item);
     item->setLevel(10);
 
-    this->hoverElement = item->addItem(new TextSprite("---", "Inter-VariableFont.ttf", 16, WHITE, this->position));
+    this->hoverElement = item->addItem(new TextSprite("---", 16, WHITE, this->position));
     item->getItem(this->hoverElement)->disable();
 }
 
@@ -132,7 +131,7 @@ void Map::process(Uint64 ticks) {
 
 void Map::handleEvent(void) {
     this->mutex.lock();
-    for(std::vector<Event>::iterator it = this->event.begin(); it != this->event.end(); ++it)
+    for(std::vector<Event>::iterator it = this->events.begin(); it != this->events.end(); ++it)
     {
         Event item = *it;
 
@@ -161,11 +160,8 @@ void Map::handleEvent(void) {
             // SDL_Log("Unhandled: '%s'", getEventTypeName(item.type));
             break;
         }
-
-        // remove event
-        it = this->event.erase(it);
-        it--;   // get previous iterator
     }
+    this->clearEvent();
     this->mutex.unlock();
 }
 

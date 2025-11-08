@@ -92,6 +92,11 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
         }
     }
 
+    // set up option
+    options.addOption({"exit", "false"});
+    options.addOption({"fps", "60"});
+    options.addOption({"fail", "false"});
+
     // set up the application data
     *appstate = new AppContext(window, renderer);
     auto* app = (AppContext*)*appstate;
@@ -99,17 +104,18 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
     SDL_SetRenderVSync(renderer, SDL_RENDERER_VSYNC_ADAPTIVE);
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, "60"); // set fps
+    SDL_SetHint(SDL_HINT_MAIN_CALLBACK_RATE, options.getOption("fps").c_str()); // set fps
 
     app->renderEngine.loadTextures();
 
     SDL_StartTextInput(app->window);
 
     SDL_AddTimer(10, (SDL_TimerCallback)SDL_AppWorker, app);
-    SDL_Log("Application started successfully!");
 
-    app->gameEngine.addItem(new Text("FPS", {0.0, 0.0}));
-    app->gameEngine.addItem(new TextArea("Test TextArea", {0.0, 50.0}));
+    app->gameEngine.addItem(new Text("FPS", {0.0, 0.0}, WHITE));
+    app->gameEngine.addItem(new TextArea("Test TextArea", {0.0, 50.0}, WHITE));
+    app->gameEngine.addItem(new Button("Quit", {0.0, 100.0, 100.0, 32.0}, "exit"));
+    app->gameEngine.addItem(new Button("Fail", {0.0, 150.0, 100.0, 32.0}, "fail"));
 
     Map* map = new Map();
     app->mapID = map->id;
@@ -120,6 +126,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 
     requestKeybordTarget(map->getRenderableItem()->id);
 
+    SDL_Log("Application started successfully!");
     return SDL_APP_CONTINUE;
 }
 
@@ -214,10 +221,20 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
     
     SDL_RenderPresent(app->renderer);
 
+    if (options.getOption("exit") == "true")
+        return SDL_APP_SUCCESS;
+
+    if (options.getOption("fail") == "true")
+        return SDL_APP_FAILURE;
+
     return SDL_APP_CONTINUE;
 }
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result) {
-    SDL_Log("Application quit successfully!");
+    if (result == SDL_APP_SUCCESS)
+        SDL_Log("Application quit successfully!");
+    else
+        SDL_Log("Application quit unsuccessfully!");
+
     SDL_Quit();
 }
